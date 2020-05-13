@@ -70,3 +70,26 @@ def listen(session):
             #except: 
             #    return -2
     
+def get(session, time):
+
+    name, socc = session
+    time = str(time)
+
+    #the server makes an exception for the header "get"
+    header = "get"
+    message = f"{header:<20}{time}"
+    
+    socc.send(message.encode("utf-8"))
+    
+    print("getting message") 
+    message_header = socc.recv(20)
+    if len(message_header) == 0:
+        return -1
+
+    print("getting message") 
+    message_len = int(message_header.decode("utf-8").strip())
+    return socc.recv(message_len)
+
+
+
+    

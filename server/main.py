@@ -1,4 +1,6 @@
 import socket
+import myloggingmodulewithoutnameconfusion as log
+import time
 import select
 
 #globals
@@ -20,7 +22,14 @@ server_socket.listen()
 # in the begining its just the server_socket
 socket_list = [server_socket]
 
+#send message
+def send_message(client, message):
+    header = str(len(message))
+    header = f"{header:<20}".encode("utf-8")
 
+    client.send(header+message)
+
+ 
 #recieve a message 
 #this NEEDS to be changed
     #it relies on the clinet not sending a too long message
@@ -33,11 +42,17 @@ def recieve_message(client):
         if not len(header):
             return -1
 
-        #pretty obvious
-        mesLength = int(header.decode('utf-8').strip())
+        # get is a query by the client to get all messages since [time]
+        #seperate handler
+        if header.strip().decode("utf-8") == "get":
+            print("fetching old")
+            messages = log.get("message_history", client.recv(18).decode("utf-8"))
+            send_message(client, messages.encode("utf-8"))
+            return 0
+        else:
+            mesLength = int(header.decode('utf-8').strip())
         
         #this could be an issue if the message is very long
-        print("random print")
         return client.recv(mesLength) 
         
     except:
@@ -45,13 +60,7 @@ def recieve_message(client):
         return -1
 
 
-def send_message(client, message):
-    header = str(len(message))
-    header = f"{header:<20}".encode("utf-8")
-
-    client.send(header+message)
-
-    
+   
 
 
 
@@ -78,6 +87,9 @@ while True:
             if user == -1:
                 print("authentication of user failed")
                 continue
+            elif user == 0:
+                #get message request, should be ignored
+                continue
 
             #add user to users sockets list
             socket_list.append(client_socket)
@@ -98,10 +110,18 @@ while True:
                 #continue the loop
                 continue
 
+            elif message == 0:
+                #get message request, should be ignored
+                continue
+
             #otherwhise send the message on to all other clients
             for client in socket_list:
                 if client != notified_socket and client != server_socket:
                     send_message(client, message)
+
+            #log messages after being sent
+            #decoding is okay bc it should be in base64
+            log.save("message_history", message.decode("utf-8"))
 
     
     #need to remove the ones from the exeption sockets
