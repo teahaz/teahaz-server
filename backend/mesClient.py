@@ -6,16 +6,12 @@ import base64
 # *this following is some specifications about the protocol used to communicate to the server*
 # *do not expect these to stay the same*
 
-### packet structure
-    #the following structure must be followed by both send and the recv
-
-## packets are sent with 2 headers
-
 # header 1 [len = 15] contains the length of the 2 other headers combined
     #this header is used to determain how much we need to recv
 
-# header 2 [len = 20] is the name of the sender
-    # i will not be dealing with this header but leave balazs to deal with it as he likes
+# the message itself is a dict/one line json, that can be converted via the json library
+    #the dict would contain the users name and their message in following format
+        #{"name":"users_name", "message":"users_message"}
 
 ### connections
 # when connecting to the server the first message is a name with 20 padding
@@ -27,7 +23,6 @@ def send(session, text):
 
     #try:
     if True:
-        print(session)
         ################### some exception raised bc name is not part of session???
         name, socc = session
 
@@ -83,11 +78,14 @@ def listen(session):
 
         
         if len(message_header) > 1:
-            #try:
-            message_len = int(message_header.decode("utf-8").strip())
-            return socc.recv(message_len)
-            #except: 
-            #    return -2
+            try:
+                message_len = int(message_header.decode("utf-8").strip())
+                
+                mesb64 = socc.recv(message_len)
+
+                return base64.b64decode(mesb64, altchars=None)
+            except: 
+                return -2
     
 def get(session, time):
 
@@ -100,16 +98,28 @@ def get(session, time):
     
     socc.send(message.encode("utf-8"))
     
-    print("getting message") 
     message_header = socc.recv(20)
-    print("getting message") 
     if len(message_header) == 0:
         return -1
 
-    print("getting message") 
     message_len = int(message_header.decode("utf-8").strip())
-    return socc.recv(message_len)
 
+    #i am fully aware that this is not how i should be handling json
+    unformatData = socc.recv(message_len).decode("utf-8")
+    
+    #the json/dictionaries are stored one by one bc it makes them a lot easier to handle in larger numbers
+    #i am fully aware that this is not how i should be handling json
+    messages = ""
+    unformatData = unformatData.split("\n")
+    for line in unformatData:
+        # the last one can often be empty line and this is the simplest way of filtering it
+        if len(line) > 5:
+            formatData = json.loads(line.strip(",\n"))
+            formatDataDec = base64.b64decode(formatData["message"])
+            formatDataDec = formatDataDec.decode("utf-8")
+            messages += formatDataDec+"\n"
+
+    return messages
 
 
     

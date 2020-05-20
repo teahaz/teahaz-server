@@ -7,7 +7,7 @@ import select
 global PORT
 PORT = 8001
 
-global HEADERLEN
+global HEADERLE
 HEADERLEN = 20
 
 

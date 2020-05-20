@@ -53,7 +53,7 @@ client.send(session, loginDetails)
 
 print("attempting to get messages")
 #get messages since epochtime [1589379287.4890685]
-lastGetTime = 1589789732.4058611
+lastGetTime =1589969514.155710
 missedMessages = client.get(session, lastGetTime) 
 print(missedMessages)
 
