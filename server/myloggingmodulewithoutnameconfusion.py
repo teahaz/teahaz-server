@@ -19,6 +19,7 @@ def save(filename, text):
 
 def get(filename, time):
     # the client will send a time indicating how old messages it wants
+    print("got here 0")
     time = int(float(str(time).strip()))
 
 
@@ -29,10 +30,12 @@ def get(filename, time):
 
     #read file backwards
     with FileReadBackwards(filename , encoding="utf-8") as frb:
+        print("got here 1") 
         while True:
             #read until file has ended
             l = frb.readline()
             if not l:
+                print("gotta break")
                 break
             #after each \n check the time
             line = json.loads(l)

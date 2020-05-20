@@ -1,51 +1,37 @@
-{"time": "1589374074.8149395", "message": "bob                 hello"}
-{"time": "1589374080.763255", "message": "mark                sup"}
-{"time": "1589374092.6423702", "message": "bob                 this logs everything"}
-{"time": "1589374139.3407412", "message": "bob                 point as the server uses headers anyway"}
-{"time": "1589379359.7221878", "message": "ehll                sdf"}
-{"time": "1589379359.9373097", "message": "ehll                d"}
-{"time": "1589379360.1354196", "message": "ehll                fd"}
-{"time": "1589379360.3443382", "message": "ehll                f"}
-{"time": "1589379360.5473065", "message": "ehll                df"}
-{"time": "1589379360.739598", "message": "ehll                sd"}
-{"time": "1589379363.9345887", "message": "ehll                whats up"}
-{"time": "1589379367.6846292", "message": "bob                 life lol"}
-{"time": "1589379374.5180337", "message": "bob                 pls work this time "}
-{"time": "1589379383.5334802", "message": "ehll                ye that would be epik"}
-{"time": "1589379384.6124415", "message": "ehll                \u001b[3~"}
-{"time": "1589379388.170767", "message": "ehll                sdllslslsls"}
-{"time": "1589379394.5348203", "message": "bob                 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}
-{"time": "1589385572.368742", "message": "mark                lsldfkdsf"}
-{"time": "1589385572.541589", "message": "mark                sd"}
-{"time": "1589385572.7227929", "message": "mark                f"}
-{"time": "1589385572.9066932", "message": "mark                ds"}
-{"time": "1589385573.0817654", "message": "mark                fds"}
-{"time": "1589385573.2540498", "message": "mark                fd"}
-{"time": "1589385573.4287682", "message": "mark                sf"}
-{"time": "1589385573.606665", "message": "mark                d"}
-{"time": "1589385573.7828414", "message": "mark                fds"}
-{"time": "1589385573.9638484", "message": "mark                f"}
-{"time": "1589385574.1357288", "message": "mark                s"}
-{"time": "1589385574.3060117", "message": "mark                d"}
-{"time": "1589385574.4878163", "message": "mark                fd"}
-{"time": "1589385574.6639647", "message": "mark                f"}
-{"time": "1589385574.8496883", "message": "mark                ds"}
-{"time": "1589385575.024082", "message": "mark                f"}
-{"time": "1589385575.2018602", "message": "mark                ds"}
-{"time": "1589385575.387926", "message": "mark                f"}
-{"time": "1589385577.0231113", "message": "mark                hello"}
-{"time": "1589385578.4240458", "message": "mark                sklslkd"}
-{"time": "1589385579.5649536", "message": "mark                sdfds"}
-{"time": "1589391306.9165492", "message": "mark                "}
-{"time": "1589391307.113569", "message": "mark                s"}
-{"time": "1589391307.3426507", "message": "mark                s"}
-{"time": "1589391307.5196905", "message": "mark                "}
-{"time": "1589391307.7337003", "message": "mark                s"}
-{"time": "1589391307.9396238", "message": "mark                s"}
-{"time": "1589391308.1286926", "message": "mark                s"}
-{"time": "1589391308.3297577", "message": "mark                s"}
-{"time": "1589391308.5357063", "message": "mark                s"}
-{"time": "1589391308.7368221", "message": "mark                s"}
-{"time": "1589391308.940814", "message": "mark                s"}
-{"time": "1589391309.1497772", "message": "mark                s"}
-{"time": "1589391309.3367705", "message": "mark                "}
+{"time": "1589789720.114424", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJtYXJrIn0="}
+{"time": "1589789732.4058611", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJoZWxsbyJ9"}
+{"time": "1589789733.9246976", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJzdXAgIn0="}
+{"time": "1589789736.312923", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJob3cgYXJlIHlvdSAifQ=="}
+{"time": "1589789738.1852171", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJsb2wifQ=="}
+{"time": "1589791667.3927395", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJtYXJrIn0="}
+{"time": "1589793546.504687", "message": "eyJuYW1lIjogIm1hciIsICJkYXRhIjogIm1hciJ9"}
+{"time": "1589793574.5071433", "message": "eyJuYW1lIjogImFzIiwgImRhdGEiOiAiYXMifQ=="}
+{"time": "1589793606.7732127", "message": "eyJuYW1lIjogInMiLCAiZGF0YSI6ICJzIn0="}
+{"time": "1589793642.8429108", "message": "eyJuYW1lIjogIngiLCAiZGF0YSI6ICJ4In0="}
+{"time": "1589955313.966718", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJtYXJrIn0="}
+{"time": "1589955487.6525466", "message": "eyJuYW1lIjogIm1yIiwgImRhdGEiOiAibXIifQ=="}
+{"time": "1589955522.0228622", "message": "eyJuYW1lIjogImFzIiwgImRhdGEiOiAiYXMifQ=="}
+{"time": "1589955571.6360261", "message": "eyJuYW1lIjogInNzcyIsICJkYXRhIjogInNzcyJ9"}
+{"time": "1589955696.319045", "message": "eyJuYW1lIjogInNzIiwgImRhdGEiOiAic3MifQ=="}
+{"time": "1589955796.5049403", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJtYXJrIn0="}
+{"time": "1589955801.1683846", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICIxIn0="}
+{"time": "1589955801.7350051", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICIyIn0="}
+{"time": "1589955802.2083457", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICIzIn0="}
+{"time": "1589955802.6338563", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICI0In0="}
+{"time": "1589955803.175272", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICI1In0="}
+{"time": "1589955803.7525496", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICI2In0="}
+{"time": "1589955804.2534766", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICI3In0="}
+{"time": "1589955804.7943394", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICI4In0="}
+{"time": "1589955805.326303", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICI5In0="}
+{"time": "1589955805.8432744", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICIwIn0="}
+{"time": "1589955808.9282653", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJvbmUifQ=="}
+{"time": "1589955811.383238", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJ0d28ifQ=="}
+{"time": "1589955814.7797337", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJ0aHJlZSJ9"}
+{"time": "1589955817.6721866", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJmb3VyIn0="}
+{"time": "1589955819.4861007", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJmaXZlICJ9"}
+{"time": "1589955821.0551815", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJzaXoifQ=="}
+{"time": "1589955823.556127", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJzZXZlbiJ9"}
+{"time": "1589955826.2154703", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJlaWdodCAifQ=="}
+{"time": "1589955828.3181531", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJuaW5lICJ9"}
+{"time": "1589955829.7790508", "message": "eyJuYW1lIjogIm1hcmsiLCAiZGF0YSI6ICJ0ZW4ifQ=="}
+{"time": "1589955836.5423465", "message": "eyJuYW1lIjogInNzIiwgImRhdGEiOiAic3MifQ=="}

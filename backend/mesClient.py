@@ -1,4 +1,6 @@
 import socket
+import json
+import base64
 
 ################################################################################################################################################################################
 # *this following is some specifications about the protocol used to communicate to the server*
@@ -21,18 +23,29 @@ import socket
 ################################################################################################################################################################################
 
 
-def send(session, message):
+def send(session, text):
 
-    try:
+    #try:
+    if True:
+        print(session)
+        ################### some exception raised bc name is not part of session???
         name, socc = session
-        #the userneam header is 20 for now
-        message = f"{name:<20}{message}"
+
+        #name and data should be in json format
+        data = {"name": name, "data": text}
+
+        message = json.dumps(data)
+        
+        #message has to be encoded in bas64 as it could because it has the potential to cause formatting vulnerabilities
+        message = base64.b64encode(message.encode("utf-8"), altchars=None)
+
         header = len(message)
-    except:
+    #except:
+    else:
         return -1
 
     try:
-        socc.send(f"{header:<20}{message}".encode("utf-8"))
+        socc.send(f"{header:<20}".encode("utf-8")+message)
     except:
         return -2   
 
@@ -40,12 +53,18 @@ def send(session, message):
 
 def connect(name, ip, port):
     #try:
+    if True:
         socc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         socc.connect((ip, port))
-        print("sending login")
-        send(socc, name)
-        print("sent login")
+
+        #session has to be name and socc for consitency 
+        if not send((name, socc), name): # if it doesnt return then its good
+            pass
+        else:
+            return 0
+
         return (name, socc)
+    else:
     #except:
         return 0
 
@@ -83,6 +102,7 @@ def get(session, time):
     
     print("getting message") 
     message_header = socc.recv(20)
+    print("getting message") 
     if len(message_header) == 0:
         return -1
 
