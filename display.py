@@ -64,7 +64,7 @@ def printMsg(msgIndex):
     text = '  '+msg['data'].replace('\\n','\n')
  
     if msgIndex == 0 or msg['name'] != previousName:
-        height += 2
+        #height += 2
         print('\n ',msg['name'],':',sep='')
 
     print(text)
@@ -131,11 +131,12 @@ while True:
         
         # add height
         #newlines 
-        #nl = msg.count('\\n')
+        nl = msg.count('\\n')
 
         #overflows
-        #ov = int(len(json.loads(msg)['data'])/tWidth)
-        #height += ov + nl + 1
+        ov = int(len(json.loads(msg)['data'])/tWidth)
+        #print(nl,ov)
+        height += ov + nl + 1
         
     os.system('clear')
 
@@ -150,6 +151,11 @@ while True:
     #body
     for i in range(len(messages)):
         printMsg(i)
+        #pass
 
     #bottom border 
-    border(y=tHeight,s=str(datetime.datetime.now())[:19])
+    #print(tHeight,height)
+    if height > tHeight-10:
+        border(y=tHeight,s=str(datetime.datetime.now())[:19])
+    else:
+        border(y=tHeight-3,s=str(datetime.datetime.now())[:19])
