@@ -20,7 +20,6 @@ import base64
 
 
 def send(session, text):
-
     #try:
     if True:
         ################### some exception raised bc name is not part of session???
@@ -66,16 +65,17 @@ def connect(name, ip, port):
 
 
 # we dont need 2 headers bc balazs can deal with the username
-def listen(session):
+def check(session):
     name, socc = session
     
-    while True:
-        #try recv the header of the message
-        try:
-            message_header = socc.recv(20)
-        except:
-            return -1
+    #while True:
+    #try recv the header of the message
+    try:
+        message_header = socc.recv(20)
+    except:
+        return -1
 
+<<<<<<< HEAD:backend/mesClient.py
         
         if len(message_header) > 1:
             try:
@@ -86,9 +86,20 @@ def listen(session):
                 return base64.b64decode(mesb64, altchars=None)
             except: 
                 return -2
+=======
+    
+    if len(message_header) > 1:
+        try:
+            message_len = int(message_header.decode("utf-8").strip())
+            
+            mesb64 = socc.recv(message_len)
+
+            return base64.b64decode(mesb64, altchars=None)
+        except: 
+            return -2
+>>>>>>> bazs:mesClient.py
     
 def get(session, time):
-
     name, socc = session
     time = str(time)
 
