@@ -74,8 +74,6 @@ def check(session):
         message_header = socc.recv(20)
     except:
         return -1
-
-<<<<<<< HEAD:backend/mesClient.py
         
         if len(message_header) > 1:
             try:
@@ -86,7 +84,6 @@ def check(session):
                 return base64.b64decode(mesb64, altchars=None)
             except: 
                 return -2
-=======
     
     if len(message_header) > 1:
         try:
@@ -97,7 +94,6 @@ def check(session):
             return base64.b64decode(mesb64, altchars=None)
         except: 
             return -2
->>>>>>> bazs:mesClient.py
     
 def get(session, time):
     name, socc = session
