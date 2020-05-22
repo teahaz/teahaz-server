@@ -12,7 +12,7 @@ def save(filename, text):
     data = json.dumps(data)
 
     with open(filename, "a+")as outfile:
-        outfile.write(f"{data},\n")
+        outfile.write(f"{data}\n")
 
 
 

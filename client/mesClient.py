@@ -1,5 +1,6 @@
 import socket
 import json
+import time
 import base64
 
 ################################################################################################################################################################################
@@ -26,7 +27,7 @@ def send(session, text):
         name, socc = session
 
         #name and data should be in json format
-        data = {"name": name, "data": text}
+        data = {"time":str(time.time()), "name": name, "message": text}
 
         message = json.dumps(data)
         
