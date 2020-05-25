@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
-import sys,json,os,datetime
+import sys,json,os,datetime,time,signal
 import mesClient as client
+
+# detect program exit
+def onExit(signum,frame):
+    global keepGoing
+
+    keepGoing = False #break while loop
+    print('exiting')
+    sys.exit()
+
+signal.signal(signal.SIGINT,onExit)
+signal.signal(signal.SIGTSTP,lambda: print('you arent supposed to do this'))
 
 # cursor movement:
 # http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
@@ -16,6 +27,10 @@ def terminal_size():
         struct.pack('HHHH', 0, 0, 0, 0)))
     return w, h
 
+def dbg(s):
+    with open(os.path.join(os.path.dirname(__file__),'log'),'a') as f:
+        f.write(' '+s+'\n')
+
 
 # listens until it gets a messge and it returns either that or an error
 def check(session):
@@ -23,10 +38,10 @@ def check(session):
     
     # these arent necessary true, you can never tell why a socket fails but usually they are good
     if a == -1:
-        dbg("Connection closed.")
+        print("Connection closed.")
         return 0
     elif a == -2:
-        dbg("Malformed packet from server.")
+        print("Malformed packet from server.")
         return 0
     else:
         return(a.decode("utf-8"))
@@ -34,12 +49,17 @@ def check(session):
 
 def border(y,s=''):
     '''
-    /--------------------\ 
-              {s}
-    \--------------------/
+    /-=-=-=-=-=-=-=-=-=-=-\ 
+    |         {s}         |
+    \-=-=-=-=-=-=-=-=-=-=-/
     '''
     
-    b = '\n'.join(['\n/'+(tWidth-4)*'-'+'\ ', s.center(tWidth),'\\'+(tWidth-4)*'-'+'/\n'])
+    line1 = '/'+int((tWidth-4)/2)*'-='+'-'+'\ '
+    line2 = '|'+s.center(tWidth-2)[:-1]+'|'
+    line3 = '\\'+int((tWidth-4)/2)*'-='+'-'+'/ '
+    b = '\n'.join([line1,line2,line3])
+
+    #b = '\n'.join(['\n/'+(tWidth-4)*'-'+'\ ', s.center(tWidth),'\\'+(tWidth-4)*'-'+'/\n'])
     
     if y:
         sys.stdout.write("\x1b7\x1b[%d;%df%s\x1b8" % (y,0,b))
@@ -51,23 +71,65 @@ def border(y,s=''):
 def printMsg(msgIndex):
     # _msgIndex: index into messages
     # uses global name, messages, height
-    global height 
-    
-    try:
-        msg = json.loads(messages[msgIndex])
-    
-    #already dict
-    except TypeError:
-        msg = messages[msgIndex]
+    # note: because of the server format this needs a dict as a string
 
+    #global height 
+    
+    msg = json.loads(messages[msgIndex])
     previousName = json.loads(messages[msgIndex-1])['name']
-    text = '  '+msg['message'].replace('\\n','\n')
+    sameName = (previousName == msg['name'])
+    time = epochToDT(msg['time'])
+    
+    
+    if showIcons:
+        icons = [' ','.','-','=','-','.']
+        if sameName:
+            icon = icons[msgIndex % len(icons)]
+        else: 
+            icon = icons[0]
+    else:
+        icon = ''
  
-    if msgIndex == 0 or msg['name'] != previousName:
-        #height += 2
+
+    if msgIndex == 0 or not sameName:
         print('\n ',msg['name'],':',sep='')
+ 
+
+    text = '  '+icon+'  '+msg['message'].replace('\\n','\n')
+    if showTime:
+        timePad = tWidth-len(text)-14
+        text += timePad*' '+icon+'  '+time
 
     print(text)
+
+
+def handleCommand(cmd):
+    global showTime,showIcons
+    
+    dbg('cmd: '+cmd)
+    cmd = cmd.lower()
+
+    if cmd in ['c','clr','clear']:
+        os.system('clear')
+        
+        global messages
+        messages = [] 
+
+    elif cmd in ['st','showtime']:
+        showTime = not showTime
+        showIcons = not showIcons
+
+    elif cmd in ['si','showicons']:
+        showIcons = not showIcons
+    
+
+    else:
+        return -1
+    return 1
+
+
+def epochToDT(t):
+    return time.strftime('%H:%M:%S', time.localtime(float(t)))
 
 
 
@@ -75,6 +137,7 @@ def printMsg(msgIndex):
 
 os.system('clear')
 
+curdir = os.path.dirname(__file__)
 tWidth,tHeight = terminal_size()
 ip = "127.0.0.1"
 port = 8001
@@ -92,14 +155,13 @@ if session == 0:
 ## to avoid <socket mumbo-jumbo>
 client.send(session,'login')
 
-
 ### initialization
 messages = []
 height = 0
 
 ## "loading" message (mostly placeholder)
 # top border
-border(y=0,s='teahaz')
+border(y=0,s=name+' @ teahaz')
 
 #move cursor down
 print('\033[5;0f')
@@ -108,18 +170,42 @@ print(' teahaz:\n  Checking messages...')
 # bottom border
 border(y=tHeight-3,s=str(datetime.datetime.now())[:19])
 
+# safeguard
+if 'th_cmd' in os.listdir(curdir):
+    os.remove(os.path.join(curdir,'th_cmd'))
+
+# create log file
+open(os.path.join(os.path.dirname(__file__),'log'),'w').close
 
 #needs server side fixes
 #oldMessages = json.load(open('message_history','r'))
 #messages = [m for m in oldMessages]
 
 
+showTime = True
+showIcons = True
+
+
 ### main loop
 # checks messages, adds them to array and displays
-while True:
+# needed so that onExit can terminate the loop
+skip = False
+keepGoing = True
+while keepGoing:
+
+    ## handle commands sent by input
+    if 'th_cmd' in os.listdir(curdir):
+        cmd = json.load(open(os.path.join(curdir,'th_cmd'),'r'))
+        os.remove(os.path.join(curdir,'th_cmd'))
+        dbg('received '+cmd['data'])
+        if cmd['name'] == name:
+            handleCommand(cmd['data'])    
+            skip = True
+
    
     ## get new messages
-    msg = check(session)
+    if not skip:
+        msg = check(session)
     
     ## add to array
     # errors are already printed in check, but theyll be logged to a file probably so this just ignores them
@@ -143,7 +229,7 @@ while True:
 
     ## print
     #top border
-    border(y=0,s='teahaz')
+    border(y=0,s=name+' @ teahaz')
 
     #move cursor down
     print('\033[5;0f')
@@ -151,11 +237,14 @@ while True:
     #body
     for i in range(len(messages)):
         printMsg(i)
-        #pass
 
     #bottom border 
-    #print(tHeight,height)
     if height > tHeight-10:
         border(y=tHeight,s=str(datetime.datetime.now())[:19])
     else:
         border(y=tHeight-3,s=str(datetime.datetime.now())[:19])
+
+    skip = False
+
+if not keepGoing:
+    os.system('clear')
