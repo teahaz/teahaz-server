@@ -2,15 +2,19 @@
 
 
 ### things i should implement:
+	- make the screen clear on exit if it's even possible
 
 ### things the other person should implement:
     
     
 ### bugs
-    - changing data to message broke display
+
+### fixed
+	- changing data to message broke display
     
 ### recently done
     - added autologin file
+
     
     
 
@@ -34,6 +38,7 @@
     - method GET has troubles handling large amounts of data    
         should not be a problem under 100 lines, but needs to be fixed regardless
 
+### fixed
 
 ### recently done
     - fixed inconsistancy in incoming messages
