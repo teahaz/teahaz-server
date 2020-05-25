@@ -61,7 +61,7 @@ def printMsg(msgIndex):
         msg = messages[msgIndex]
 
     previousName = json.loads(messages[msgIndex-1])['name']
-    text = '  '+msg['data'].replace('\\n','\n')
+    text = '  '+msg['message'].replace('\\n','\n')
  
     if msgIndex == 0 or msg['name'] != previousName:
         #height += 2
@@ -134,7 +134,7 @@ while True:
         nl = msg.count('\\n')
 
         #overflows
-        ov = int(len(json.loads(msg)['data'])/tWidth)
+        ov = int(len(json.loads(msg)['message'])/tWidth)
         #print(nl,ov)
         height += ov + nl + 1
         
