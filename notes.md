@@ -20,6 +20,8 @@
 
 	- clean up input.py
 
+	- possibly look into threading the input and not the listenero
+
 
 ### things the other person should implement:
 	- maybe we could have a way to message different people specifically and have separate connection
