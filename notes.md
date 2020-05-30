@@ -27,9 +27,11 @@
 	- maybe we could have a way to message different people specifically and have separate connection
         my idea is that we can have a hub on like port 8000 and for each connection it will throw you on a pre defined port
         kinda like channels, would also mean that you can skip the "hub" by just connecting on the port your dm/group is on
+            honestly we might not even need the "hub" just a text file that says "dm with bazsi = port 8001 /n group with sleep parlysis demons = 8006"
 
         obvious issue: this wont scale well but for now it might be good? [im pretty sure my server could only handle listning on like 50 ports max]
             [ i mean if you think about it its self hosted so at any one server there will only be so many connections]
+
     
 
 ### bugs
