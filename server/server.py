@@ -2,6 +2,7 @@ import socket
 import myloggingmodulewithoutnameconfusion as log
 import time
 import select
+import os
 
 #globals
 global PORT
@@ -10,6 +11,10 @@ PORT = 8001
 global HEADERLE
 HEADERLEN = 20
 
+if not os.path.exists("./message_history"):
+    temp = open("message_history", "w+")
+    temp.close()
+    
 
 #basic setup
 #server_socket = server_socket
