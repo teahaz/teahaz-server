@@ -60,12 +60,13 @@
 
 
 ### things i should implement:
+    - authentication of clint
+        this is being done in the authenticaton branch
 
 
 ### things the other person should implement:
     
 
-// ima write bugs on the side of the person it belongs to
 ### bugs
     - method GET has troubles handling large amounts of data    
         should not be a problem under 100 lines, but needs to be fixed regardless
