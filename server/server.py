@@ -1,8 +1,11 @@
 import socket
-import myloggingmodulewithoutnameconfusion as log
 import time
 import select
 import os
+
+#local imports
+import myloggingmodulewithoutnameconfusion as log
+import handleAuthenticationFromUsers as auth
 
 #globals
 global PORT
@@ -73,29 +76,50 @@ while True:
     #loop through all the sockets that need attention
     for notified_socket in read_sockets:
 
-        # if a new device connected
-            #if the socket that need attention is the one open for connections then someone has connected
+        ################ deal with newly connected devces ################
+
+        #if the socket that need attention is the one open for connections then someone has connected
         if notified_socket == server_socket:
 
             #accept connection
             client_socket, client_address = server_socket.accept()
             print(f"{client_address} has connected")    
 
-            #on first connection the client sends it name
-                #this will be authenticating stuff in later versions
-            user = recieve_message(client_socket)
-            
-            # if user fails to send its name we will just ignore it and continue with the loop
-            if user == -1:
-                print("authentication of user failed")
-                continue
-            elif user == 0:
-                #get message request, should be ignored
-                continue
 
-            #add user to users sockets list
-            socket_list.append(client_socket)
-            print(f"client {client_address} succesfully authenticated")
+
+            #on first connection the client username and password
+                #this step will later have a basic key exchange before it
+            username_and_password = recieve_message(client_socket) # i dont decode here bc if any part of the verification fails(including decode) it should just tell you that you are not logged in
+            
+
+
+            #instead of doing that here is where the auth should take place
+                #checks if the user sent a valid username and password combination
+            logged_in = auth.verify(username_and_password);
+            
+            # obvi if user fails to send valid creds then it cant connect
+            if user == False:
+                print("authentication of user failed")
+                client_socket.send("[403] fuck you, you cant hack me!!".encode("utf-8"))
+
+                continue # at this point im not sure why this is even needed
+
+            elif user == True:
+                #get message request, should be ignored
+                client_socket.send("[200] login succesful".encode("utf-8"))
+
+
+                #add user to users sockets list
+                socket_list.append(client_socket)
+                print(f"client {client_address} succesfully authenticated")
+
+                continue # at this point im not sure why this is even needed
+
+
+
+        ################ /deal with newly connected devces ################
+
+
 
         #the user has already logged in and is just sending a message
         else:

@@ -79,3 +79,16 @@
         its all "mesage" now
     - added sender time to messages 
         epoch time format[ time.time() ]
+
+
+### actual notes
+    - username and password will be hashed before sending
+        not bc it would add more security but i wouldnt need to sanitize them, and base64 seems like a bad idea for some reason
+    - when sending username and password, they will be seperated by whitespace
+        this is okay bc they will be hashed without allowing for whitespace
+
+
+#fyi
+### server
+responses
+    the first part of the response from the server `[###]` is an http response code which you can rely on, the second part should be ignored
