@@ -92,3 +92,7 @@
 ### server
 responses
     the first part of the response from the server `[###]` is an http response code which you can rely on, the second part should be ignored
+i feel like i need to add an explentaion for my abuse of the json format
+    i store data line by line bc this way i can read and process a line without putting the whole file into memory
+    this is normal tho i dont know any implementation that uses json with this
+    but really why not, python is slow enough this wont make much of a difference, this is a messaging app not a game, that extra ~3ms wont matter
