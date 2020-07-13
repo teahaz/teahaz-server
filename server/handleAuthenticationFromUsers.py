@@ -6,14 +6,31 @@ import bcrypt
 def verify(username_and_password):
     # username and password will be seperated by space
     username_and_password = username_and_password.decode("utf-8")
+    
+    username_and_password = username_and_password.split(" ")
     username = username_and_password[0]
     password = username_and_password[1]
+
 
 
     #need to ge a method to check them
     #if bcrypt.checkpw(password, hashed_password) and bcrypt.checkpw(username, hashed_username):
     # the idea would be to check thse at once so that you cant know if the passowrd or the username is wrong
         # yes this actually makes it more secure
+
+
+
+    # this bit of code is from geeksforgeeks, it is not good
+    # while the code is okay i need to read line by line and not store the whole file in memeory
+    # i need to fix this when i can
+    with open("./thisisnotadatabase", "r")as plsdontjudgemydb:
+        entry = plsdontjudgemydb.readlines()
+        for line in Lines:
+            pass
+            # do something
+    
+
+
 
 
 
