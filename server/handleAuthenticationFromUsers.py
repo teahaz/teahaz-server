@@ -20,14 +20,26 @@ def verify(username_and_password):
 
 
 
-    # this bit of code is from geeksforgeeks, it is not good
-    # while the code is okay i need to read line by line and not store the whole file in memeory
-    # i need to fix this when i can
+    # read the userlist on by one to check them
+    # this should load the whole thing into memory, but that should not be an issue as users dont set good passwords and it wont take much memory
+        # remind me to change this if we have over 2 million users on this one server
     with open("./thisisnotadatabase", "r")as plsdontjudgemydb:
-        entry = plsdontjudgemydb.readlines()
-        for line in Lines:
-            pass
-            # do something
+        db = plsdontjudgemydb.readlines()
+        for entry in db:
+            entry = json.loads(entry)
+            
+            # bcrypt will return True if the its a match, so this will be true if both the username and the password match
+            # IMPORTANT you need to check these at the same time for obvious security
+            if bcrypt.checkpw(username.encode("utf-8"), entry['username'].encode('utf-8')) and bcrypt.checkpw(password.encode("utf-8"), entry['password'].encode("utf-8")):  
+
+                # add, [if needed] any code to deal with the correct password
+                print("username and password accepted")
+
+                return True
+    
+    return False
+
+
     
 
 
@@ -88,6 +100,30 @@ def adduser(username, password):
     #    print("It Does not Match :(")
     #### end of tests
 
+    
+
+
+# WARNING this is a temporary solution untill i dont have a register function
+# by calling the program as main, you run the add user method
+# this will be ripped out later so pls dont rely on it
+
+if __name__ == "__main__":
+    print("add user directly")
+    print("WARNING: this is only temporary")
+    print("this next bit alows you to add a user to the 'database'[ which it totally isnt, but idk how to refer to it]")
+    username = str(input("username: "))
+    password = str(input("password: "))
+
+    choice = input("\n\n do you want to [V]erify and existing user or [A]dd a new one? [V/A]: ")
+    if choice == "V":
+        print("so you have chosen verify")
+        verify(f"{username} {password}".encode("utf-8"))
+    else:
+        print("so you have chosen adduser")
+        adduser(username, password)
+
+
+    
 
     
 
@@ -97,4 +133,3 @@ def adduser(username, password):
     
 
 
-adduser("yet another username", "with a very special password at that")
