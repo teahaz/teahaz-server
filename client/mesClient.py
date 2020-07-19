@@ -1,3 +1,4 @@
+# all this shit probably has to be re written lmao
 import socket
 import json
 import time
@@ -46,6 +47,8 @@ def send(session, text):
 
 
 
+# IMPORTANT connect will not handle authenticate as bazsi will probably want some fancy menu, idk
+# connect however should handle key exchange and stuff like it
 def connect(name, ip, port):
     #try:
     if True:
