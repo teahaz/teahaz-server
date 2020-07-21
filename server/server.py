@@ -69,6 +69,10 @@ def recieve_message(client):
 
 
 
+# there is an issue with the way this server is implemented
+# if a client connects and doesnt send its details quickly it will stop the server from continueing
+# to avoid this, we need to open a new thread for connecting clients
+# there is a chance that this could also be a problem in case of sending lagre files, so everything needs to be a little bit threaded
 while True:
     #select.selec(sockets that you can read from[something got sent], sockets to write to[unnecessary], exeption sockets[something with an error])
     read_sockets, somethingApparentlUninportant, exception_sockets = select.select(socket_list, [], socket_list)
@@ -86,8 +90,15 @@ while True:
             print(f"{client_address} has connected")    
 
 
+            socket_test = recieve_message(client_socket)
+            if socket_test:
+                print(f"{client_address} has passed the socket test")
+            else:
+                print('{client_address} did not send a test')
+                continue
 
-            #on first connection the client username and password
+
+            #after running a test on the socket the client will send its username and password
                 #this step will later have a basic key exchange before it
             username_and_password = recieve_message(client_socket) # i dont decode here bc if any part of the verification fails(including decode) it should just tell you that you are not logged in
             
