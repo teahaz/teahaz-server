@@ -79,6 +79,7 @@
         its all "mesage" now
     - added sender time to messages 
         epoch time format[ time.time() ]
+    - finished the base of authenticaton
 
 
 ### actual notes
@@ -90,8 +91,26 @@
 
 #fyi
 ### server
-responses
-    the first part of the response from the server `[###]` is an http response code which you can rely on, the second part should be ignored
+i need to add a small tutorial for adding auth, idk if this is good enough but hey its best i can do
+    - to start with i already did it in a file called `client/input_with_auth_example_but_i_broke_it.py` 
+    on the other the order of conneting to the server is
+        - connect
+        - socket test [thing that was formerly a tmp fix for a timing issue, (instead of fixing i made it into something useful)]
+        - authenticate(session, password_auth=True, username="", password="", path_to_saved_creds="./.creds")
+            so there are lots of args for this so i need to explain them
+            1: you always need to add the session
+            2: password_auth=True/false: when  you first connect there are no saved creds so you should supply a username and a password
+                fyi: this is not registering, {thats not implemented yet lmao}
+                when the device has logged in before it saves the creds (the password is encrypted) for autologin, 
+                if you want autologin just say password_auth=False and dont give a username and password
+                
+            3: username should be obvi, again this is only if password auth is true
+            4: password should be obvi, again this is only if password auth is true
+
+            5: this is the path to the saved creds/where they should be saved. (its in json format so dont shout at me)
+                if you have password_auth=false it will use creds here to log in
+                else it will save creds here
+                the username is unencrypted so you can use it instead of `name` in the code
 i feel like i need to add an explentaion for my abuse of the json format
     i store data line by line bc this way i can read and process a line without putting the whole file into memory
     this is normal tho i dont know any implementation that uses json with this

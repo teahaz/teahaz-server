@@ -36,7 +36,7 @@ def authenticate(session, password_auth=True, username="", password="", path_to_
 
         # write user creds in json format, so bazsi wont get angry at me
         creds = {"username": username, "password": hashed_password}
-        with open("path_to_saved_creds", "w+")as outfile:
+        with open(path_to_saved_creds, "w+")as outfile:
             outfile.write(json.dumps(creds))
 
 

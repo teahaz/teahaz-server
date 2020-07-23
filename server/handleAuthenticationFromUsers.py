@@ -5,6 +5,7 @@ import bcrypt
 
 def verify(username_and_password):
     # username and password will be seperated by space
+    print(len(username_and_password))
     username_and_password = username_and_password.decode("utf-8")
     
     

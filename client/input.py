@@ -49,7 +49,7 @@ if session == 0:
     sys.exit()
 
 ## needed for timing or idk
-client.send(session,'login')
+client.send(session,'this is a socket test and not timing btw')
 
 ## temporary input system
 while True:
