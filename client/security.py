@@ -9,7 +9,7 @@ def hashpassword(password):
 
     m = hashlib.sha256()
     m.update(password.encode("utf-8"))
-    hashed_password = base64.b64encode(m.diges())
+    hashed_password = base64.b64encode(m.digest())
 
     return hashed_password.decode("utf-8")
 
@@ -32,7 +32,7 @@ def authenticate(session, password_auth=True, username="", password="", path_to_
         message = f"{username}  {hashed_password}"
         header = str(len(message))
 
-        socc.send(f"{header:<20}{username}  {hashed_password}".encode("utf-8"))
+        socc.send(f"{header:<20}{username} {hashed_password}".encode("utf-8"))
 
         # write user creds in json format, so bazsi wont get angry at me
         creds = {"username": username, "password": hashed_password}

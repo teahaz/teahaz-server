@@ -7,6 +7,8 @@ def verify(username_and_password):
     # username and password will be seperated by space
     username_and_password = username_and_password.decode("utf-8")
     
+    
+
     username_and_password = username_and_password.split(" ")
     username = username_and_password[0]
     password = username_and_password[1]
@@ -28,6 +30,10 @@ def verify(username_and_password):
         for entry in db:
             entry = json.loads(entry)
             
+            
+
+
+
             # bcrypt will return True if the its a match, so this will be true if both the username and the password match
             # IMPORTANT you need to check these at the same time for obvious security
             if bcrypt.checkpw(username.encode("utf-8"), entry['username'].encode('utf-8')) and bcrypt.checkpw(password.encode("utf-8"), entry['password'].encode("utf-8")):  
@@ -37,6 +43,7 @@ def verify(username_and_password):
 
                 return True
     
+    print("username and password unacceptable")
     return False
 
 
@@ -44,6 +51,16 @@ def verify(username_and_password):
 
 
 
+# ony really for internal use
+def hashpassword(password):
+    import hashlib
+    import base64
+
+    m = hashlib.sha256()
+    m.update(password.encode("utf-8"))
+    hashed_password = base64.b64encode(m.digest())
+
+    return hashed_password.decode("utf-8")
 
 
 
@@ -112,7 +129,10 @@ if __name__ == "__main__":
     print("WARNING: this is only temporary")
     print("this next bit alows you to add a user to the 'database'[ which it totally isnt, but idk how to refer to it]")
     username = str(input("username: "))
+
     password = str(input("password: "))
+    password = hashpassword(password) 
+    print(password)
 
     choice = input("\n\n do you want to [V]erify and existing user or [A]dd a new one? [V/A]: ")
     if choice == "V":
@@ -121,15 +141,4 @@ if __name__ == "__main__":
     else:
         print("so you have chosen adduser")
         adduser(username, password)
-
-
-    
-
-    
-
-
-
-    
-    
-
 

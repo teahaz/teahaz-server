@@ -97,10 +97,15 @@ while True:
                 print('{client_address} did not send a test')
                 continue
 
+            test_value = recieve_message(client_socket)
+            if not test_value:
+                print("user didnt send test value :(")
+                continue
 
-            #after running a test on the socket the client will send its username and password
-                #this step will later have a basic key exchange before it
-            username_and_password = recieve_message(client_socket) # i dont decode here bc if any part of the verification fails(including decode) it should just tell you that you are not logged in
+
+
+            username_and_password = recieve_message(client_socket)
+
             
 
 
@@ -109,15 +114,16 @@ while True:
             logged_in = auth.verify(username_and_password);
             
             # obvi if user fails to send valid creds then it cant connect
-            if user == False:
+            if logged_in == False:
                 print("authentication of user failed")
+
+                # this is totally unnecessary and should probably be removed
                 client_socket.send("[403] fuck you, you cant hack me!!".encode("utf-8"))
 
                 continue # at this point im not sure why this is even needed
 
-            elif user == True:
+            elif logged_in == True:
                 #get message request, should be ignored
-                client_socket.send("[200] login succesful".encode("utf-8"))
 
 
                 #add user to users sockets list
