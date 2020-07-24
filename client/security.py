@@ -29,20 +29,29 @@ def authenticate(session, password_auth=True, username="", password="", path_to_
     if password_auth:
         hashed_password = hashpassword(password)
 
-        message = f"{username}  {hashed_password}"
-        header = str(len(message))
-
-        socc.send(f"{header:<20}{username} {hashed_password}".encode("utf-8"))
-
         # write user creds in json format, so bazsi wont get angry at me
         creds = {"username": username, "password": hashed_password}
         with open(path_to_saved_creds, "w+")as outfile:
             outfile.write(json.dumps(creds))
 
 
-    elif not password_auth:
-        #hasent been implemented yet
-        pass
+    else:
+        with open(path_to_saved_creds, "r")as infile:
+            creds = infile.read()
+        creds = json.loads(creds)
+
+        username = creds["username"]
+        hashed_password = creds["password"]
+
+
+    # method for sending the cred
+    message = f"{username} {hashed_password}"
+    header = str(len(message))
+    socc.send(f"{header:<20}{username} {hashed_password}".encode("utf-8"))
+
+
+
+
 
 
 def register():

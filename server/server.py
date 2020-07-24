@@ -105,6 +105,7 @@ while True:
 
 
             username_and_password = recieve_message(client_socket)
+            print(username_and_password)
 
             
 
