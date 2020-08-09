@@ -111,6 +111,11 @@ i need to add a small tutorial for adding auth, idk if this is good enough but h
                 if you have password_auth=false it will use creds here to log in
                 else it will save creds here
                 the username is unencrypted so you can use it instead of `name` in the code
+
+    ### i need to add 2 things to the text above, 
+            1: if i said anywhere that autologin doesnt work, then its a lie bc i fixed it (my comments are more bloated then the code lmao)
+            2: check out client/testers/authTest.py for a commented example of how to use it
+
 i feel like i need to add an explentaion for my abuse of the json format
     i store data line by line bc this way i can read and process a line without putting the whole file into memory
     this is normal tho i dont know any implementation that uses json with this
