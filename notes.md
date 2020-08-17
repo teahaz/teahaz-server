@@ -57,3 +57,7 @@ get all the messages since <time>
     tho it would be nice if these were cashed locally too
 
 
+### known bugs
++ storing messages
+for storing messages the server uses one file, in general this could be good but has one big issue
+if two messages are being sent at once then they might try to write to the file at once which could cause issues

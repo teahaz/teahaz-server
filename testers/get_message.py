@@ -4,7 +4,7 @@ import base64
 from base64 import b64encode as b
 
 
-url = "http://localhost:5000/api/get/"
+url = "http://localhost:5000/api/v0/get/"
 
 a = {
         'username': b(b'fuckface').decode('utf-8'),

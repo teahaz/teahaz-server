@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from flask_restful import Resource, Api
 
+
 from api import message_send
 from api import message_get
 
@@ -33,8 +34,8 @@ class api__send_message(Resource):
 
 
 api.add_resource(index, '/')
-api.add_resource(api__send_message, '/api/send/')
-api.add_resource(api__get_message, '/api/get/')
+api.add_resource(api__send_message, '/api/v0/send/')
+api.add_resource(api__get_message, '/api/v0/get/')
 
 
 if __name__ == "__main__":

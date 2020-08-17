@@ -3,7 +3,7 @@ import json
 from base64 import b64encode as b
 
 while 1:
-    url = "http://localhost:5000/api/send/"
+    url = "http://localhost:5000/api/v0/send/"
     
     message = input(">> ")
 
