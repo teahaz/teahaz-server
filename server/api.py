@@ -34,8 +34,8 @@ def message_send(json_data):
 
 def message_get(json_data):
     # im not sure i need all this but its just here for now
-    username = json_data['username']
-    cookie = json_data['cookie']
+    #username = json_data['username']
+    #cookie = json_data['cookie']
     last_get_time = int(float(base64.b64decode(json_data['last_get_time'])))
 
     # each needed line will be appended to this and then returned
