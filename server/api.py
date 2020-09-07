@@ -1,7 +1,7 @@
 import time
 import base64
 import json
-from file_read_backwards import FileReadBackwards
+import sqlite3
 
 
 def validate(username, cookie):
@@ -33,33 +33,9 @@ def message_send(json_data):
     
 
 def message_get(json_data):
-    # im not sure i need all this but its just here for now
-    #username = json_data['username']
-    #cookie = json_data['cookie']
-    last_get_time = int(float(base64.b64decode(json_data['last_get_time'])))
+    sqlite3.connect("server")
+    return True
 
-    # each needed line will be appended to this and then returned
-    data = ""
-
-
-    with FileReadBackwards('db/notadatabase' , encoding="utf-8") as frb:
-        while True:
-            #read until file has ended
-            l = frb.readline()
-            if not l:
-                break
-
-            
-            #after each \n check the time
-            line = json.loads(l)
-            senderTime = int(float(line["time"]))
-
-            if senderTime < last_get_time:
-                break
-
-            data += l 
-
-        return base64.b64encode(data.encode('utf-8')).decode('utf-8'), 200
 
 
 

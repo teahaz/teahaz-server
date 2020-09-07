@@ -48,3 +48,7 @@ inside the folder */server/storage* there is a pre defined folder structure
 - chatroom names might be a uuid or a hash of some sorts, this will be figured out with time
 - filhash might also be changed to a uuid so because of pythons slow math engine
 
++ making connections
+for now i will make a connection to the sqlite server [local file] each time it is needed
+yehs this will probably add latency, and yes i will change this but for simplicity it will be like this for now
+
