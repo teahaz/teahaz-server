@@ -26,6 +26,9 @@ inside the folder */server/storage* there is a pre defined folder structure
 |    |-- messages.db
 |    |
 |    |
+|    |-- members.db
+|    |
+|    |
 |    |--uploads
 |          |
 |          |
@@ -36,6 +39,9 @@ inside the folder */server/storage* there is a pre defined folder structure
 |-conv2 // a folder for each chatroom on the server
 |    |
 |    |-- messages.db
+|    |
+|    |
+|    |-- members.db
 |    |
 |    |
 |    |--uploads
@@ -52,3 +58,9 @@ inside the folder */server/storage* there is a pre defined folder structure
 for now i will make a connection to the sqlite server [local file] each time it is needed
 yehs this will probably add latency, and yes i will change this but for simplicity it will be like this for now
 
+## users and login
+2 main ideas
+1. users could be logged in to a server where there are multiple chatrooms are available, the users can be authorised to use different ones
+    in this case users.db would be where it is, and there would be a members.db inside the chatroom folder to indicate who has access to the chatroom
+2. each chatroom could have their own set of users and passwords, esentially making the chatroom its own "server"
+    in this case users.db would not exist, and members.db would include passwords and cookies

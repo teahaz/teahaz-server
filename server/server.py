@@ -19,16 +19,16 @@ class index(Resource):
 # TODO change this to get with args, k thanks
 class api__get_message(Resource):
     def post(self):
-        data, response = message_get(request.get_json())
-        return data, response
+        response, data = message_get(request.get_json())
+        return response, data
 
 
 # validates and saves the message sent by user,
 #   everything is sent back to the user for debug, in production a successful request will return and empty dict
 class api__send_message(Resource):
     def post(self):
-        response = message_send(request.get_json())
-        return request.get_json(), response
+        response, info = message_send(request.get_json())
+        return response, info
 
 
 
@@ -36,8 +36,8 @@ class api__send_message(Resource):
 #   also sends back debug info for now
 class api__send_file(Resource):
     def post(self):
-        response = message_send(request.get_json())
-        return request.get_json(), response
+        response, info = message_send(request.get_json())
+        return response, info
 
 
 
