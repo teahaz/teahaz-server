@@ -1,5 +1,6 @@
 # stuff i need to work on
 
+
 ## database
 switching everything over from storing in files to storing as a database, this should help solve multiple issues
 ideas on how the database will work
