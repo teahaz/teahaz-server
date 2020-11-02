@@ -1,5 +1,6 @@
+# WARNING: this dockerfile is not complete and cannot be used to run the server yet
 ################################################################################################
-#Dockerfile for running the server easier [includes the database for now as well]
+#Dockerfile for running the server easier
 # build with:
 #   sudo docker build -t teahaz_server:latest .
 #
@@ -12,24 +13,28 @@
 # get shell with: [NOTE the server has to be running for this]
 #   sudo docker exec -it <container id> /bin/bash
 ################################################################################################
-from ubuntu:20.04
+FROM ubuntu:20.04
 
 # installs
 # apt 
-run apt-get update && apt-get upgrade -y
-run apt install python3  python3-pip python3-wheel -y
-run apt install mysql-server -y
+RUN apt-get update && apt-get upgrade -y
+RUN apt install python3  python3-pip python3-wheel -y
 
 #run apt install vim -y #pls dont edit files in the container as they will be owned by root 
-run apt install nano -y # installing nano so there will be no insentive to edit inside the docker container
+RUN apt install nano -y # installing nano so there will be no insentive to edit inside the docker container
 
 #pip
-run pip3 install flask flask_restful file_read_backwards
+RUN pip3 install flask flask_restful file_read_backwards
 
 
 #other 
-run mkdir /server
-workdir /server
+RUN mkdir /server
+WORKDIR /server 
 
-cmd cd /server
-CMD python3 server.py
+
+#drop privilages
+# this i will leave out for testing, but needs to be added for prod
+# create a user who has no acces to root or sudo, and switch everything to that user after everyting else is done
+
+
+CMD cd /server; python3 server.py

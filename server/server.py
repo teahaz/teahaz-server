@@ -4,6 +4,10 @@ from flask_restful import Resource, Api
 
 from api import message_send
 from api import message_get
+from api import upload_file
+from api import download_file
+
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -14,29 +18,33 @@ class index(Resource):
         return render_template("index.html")
 
 
-
-
-class api__get_message(Resource):
+# handles messages
+class api__messages(Resource):
+    # gets messages since {time.time()}
+    def get(self):
+        response, data = message_get(request.get_json())
+        return response, data
+    # sends message
     def post(self):
-        data, response = message_get(request.get_json())
-        return data, response
+        response, data = message_send(request.get_json())
+        return response, data
 
 
-# validates and saves the message sent by user,
-#   everything is sent back to the user for debug, in production a successful request will return and empty dict
-class api__send_message(Resource):
+# handles files
+class api__files(Resource):
+    def get(self):
+        response, data = message_send(request.get_json())
+        return response, data
     def post(self):
-        response = message_send(request.get_json())
-        return request.get_json(), response
-
-
-
+        response, data = message_send(request.get_json())
+        return response, data
 
 
 api.add_resource(index, '/')
-api.add_resource(api__send_message, '/api/v0/send/')
-api.add_resource(api__get_message, '/api/v0/get/')
+api.add_resource(api__messages, '/api/v0/message/')
+api.add_resource(api__files, '/api/v0/file/')
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # these are just set for testing
+    app.run(host='localhost', port=5000, debug=True)
