@@ -23,7 +23,7 @@ def message_send(json_data):
 
     # storing the usual one line json_data that i have been doing before 
     token = {'time':timenow, 'username': username, 'type':message_type, 'message': message}
-    with open('db/notadatabase', 'a')as outfile:
+    with open('db/notadatabase', 'a+')as outfile:
         outfile.write(json.dumps(token)+'\n')
 
     return 200, "ok"
@@ -37,9 +37,9 @@ def message_get(json_data):
     last_time = json_data['last_get_time']
     convId = json_data['convId']
 
-    # check if user can has can access
+    # checks if user is authenticated
     if not helpers.authenticate(username, cookie): return 401, "unauthorized"
-    #check if conversation exists
+    #check if conversation exists, and if user has permission
     if not helpers.is_valid_chatroom(convId, username, cookie): return 403, "chatroom doesnt exist or not authorized"
 
 
@@ -49,3 +49,9 @@ def message_get(json_data):
 
 
 
+def upload_file(json_data):
+    return 200, 'filename'
+
+
+def download_file(json_data):
+    return 200, 'filename'
