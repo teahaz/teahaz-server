@@ -1,56 +1,68 @@
 import time
 import base64
 import json
-import sqlite3
 
 import helpers
 from helpers import decode_messages as d
 
 
 
-# method will validate user, decrypt [if this dont end up being e2ee] and store
-# method wont make any difference between a file and a textmessage [maybe for big files idk, its my server i can store all this in one file if i want]
 def message_send(json_data):
+    # get the data needed for this function
     username = json_data['username']
     cookie = json_data['cookie']
-    message = json_data['message']
     message_type = json_data['type']
-    timenow = str(time.time())
+    chatroom_id = json_data['chatroom']
+    message = json_data['message']
 
-    #obvi not yet implemented
+    # check message type
+    if not message_type == "text":
+        return 400, "posting non-'text' type to /message is forbidden"
+
+    # authenticate
     if not helpers.authenticate(username , cookie):
-        return 401, "unauthorized"
+        return 401, "not authenticated"
 
-    # storing the usual one line json_data that i have been doing before 
-    token = {'time':timenow, 'username': username, 'type':message_type, 'message': message}
-    with open('db/notadatabase', 'a+')as outfile:
-        outfile.write(json.dumps(token)+'\n')
+    # check chatroom permission
+    if not helpers.check_access(username , chatroom_id):
+        return 401, "chatroom doesnt exist or user doesnt have access to view it"
 
-    return 200, "ok"
+    # store message that got sent
+    response = helpers.save_message(
+            time=time.time(),
+            username=username,
+            chatroom_id = chatroom_id,
+            message=message
+            )
+
+    return 200, response
+
+
 
 
 
 
 def message_get(json_data):
-    username = json_data['username']
-    cookie = json_data['cookie']
-    last_time = json_data['last_get_time']
-    convId = json_data['convId']
+    #username = json_data['username']
+    #cookie = json_data['cookie']
+    #last_time = json_data['last_get_time']
+    #convId = json_data['convId']
 
     # checks if user is authenticated
-    if not helpers.authenticate(username, cookie): return 401, "unauthorized"
-    #check if conversation exists, and if user has permission
-    if not helpers.is_valid_chatroom(convId, username, cookie): return 403, "chatroom doesnt exist or not authorized"
+    #if not helpers.authenticate(username, cookie): return 401, "unauthorized"
+    ##check if conversation exists, and if user has permission
+    #if not helpers.is_valid_chatroom(convId, username, cookie): return 403, "chatroom doesnt exist or not authorized"
 
 
-    print(d(username), d(cookie), d(last_time), d(convId))
-    return 200, json_data
-
+    #print(d(username), d(cookie), d(last_time), d(convId))
+    #return 200, json_data
+    return 200, ''
 
 
 
 def upload_file(json_data):
     return 200, 'filename'
+
 
 
 def download_file(json_data):
