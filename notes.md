@@ -1,3 +1,4 @@
+stop using bransh add_sql
 # new teahaz 
 old files are in the .old directory
 
