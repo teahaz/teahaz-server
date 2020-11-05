@@ -1,9 +1,8 @@
 import time
-import base64
 import json
+from base64 import b64decode as d
 
 import helpers
-from helpers import decode_messages as d
 
 
 

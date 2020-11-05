@@ -151,47 +151,45 @@ yes this will probably add latency, and yes i will change this but for simplicit
 
 
 ### sqlite version2
+i want to try out a new version for this where everything will be in one or two files
+pros:
+    - better compliance with sql standard
+    - simplicity
+    - portability
+cons:
+    - if one thing gets compromised everything gets compromised
+##### i think the cons of this might be too much
+
+
+### sqlite version3
 for now i will use sqlite, bc i can make persistant storage in local files
 inside the folder */server/storage* there is a pre defined folder structure
 ``
 /server/storage/
 |
+|-users.db
 |
+|-conv1 // a folder for each chatroom on the server
+|    |
+|    |-- chatroom.db // both the members that have access and the
+|    |
+|    |--uploads
+|          |
+|          |
+|          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
+|          |
+|          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
 |
-|
-|
-|
-|-chatrooms.db
-    |
-    |-conv1 e
-    |    |
-    |    |-- messages.db
-    |    |
-    |    |
-    |    |-- members.db
-    |    |
-    |    |
-    |    |--uploads
-    |          |
-    |          |
-    |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
-    |          |
-    |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
-    |
-    |-conv2 // a folder for each chatroom on the server
-    |    |
-    |    |-- messages.db
-    |    |
-    |    |
-    |    |-- members.db
-    |    |
-    |    |
-    |    |--uploads
-    |          |
-    |          |
-    |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
-    |          |
-    |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
+|-conv2 // a folder for each chatroom on the server
+|    |
+|    |-- chatroom.db // both the members that have access and the
+|    |
+|    |--uploads
+|          |
+|          |
+|          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
+|          |
+|          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
 ``
 - chatroom names might be a uuid or a hash of some sorts, this will be figured out with time
 - file-hashes might also be changed to a uuid so because of pythons slow math engine
@@ -199,6 +197,16 @@ inside the folder */server/storage* there is a pre defined folder structure
 + making connections
 for now i will make a connection to the sqlite server [local file] each time it is needed
 yes this will probably add latency, and yes i will change this but for simplicity it will be like this for now
+
+##### pros:
+    - distributed databases minimize make attacks less effective as they might only get local chatrooms
+##### cons:
+    - this is not really what sql was designed for
+    - perhaps it will make loading times/coldstarts slow // will only know this after implementing
+
+
+## chatroom_id
+the chatroom-id being added to a database that is in its folder might be redundant but i want to use it for easier access to data and to make sure everything is fine
 
 
 
