@@ -12,6 +12,7 @@ a = {
         'cookie': b(b'AAAAA').decode('utf-8'), 
         'last_get_time':b(b"1597017007.553126").decode("utf-8")
 }
+print(a)
 
 
 res = requests.post(url, json=a)

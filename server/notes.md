@@ -229,3 +229,6 @@ the chatroom-id being added to a database that is in its folder might be redunda
     - error on all but no cookie, which should go to /auth
 - find a better var name for `response` in api.py [saving stuff in the database]
 - find better name for helpers
+- create try: except: for all parts of the file
+    - server should not crash, but should print errors with the server_logger module
+- sanitize / encode all data that interacts with the database, perhpas even no user controlled ones like time and chatroom_id

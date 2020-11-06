@@ -1,17 +1,22 @@
 import requests
 import json
-from base64 import b64encode as b
+import base64
+
+def b(a):
+    return base64.b64encode(a.encode('utf-8')).decode('utf-8')
 
 while 1:
-    url = "http://localhost:5000/api/v0/send/"
-    
+    url = "http://localhost:5000/api/v0/message/"
+
     message = input(">> ")
+    print(type(b(message)))
 
     a = {
-            'username':b(b'fuckface').decode('utf-8'),
-            'cookie': b(b'AAAAA').decode('utf-8'),
-            'type': b(b'text').decode('utf-8'),
-            'message': b(message.encode("utf-8")).decode('utf-8')
+        "username": "me",
+        "cookie": "test_cookie",
+        "type": "text",
+        "chatroom": "conv1",
+        "message": b(message)
     }
 
     res = requests.post(url, json=a)
