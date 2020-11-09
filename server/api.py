@@ -33,7 +33,7 @@ def message_send(json_data):
             message=message
             )
 
-    return str(response), 200
+    return 200, str(response)
 
 
 
@@ -41,20 +41,25 @@ def message_send(json_data):
 
 
 def message_get(json_data):
-    #username = json_data['username']
-    #cookie = json_data['cookie']
-    #last_time = json_data['last_get_time']
-    #convId = json_data['convId']
+    username = json_data['username']
+    cookie = json_data['cookie']
+    last_time = json_data['time']
+    chatroom_id = json_data['chatroom']
+
 
     # checks if user is authenticated
-    #if not helpers.authenticate(username, cookie): return 401, "unauthorized"
-    ##check if conversation exists, and if user has permission
-    #if not helpers.is_valid_chatroom(convId, username, cookie): return 403, "chatroom doesnt exist or not authorized"
+    if not helpers.authenticate(username, cookie):
+        return 401, "unauthorized"
 
+    # check chatroom permission
+    if not helpers.check_access(username , chatroom_id):
+        return 401, "chatroom doesnt exist or user doesnt have access to view it"
+
+
+    return_data = helpers.get_messages(last_time=last_time, username=username, chatroom_id=chatroom_id)
 
     #print(d(username), d(cookie), d(last_time), d(convId))
-    #return 200, json_data
-    return 200, ''
+    return 200, return_data
 
 
 

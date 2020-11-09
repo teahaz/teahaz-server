@@ -9,7 +9,6 @@ while 1:
     url = "http://localhost:5000/api/v0/message/"
 
     message = input(">> ")
-    print(type(b(message)))
 
     a = {
         "username": "me",

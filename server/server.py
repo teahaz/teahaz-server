@@ -23,21 +23,23 @@ class api__messages(Resource):
     # gets messages since {time.time()}
     def get(self):
         response, data = message_get(request.get_json())
-        return response, data
+        return data, response
     # sends message
     def post(self):
         response, data = message_send(request.get_json())
-        return response, data
+        return data, response
 
 
 # handles files
 class api__files(Resource):
     def get(self):
         response, data = message_send(request.get_json())
-        return response, data
+        return data, response
+
     def post(self):
         response, data = message_send(request.get_json())
-        return response, data
+        return data, response
+
 
 
 api.add_resource(index, '/')

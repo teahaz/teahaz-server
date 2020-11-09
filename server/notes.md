@@ -225,10 +225,18 @@ the chatroom-id being added to a database that is in its folder might be redunda
 
 
 # TODO
-- error check the json in api.py
-    - error on all but no cookie, which should go to /auth
+- error check the json in api.py (both errors and missing, and sanitize)
+    - error on all but no cookie, which should redirect to /auth
+
 - find a better var name for `response` in api.py [saving stuff in the database]
+
 - find better name for helpers
+
 - create try: except: for all parts of the file
     - server should not crash, but should print errors with the server_logger module
+
 - sanitize / encode all data that interacts with the database, perhpas even no user controlled ones like time and chatroom_id
+
+- larger requests should be rate limited so ppl cant ddos the server
+
+- cache db connections, so on first message it needs to reconnect but newer ones it just caches

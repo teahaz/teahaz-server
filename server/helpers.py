@@ -46,8 +46,7 @@ def check_access(username, chatroom_id):
 
 
 def save_message(time=0, username='', message='', chatroom_id='conv1'):
-    # chatroom_id is the folder name that data to do with chatroom resides in
-    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
     db_cursor = db_connection.cursor()
     # a safe-ish way of adding sql
     # all of these values should be encoded as a sort of paranoid model
@@ -78,5 +77,17 @@ def init_chat(chatroom_id):
     db_connection.commit()
     db_connection.close()
     return True
+
+
+def get_messages(last_time=0, chatroom_id=''):
+    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute("SELECT * FROM messages WHERE time >= ?", (last_time,))
+
+    db_connection.close()
+
+
+
 
 
