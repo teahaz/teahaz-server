@@ -4,18 +4,18 @@ import base64
 from base64 import b64encode as b
 
 
-url = "http://localhost:5000/api/v0/get/"
+url = "http://localhost:5000/api/v0/message/"
 
 a = {
-        'username': b(b'fuckface').decode('utf-8'),
-        'convId': b(b'conv1').decode('utf-8'),
-        'cookie': b(b'AAAAA').decode('utf-8'), 
-        'last_get_time':b(b"1597017007.553126").decode("utf-8")
+
+    "username": "bruh",
+    "cookie": "AAAA",
+    "time": 1604951915.377928,
+    "chatroom": "conv1",
 }
-print(a)
 
 
-res = requests.post(url, json=a)
+res = requests.get(url, json=a)
 
 print(res.text)
 #print(base64.b64decode(res.text).decode('utf-8'))

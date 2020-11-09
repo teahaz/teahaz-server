@@ -46,6 +46,8 @@ def message_get(json_data):
     last_time = json_data['time']
     chatroom_id = json_data['chatroom']
 
+    ## pls make sure to error check this
+    last_time = int(last_time)
 
     # checks if user is authenticated
     if not helpers.authenticate(username, cookie):
@@ -56,10 +58,11 @@ def message_get(json_data):
         return 401, "chatroom doesnt exist or user doesnt have access to view it"
 
 
-    return_data = helpers.get_messages(last_time=last_time, username=username, chatroom_id=chatroom_id)
+    return_data = helpers.get_messages(last_time=last_time, chatroom_id=chatroom_id)
 
     #print(d(username), d(cookie), d(last_time), d(convId))
     return 200, return_data
+
 
 
 

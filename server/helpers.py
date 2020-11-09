@@ -85,7 +85,10 @@ def get_messages(last_time=0, chatroom_id=''):
 
     db_cursor.execute("SELECT * FROM messages WHERE time >= ?", (last_time,))
 
+    data = db_cursor.fetchall()
     db_connection.close()
+
+    return data
 
 
 
