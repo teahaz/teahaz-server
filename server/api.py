@@ -66,9 +66,9 @@ def message_get(json_data):
 
 
 
-def upload_file(json_data):
-    return 200, 'filename'
-
+def upload_file(json_data, data):
+    print(data)
+    return 200, True
 
 
 def download_file(json_data):

@@ -32,12 +32,13 @@ class api__messages(Resource):
 
 # handles files
 class api__files(Resource):
+    #gets file
     def get(self):
-        response, data = message_send(request.get_json())
+        response, data = download_file(request.get_json())
         return data, response
-
+    # sends file
     def post(self):
-        response, data = message_send(request.get_json())
+        response, data = upload_file(request.get_json(), request.data)
         return data, response
 
 

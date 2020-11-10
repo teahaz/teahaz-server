@@ -240,3 +240,5 @@ the chatroom-id being added to a database that is in its folder might be redunda
 - larger requests should be rate limited so ppl cant ddos the server
 
 - cache db connections, so on first message it needs to reconnect but newer ones it just caches
+
+- not sure but perhaps some of the access related things should be done in server.py for a more paranoid approach
