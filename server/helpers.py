@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import os
 import sqlite3
 
@@ -91,6 +92,10 @@ def get_messages(last_time=0, chatroom_id=''):
     return data
 
 
+def save_file(data, mime_type, extension):
+    filename = hashlib.sha1().update(data).hexdigest()
+    print(filename)
 
+    return filename
 
 

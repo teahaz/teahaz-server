@@ -16,6 +16,9 @@ the following are examples of how to structure messages
 
 ### POST file
 ```json
+ISSUE: it seems we cannot send data and json in the same request
+
+
 // endpoint: /files
 {
     "username": "<username>",
@@ -107,7 +110,7 @@ i will not use mongo db in favour of sqlite: for now i think i will do mongo db,
 ### sqlite
 for now i will use sqlite, bc i can make persistant storage in local files
 inside the folder */server/storage* there is a pre defined folder structure
-``
+```
 /server/storage/
 |
 |-users.db
@@ -141,7 +144,7 @@ inside the folder */server/storage* there is a pre defined folder structure
 |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
 |          |
 |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
-``
+```
 - chatroom names might be a uuid or a hash of some sorts, this will be figured out with time
 - file-hashes might also be changed to a uuid so because of pythons slow math engine
 
@@ -164,7 +167,7 @@ cons:
 ### sqlite version3
 for now i will use sqlite, bc i can make persistant storage in local files
 inside the folder */server/storage* there is a pre defined folder structure
-``
+```
 /server/storage/
 |
 |-users.db
@@ -190,7 +193,7 @@ inside the folder */server/storage* there is a pre defined folder structure
 |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
 |          |
 |          |- filehash.extention_random-value //using this weird format to avoid any weird name issues, like path traversal or colliding names
-``
+```
 - chatroom names might be a uuid or a hash of some sorts, this will be figured out with time
 - file-hashes might also be changed to a uuid so because of pythons slow math engine
 
@@ -242,3 +245,6 @@ the chatroom-id being added to a database that is in its folder might be redunda
 - cache db connections, so on first message it needs to reconnect but newer ones it just caches
 
 - not sure but perhaps some of the access related things should be done in server.py for a more paranoid approach
+
+- find a way to send files without fucking client and server memory
+    - find a way to encrypt these files too

@@ -1,16 +1,20 @@
+# modules
 import time
 import json
 import base64
 
+# local
 import helpers
+
 
 
 def message_send(json_data):
     # get the data needed for this function
     username = json_data['username']
     cookie = json_data['cookie']
-    message_type = json_data['type']
     chatroom_id = json_data['chatroom']
+    message_type = json_data['type']
+
     message = json_data['message']
 
     # check message type
@@ -38,13 +42,12 @@ def message_send(json_data):
 
 
 
-
-
 def message_get(json_data):
     username = json_data['username']
     cookie = json_data['cookie']
-    last_time = json_data['time']
     chatroom_id = json_data['chatroom']
+
+    last_time = json_data['time']
 
     ## pls make sure to error check this
     last_time = int(last_time)
@@ -67,8 +70,32 @@ def message_get(json_data):
 
 
 def upload_file(json_data, data):
-    print(data)
-    return 200, True
+    username = json_data['username']
+    cookie = json_data['cookie']
+    chatroom_id = json_data['chatroom']
+    message_type = json_data['type']
+
+    mime_type = json_data['mimetype']
+    extension = json_data['extension']
+
+    # check message type
+    if not message_type == "file":
+        return 400, "posting non-'file' type to /file is forbidden"
+
+    # checks if user is authenticated
+    if not helpers.authenticate(username, cookie):
+        return 401, "unauthorized"
+
+    # check chatroom permission
+    if not helpers.check_access(username , chatroom_id):
+        return 401, "chatroom doesnt exist or user doesnt have access to view it"
+
+    filename = helpers.save_file(data, mime_type, extension)
+
+    #response = helpers.store_in_db?
+    response = filename
+
+    return 200, response
 
 
 def download_file(json_data):
