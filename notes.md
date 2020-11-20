@@ -77,4 +77,3 @@ i feel like i need to add an explentaion for my abuse of the json format
 + storing messages
 for storing messages the server uses one file, in general this could be good but has one big issue
 if two messages are being sent at once then they might try to write to the file at once which could cause issues
->>>>>>> 22fdcd5666c78190ef890b21b3b698a6c74d9721

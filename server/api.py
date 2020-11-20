@@ -1,4 +1,5 @@
 # modules
+import uuid
 import time
 import json
 import base64
@@ -30,14 +31,16 @@ def message_send(json_data):
         return 401, "chatroom doesnt exist or user doesnt have access to view it"
 
     # store message that got sent
-    response = helpers.save_message(
+    if not helpers.save_in_db(
             time=time.time(),
             username=username,
             chatroom_id = chatroom_id,
+            message_type='text',
             message=message
-            )
+            ):
+        return 500, "server failed to save mesage"
 
-    return 200, str(response)
+    return 200, "OK"
 
 
 
@@ -69,12 +72,13 @@ def message_get(json_data):
 
 
 
-def upload_file(json_data, data):
+def upload_file(json_data):
     username = json_data['username']
     cookie = json_data['cookie']
     chatroom_id = json_data['chatroom']
     message_type = json_data['type']
 
+    data = json_data['data']
     mime_type = json_data['mimetype']
     extension = json_data['extension']
 
@@ -90,10 +94,26 @@ def upload_file(json_data, data):
     if not helpers.check_access(username , chatroom_id):
         return 401, "chatroom doesnt exist or user doesnt have access to view it"
 
-    filename = helpers.save_file(data, mime_type, extension)
+    filename = uuid.uuid1()
 
-    #response = helpers.store_in_db?
-    response = filename
+    # try and save the file that the user sent
+    if not helpers.save_file(data, chatroom_id, mime_type, extension, filename):
+        return 500, "internal server error while saving your file"
+
+
+    # save a reference to the file in the chatroom database
+    response = helpers.save_in_db(
+
+            time=time.time(),
+            username=username,
+            chatroom_id=chatroom_id,
+            message_type=message_type,
+            filename=filename,
+            mime_type=mime_type,
+            extension=extension
+
+            )
+
 
     return 200, response
 

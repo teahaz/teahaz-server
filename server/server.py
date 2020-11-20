@@ -30,7 +30,7 @@ class api__messages(Resource):
         return data, response
 
 
-# handles files
+# handles file
 class api__files(Resource):
     #gets file
     def get(self):
@@ -38,7 +38,7 @@ class api__files(Resource):
         return data, response
     # sends file
     def post(self):
-        response, data = upload_file(request.get_json(), request.data)
+        response, data = upload_file(request.get_json())
         return data, response
 
 

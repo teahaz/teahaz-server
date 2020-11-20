@@ -16,18 +16,15 @@ the following are examples of how to structure messages
 
 ### POST file
 ```json
-ISSUE: it seems we cannot send data and json in the same request
-
-
 // endpoint: /files
 {
     "username": "<username>",
     "cookie": "<cookie>",
     "type": "file",
+    "chatroom": "<chatroom_id>",
     "mimetype": "<mimetype [not file extension]>",
-    "chatroom": "<chatroom_id>"
+    "data": "<encoded file>"
 }
-// file should be attached with the http post files method
 ```
 
 
@@ -226,6 +223,13 @@ the chatroom-id being added to a database that is in its folder might be redunda
         - `members.db` should store a refrence of active members so its stored in more than one place
         - `uploads/` a folder containing all files with uuid/hash names and encrypted/base64 (file extentions should either be in the file or should show for convenience)
 
+# sending files
+this is a complicated topic
+
+at the moment i will send it as json for convenience, but this will change
+
+
+
 
 # TODO
 - error check the json in api.py (both errors and missing, and sanitize)
@@ -248,3 +252,4 @@ the chatroom-id being added to a database that is in its folder might be redunda
 
 - find a way to send files without fucking client and server memory
     - find a way to encrypt these files too
+

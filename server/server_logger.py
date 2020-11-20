@@ -1,31 +1,45 @@
+import time
+import os
+
+# the class stays here so we can easily add new templates if needed
 class colours:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+    PURPLE = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    RESET = '\033[0m'
 
 
-def server_log(*args):
-    print('[SERVER LOG] ', end='')
-    for var in args:
-        print(var, end='')
-    print('\n')
+# templates should be put on the begining of a line that is printed
+## print(colour_templates['warning'] + "string")
+colour_templates = {
+        # increasing level of severity
+        "success": colours.RESET + colours.BOLD + colours.GREEN +colours.UNDERLINE,
+        "log": colours.RESET + colours.BOLD,
+        "warning": colours.RESET + colours.YELLOW,
+        "error": colours.RESET + colours.RED,
+        "fail": colours.RESET + colours.BOLD + colours.RED + colours.UNDERLINE,
+        }
 
 
-def server_error(*args):
-    print(f'{colours.FAIL}[SERVER ERROR] ', end='')
-    for var in args:
-        print(var, end='')
-    print('\n')
 
-def server_warning(*args):
-    print(f'{colours.WARNING}[SERVER WARNING] ', end='')
-    for var in args:
-        print(var, end='')
-    print('\n')
+
+# main logger function
+def logger(level='log', msg=""):
+    # level = the type of log [colours, etc]
+    level = level.lower()
+    msg_log = colour_templates[level] + f"[ {level} ] {time.time()}  ||  {msg} {colours.RESET}\n"
+    print(msg_log)
+
+    if not os.path.exists('./logs'):
+        os.mkdir('./logs')
+
+    # keep all logs in a file for later
+    with open("logs/logfile", "a+")as outfile:
+        outfile.write(msg_log+'\n')
+
 
