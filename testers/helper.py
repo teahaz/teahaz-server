@@ -1,10 +1,7 @@
-import mimetypes
 import base64
 import requests
 
 def sendfile(url, json, filename):
-    mime = mimetypes.MimeTypes().guess_type(filename)[0]
-    print('mime: ',mime, type(mime))
 
 
     with open(filename, 'rb')as infile:
@@ -23,8 +20,7 @@ def sendfile(url, json, filename):
         'cookie': json["cookie"],
         'chatroom': json["chatroom"],
         'type': "file",
-        'mimetype': str(mime),
-        'extention': extension,
+        'extension': extension,
         'data': contents
             }
 

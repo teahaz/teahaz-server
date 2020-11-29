@@ -21,8 +21,8 @@ colour_templates = {
         "success": colours.RESET + colours.BOLD + colours.GREEN +colours.UNDERLINE,
         "log": colours.RESET + colours.BOLD,
         "warning": colours.RESET + colours.YELLOW,
-        "error": colours.RESET + colours.RED,
-        "fail": colours.RESET + colours.BOLD + colours.RED + colours.UNDERLINE,
+        "error": colours.RESET + colours.RED + colours.UNDERLINE,
+        "fail": colours.RESET + colours.BOLD + colours.RED,
         }
 
 
@@ -30,16 +30,16 @@ colour_templates = {
 
 # main logger function
 def logger(level='log', msg=""):
-    # level = the type of log [colours, etc]
-    level = level.lower()
-    msg_log = colour_templates[level] + f"[ {level} ] {time.time()}  ||  {msg} {colours.RESET}\n"
-    print(msg_log)
 
     if not os.path.exists('./logs'):
         os.mkdir('./logs')
 
+    # level = the type of log [colours, etc]
+    level = level.lower()
+    msg_log = colour_templates[level] + f"[ {level} ] {time.time()}  ||  {msg}"
+    print(msg_log)
+
     # keep all logs in a file for later
     with open("logs/logfile", "a+")as outfile:
         outfile.write(msg_log+'\n')
-
 

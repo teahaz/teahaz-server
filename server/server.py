@@ -22,11 +22,11 @@ class index(Resource):
 class api__messages(Resource):
     # gets messages since {time.time()}
     def get(self):
-        response, data = message_get(request.get_json())
+        data, response = message_get(request.headers)
         return data, response
     # sends message
     def post(self):
-        response, data = message_send(request.get_json())
+        data, response = message_send(request.get_json())
         return data, response
 
 
@@ -34,18 +34,18 @@ class api__messages(Resource):
 class api__files(Resource):
     #gets file
     def get(self):
-        response, data = download_file(request.get_json())
+        data, response = download_file(request.headers)
         return data, response
     # sends file
     def post(self):
-        response, data = upload_file(request.get_json())
+        data, response = upload_file(request.get_json())
         return data, response
 
 
 
 api.add_resource(index, '/')
-api.add_resource(api__messages, '/api/v0/message/')
 api.add_resource(api__files, '/api/v0/file/')
+api.add_resource(api__messages, '/api/v0/message/')
 
 
 if __name__ == "__main__":

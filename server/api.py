@@ -3,32 +3,34 @@ import uuid
 import time
 import json
 import base64
+from os.path import isfile as checkfile
 
 # local
 import helpers
+from server_logger import logger as log
 
 
 
 def message_send(json_data):
     # get the data needed for this function
-    username = json_data['username']
-    cookie = json_data['cookie']
-    chatroom_id = json_data['chatroom']
-    message_type = json_data['type']
+    try:
+        username = json_data['username']
+        chatroom_id = json_data['chatroom']
+        message_type = json_data['type']
+        message = json_data['message']
+    except:
+        log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
+        return 'one or more of the required arguments are not supplied, needed=[chatroom_id, type, message]', 400
 
-    message = json_data['message']
 
     # check message type
     if not message_type == "text":
-        return 400, "posting non-'text' type to /message is forbidden"
-
-    # authenticate
-    if not helpers.authenticate(username , cookie):
-        return 401, "not authenticated"
+        return "posting non-'text' type to /message is forbidden", 400
 
     # check chatroom permission
     if not helpers.check_access(username , chatroom_id):
-        return 401, "chatroom doesnt exist or user doesnt have access to view it"
+        return "chatroom doesnt exist or user doesnt have access to view it", 401
+
 
     # store message that got sent
     if not helpers.save_in_db(
@@ -38,85 +40,134 @@ def message_send(json_data):
             message_type='text',
             message=message
             ):
-        return 500, "server failed to save mesage"
+        return "server failed to save mesage", 500
 
-    return 200, "OK"
-
-
+    return "OK", 200
 
 
-def message_get(json_data):
-    username = json_data['username']
-    cookie = json_data['cookie']
-    chatroom_id = json_data['chatroom']
 
-    last_time = json_data['time']
+def message_get(headers):
+    try:
+        username = headers['username']
+        chatroom_id = headers['chatroom']
+        last_time = headers['time']
+    except:
+        log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
+        return 'one or more of the required arguments are not supplied', 400
 
-    ## pls make sure to error check this
-    last_time = int(last_time)
 
-    # checks if user is authenticated
-    if not helpers.authenticate(username, cookie):
-        return 401, "unauthorized"
+    try:## pls make sure to error check this
+        last_time = float(last_time)
+    except:
+        log(level='error', msg='[server/api/message_get/1] value for last get time, could not be converted to a floating point number')
+        return 'value for time is not a number', 400
 
     # check chatroom permission
     if not helpers.check_access(username , chatroom_id):
-        return 401, "chatroom doesnt exist or user doesnt have access to view it"
-
+        log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
+        return "chatroom doesnt exist or user doesnt have access to view it", 401
 
     return_data = helpers.get_messages(last_time=last_time, chatroom_id=chatroom_id)
 
+    if return_data == False:
+        log(level='error', msg=f'[server/api/message_get/3] server error while getting messages')
+        return "server error while getting messages", 500
+
+
     #print(d(username), d(cookie), d(last_time), d(convId))
-    return 200, return_data
+    return return_data, 200
 
 
 
 
 def upload_file(json_data):
-    username = json_data['username']
-    cookie = json_data['cookie']
-    chatroom_id = json_data['chatroom']
-    message_type = json_data['type']
-
-    data = json_data['data']
-    mime_type = json_data['mimetype']
-    extension = json_data['extension']
+    try:
+        username = json_data['username']
+        chatroom_id = json_data['chatroom']
+        message_type = json_data['type']
+        data = json_data['data']
+        extension = json_data['extension']
+    except:
+        log(level='warning', msg='[server/api/upload_file/0] one or more of the required arguments are not supplied')
+        return 'one or more of the required arguments are not supplied', 400
 
     # check message type
     if not message_type == "file":
-        return 400, "posting non-'file' type to /file is forbidden"
+        log(level='error', msg='[server/api/upload_file/1] client attempted to post message with type other then "file" to /file')
+        return "posting non-'file' type to /file is forbidden", 400
 
-    # checks if user is authenticated
-    if not helpers.authenticate(username, cookie):
-        return 401, "unauthorized"
-
-    # check chatroom permission
+    # check chatroom permission, and existance
     if not helpers.check_access(username , chatroom_id):
-        return 401, "chatroom doesnt exist or user doesnt have access to view it"
+        log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
+        return "chatroom doesnt exist or user doesnt have access to view it", 401
 
-    filename = uuid.uuid1()
+    filename = str(uuid.uuid1())
 
     # try and save the file that the user sent
-    if not helpers.save_file(data, chatroom_id, mime_type, extension, filename):
-        return 500, "internal server error while saving your file"
+    if not helpers.save_file(data, chatroom_id, extension, filename):
+        log(level='error', msg=f'[server/api/upload_file/3] failed to save file: {filename}')
+        return "internal server error while saving your file", 500
 
 
     # save a reference to the file in the chatroom database
-    response = helpers.save_in_db(
+    return_data = helpers.save_in_db(
 
             time=time.time(),
             username=username,
             chatroom_id=chatroom_id,
             message_type=message_type,
             filename=filename,
-            mime_type=mime_type,
             extension=extension
 
             )
 
+    if return_data == False:
+        log(level='error', msg=f'[server/api/upload_file/3] failed to save file: {filename}, in database')
+        return "internal server error while indexing your file", 500
 
-    return 200, response
+
+    return return_data, 200
 
 
-def download_file(json_data):
-    return 200, 'filename'
+def download_file(headers):
+    try:
+        username = headers['username']
+        chatroom_id = headers['chatroom']
+        filename = headers['filename']
+    except:
+        log(level='warning', msg='[server/api/download_file/0] client did not supply all the needed arguments for this function [username, chatroom, filename]')
+        return 'one or more of the required arguments are not supplied', 400
+
+    # we gotta be safe
+    chatroom_id = helpers.sanitize_chatroom(chatroom_id)
+
+    # check chatroom permission, and existance
+    if not helpers.check_access(username , chatroom_id):
+        log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
+        return "chatroom doesnt exist or user doesnt have access to view it", 401
+
+
+    # gotta sanitize shit
+    filename = helpers.sanitize_filename(filename)
+    # if sanitization of filename failed
+    if filename == False:
+        log(level='warning', msg=f'[server/api/download_file/2] user specified file is of invalid format [ must be 36 bytes long ]')
+        return "user specified file was not of accepted format", 400
+
+
+    # check for the files existance
+    # checkfile is an alias to os.path.isfile
+    if not checkfile(f'storage/{chatroom_id}/uploads/{filename}'):
+        log(level='error', msg=f'[server/api/download_file/3] file storage/{chatroom_id}/uploads/{filename} does not exist')
+        return "file requested by client does not exist", 401
+
+    data = helpers.read_file(chatroom_id, filename)
+    # read failed
+    if data == False:
+        log(level='error', msg=f'[server/api/download_file/4] error while reading file: {filename}')
+        return "internal server error while reading user requested file", 401
+
+
+    return data, 200
+
+

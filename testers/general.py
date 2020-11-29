@@ -6,24 +6,26 @@ import base64
 import helper
 
 
-def b(a):
+def encode(a):
     return base64.b64encode(a.encode('utf-8')).decode('utf-8')
+def encode_binary(a):
+    return base64.b64encode(a).decode('utf-8')
 
 
 
 def get(s):
     url = "http://localhost:5000/api/v0/message/"
 
-    a = {
+    headers = {
 
         "username": "bruh",
         "cookie": "AAAA",
-        "time": 1604951915.377928,
+        "time": "1604951915.377928",
         "chatroom": "conv1",
     }
 
 
-    res = requests.get(url, json=a)
+    res = s.get(url=url, headers=headers)
 
     print(res.text)
     #print(base64.b64decode(res.text).decode('utf-8'))
@@ -31,7 +33,7 @@ def get(s):
 
 def send_file(s):
     url = "http://localhost:5000/api/v0/file/"
-
+    # get filename from user
     filename = input(">> ")
 
     # this is just so i can test without typing a filename each time
@@ -40,14 +42,26 @@ def send_file(s):
     print(filename)
 
 
+    with open(filename, 'rb')as infile:
+        contents = infile.read()
+
+    contents = encode_binary(contents)
+
+    # get file extension bc mimetype sucks sometimes
+    extension = filename.split(".")[-1]
+    print('extension: ',extension , type(extension))
+
 
     a = {
         "username": "me",
         "cookie": "test_cookie",
         "chatroom": "conv1",
-    }
+        "type": 'file',
+        'extension': extension,
+        'data': contents
+            }
 
-    res = helper.sendfile(url, a, filename)
+    res = s.post(url=url, json=a)
 
     return res.text
 
@@ -63,23 +77,35 @@ def send_message(s):
         "cookie": "test_cookie",
         "type": "text",
         "chatroom": "conv1",
-        "message": b(message)
+        "message": encode(message)
     }
 
-    res = requests.post(url, json=a)
+    res = s.post(url, json=a)
+
 
     return res.text
 
 
+def get_file(s):
+    url = "http://localhost:5000/api/v0/file/"
 
+    headers = {
+            "username": 'me',
+            "filename": '8491c704-30c9-11eb-a780-b42e99435986',
+            "chatroom": 'conv1'
+            }
 
+    res = s.get(url=url, headers=headers)
 
+    return res.text
 
 s = requests.Session()
 while 1:
     choice = input('type: ')
     if choice == 'sfile':
         print(send_file(s))
+    if choice == 'gfile':
+        print(get_file(s))
     elif choice == 'send':
         print(send_message(s))
     elif choice == 'get':

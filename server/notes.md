@@ -253,3 +253,10 @@ at the moment i will send it as json for convenience, but this will change
 - find a way to send files without fucking client and server memory
     - find a way to encrypt these files too
 
+- send get data in header -- some http clients dont support sending json in get methods
+
+- send file related data in header -- i cant send json  and file, but this way i can send the file withought having to put it in json
+
+- username should be changable by user, so create a userid that is tied to the users cookie
+
+- update all the json stuff 
