@@ -233,8 +233,7 @@ at the moment i will send it as json for convenience, but this will change
 
 # TODO
 - error check the json in api.py (both errors and missing, and sanitize)
-    - error on all but no cookie, which should redirect to /auth
-
+    - error on all but no cookie, which should redirect to /auth 
 - find a better var name for `response` in api.py [saving stuff in the database]
 
 - find better name for helpers

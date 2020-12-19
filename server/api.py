@@ -1,3 +1,4 @@
+# this file handles everything connected to the message databeases
 # modules
 import uuid
 import time
@@ -6,7 +7,9 @@ import base64
 from os.path import isfile as checkfile
 
 # local
-import helpers
+import messagesdb
+import filehander
+import sanitize
 from server_logger import logger as log
 
 
@@ -28,12 +31,12 @@ def message_send(json_data):
         return "posting non-'text' type to /message is forbidden", 400
 
     # check chatroom permission
-    if not helpers.check_access(username , chatroom_id):
+    if not messagesdb.check_access(username , chatroom_id):
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
 
     # store message that got sent
-    if not helpers.save_in_db(
+    if not messagesdb.save_in_db(
             time=time.time(),
             username=username,
             chatroom_id = chatroom_id,
@@ -63,11 +66,11 @@ def message_get(headers):
         return 'value for time is not a number', 400
 
     # check chatroom permission
-    if not helpers.check_access(username , chatroom_id):
+    if not messagesdb.check_access(username , chatroom_id):
         log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
-    return_data = helpers.get_messages(last_time=last_time, chatroom_id=chatroom_id)
+    return_data = messagesdb.get_messages(last_time=last_time, chatroom_id=chatroom_id)
 
     if return_data == False:
         log(level='error', msg=f'[server/api/message_get/3] server error while getting messages')
@@ -97,20 +100,20 @@ def upload_file(json_data):
         return "posting non-'file' type to /file is forbidden", 400
 
     # check chatroom permission, and existance
-    if not helpers.check_access(username , chatroom_id):
+    if not messagesdb.check_access(username , chatroom_id):
         log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
     filename = str(uuid.uuid1())
 
     # try and save the file that the user sent
-    if not helpers.save_file(data, chatroom_id, extension, filename):
+    if not filehander.save_file(data, chatroom_id, extension, filename):
         log(level='error', msg=f'[server/api/upload_file/3] failed to save file: {filename}')
         return "internal server error while saving your file", 500
 
 
     # save a reference to the file in the chatroom database
-    return_data = helpers.save_in_db(
+    return_data = messagesdb.save_in_db(
 
             time=time.time(),
             username=username,
@@ -139,16 +142,16 @@ def download_file(headers):
         return 'one or more of the required arguments are not supplied', 400
 
     # we gotta be safe
-    chatroom_id = helpers.sanitize_chatroom(chatroom_id)
+    chatroom_id = sanitize.chatroom(chatroom_id)
 
     # check chatroom permission, and existance
-    if not helpers.check_access(username , chatroom_id):
+    if not messagesdb.check_access(username , chatroom_id):
         log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
 
     # gotta sanitize shit
-    filename = helpers.sanitize_filename(filename)
+    filename = sanitize.filename(filename)
     # if sanitization of filename failed
     if filename == False:
         log(level='warning', msg=f'[server/api/download_file/2] user specified file is of invalid format [ must be 36 bytes long ]')
@@ -161,7 +164,7 @@ def download_file(headers):
         log(level='error', msg=f'[server/api/download_file/3] file storage/{chatroom_id}/uploads/{filename} does not exist')
         return "file requested by client does not exist", 401
 
-    data = helpers.read_file(chatroom_id, filename)
+    data = filehander.read_file(chatroom_id, filename)
     # read failed
     if data == False:
         log(level='error', msg=f'[server/api/download_file/4] error while reading file: {filename}')
