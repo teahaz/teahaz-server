@@ -1,3 +1,6 @@
+this readme is very outdated
+----------------------------
+TODO: fix this ^^
 # request structure
 requests will send json data with them
 
@@ -230,32 +233,37 @@ at the moment i will send it as json for convenience, but this will change
 
 
 
+# cookies
+cookies dont need to be stored on the server side
+rather they should be an encrypted string (eg: userID) that only the server knows the key to
+this way the server can get the userID just by decrypting without having to look it up in the db
+[source](https://security.stackexchange.com/questions/225620/is-cookie-information-stored-on-the-server-side)
+
+
 
 # TODO
-- error check the json in api.py (both errors and missing, and sanitize)
-    - error on all but no cookie, which should redirect to /auth 
-- find a better var name for `response` in api.py [saving stuff in the database]
+* larger requests should be rate limited so ppl cant ddos the server
 
-- find better name for helpers
+* cache db connections, so on first message it needs to reconnect but newer ones it just caches
 
-- create try: except: for all parts of the file
-    - server should not crash, but should print errors with the server_logger module
+* find a way to send files without fucking client and server memory
+   - find a way to encrypt these files too
+   - also web client cannot have local storage access
 
-- sanitize / encode all data that interacts with the database, perhpas even no user controlled ones like time and chatroom_id
+* username should be changable so everyone should have a userid that is static
+   - this id should be used in access logs
+   - userid probably should never leave the server
 
-- larger requests should be rate limited so ppl cant ddos the server
+* update readme
 
-- cache db connections, so on first message it needs to reconnect but newer ones it just caches
+* set up something to run on the first run of the server, this should create databases and needed folders
+   - alternativly it could also just run on every startup of the server. Checking if everything is intact and that there are no new updates
 
-- not sure but perhaps some of the access related things should be done in server.py for a more paranoid approach
+* check that users with the same name cannot register
 
-- find a way to send files without fucking client and server memory
-    - find a way to encrypt these files too
+* look into how flask handles cookies
+    - [ctf writeup](https://ctftime.org/writeup/20339)
 
-- send get data in header -- some http clients dont support sending json in get methods
+* implement some central key for the server
 
-- send file related data in header -- i cant send json  and file, but this way i can send the file withought having to put it in json
-
-- username should be changable by user, so create a userid that is tied to the users cookie
-
-- update all the json stuff 
+* organize file names

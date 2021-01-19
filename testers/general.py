@@ -91,7 +91,7 @@ def get_file(s):
 
     headers = {
             "username": 'me',
-            "filename": '8491c704-30c9-11eb-a780-b42e99435986',
+            "filename": input(">> "),
             "chatroom": 'conv1'
             }
 

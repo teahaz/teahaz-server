@@ -1,6 +1,6 @@
 # this file handles all things connected to local files
 import os
-from server_logger import logger as log
+from logging_l import logger as log
 
 def save_file(data, chatroom, extension, filename):
     # uuid is used as a filename

@@ -7,10 +7,10 @@ import base64
 from os.path import isfile as checkfile
 
 # local
-import messagesdb
-import filehander
-import sanitize
-from server_logger import logger as log
+import dbhandler
+import security_l as security
+import filesystem_l as filehander
+from logging_l import logger as log
 
 
 
@@ -31,12 +31,12 @@ def message_send(json_data):
         return "posting non-'text' type to /message is forbidden", 400
 
     # check chatroom permission
-    if not messagesdb.check_access(username , chatroom_id):
+    if not dbhandler.check_access(username , chatroom_id):
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
 
     # store message that got sent
-    if not messagesdb.save_in_db(
+    if not dbhandler.save_in_db(
             time=time.time(),
             username=username,
             chatroom_id = chatroom_id,
@@ -46,7 +46,6 @@ def message_send(json_data):
         return "server failed to save mesage", 500
 
     return "OK", 200
-
 
 
 def message_get(headers):
@@ -66,11 +65,11 @@ def message_get(headers):
         return 'value for time is not a number', 400
 
     # check chatroom permission
-    if not messagesdb.check_access(username , chatroom_id):
+    if not dbhandler.check_access(username , chatroom_id):
         log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
-    return_data = messagesdb.get_messages(last_time=last_time, chatroom_id=chatroom_id)
+    return_data = dbhandler.get_messages(last_time=last_time, chatroom_id=chatroom_id)
 
     if return_data == False:
         log(level='error', msg=f'[server/api/message_get/3] server error while getting messages')
@@ -79,8 +78,6 @@ def message_get(headers):
 
     #print(d(username), d(cookie), d(last_time), d(convId))
     return return_data, 200
-
-
 
 
 def upload_file(json_data):
@@ -100,7 +97,7 @@ def upload_file(json_data):
         return "posting non-'file' type to /file is forbidden", 400
 
     # check chatroom permission, and existance
-    if not messagesdb.check_access(username , chatroom_id):
+    if not dbhandler.check_access(username , chatroom_id):
         log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
@@ -113,15 +110,13 @@ def upload_file(json_data):
 
 
     # save a reference to the file in the chatroom database
-    return_data = messagesdb.save_in_db(
-
+    return_data = dbhandler.save_in_db(
             time=time.time(),
             username=username,
             chatroom_id=chatroom_id,
             message_type=message_type,
             filename=filename,
             extension=extension
-
             )
 
     if return_data == False:
@@ -142,16 +137,16 @@ def download_file(headers):
         return 'one or more of the required arguments are not supplied', 400
 
     # we gotta be safe
-    chatroom_id = sanitize.chatroom(chatroom_id)
+    chatroom_id = security.sanitize_chatroomId(chatroom_id)
 
     # check chatroom permission, and existance
-    if not messagesdb.check_access(username , chatroom_id):
+    if not dbhandler.check_access(username , chatroom_id):
         log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
 
     # gotta sanitize shit
-    filename = sanitize.filename(filename)
+    filename = security.sanitize_filename(filename)
     # if sanitization of filename failed
     if filename == False:
         log(level='warning', msg=f'[server/api/download_file/2] user specified file is of invalid format [ must be 36 bytes long ]')

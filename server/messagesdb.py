@@ -3,7 +3,7 @@ import uuid
 import os
 import sqlite3
 
-from server_logger import logger as log
+from logging_l import logger as log
 
 
 # encode/decode shit to stop any sort of injection
