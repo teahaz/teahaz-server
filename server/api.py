@@ -16,7 +16,7 @@ from logging_l import logger as log
 
 def message_send(json_data):
     try: # get the data needed for this function
-        username = json_data['username']
+        userId = json_data['userId']
         chatroom_id = json_data['chatroom']
         message_type = json_data['type']
         message = json_data['message']
@@ -30,14 +30,14 @@ def message_send(json_data):
         return "posting non-'text' type to /message is forbidden", 400
 
     # check chatroom permission
-    if not dbhandler.check_access(username , chatroom_id):
+    if not dbhandler.check_access(userId , chatroom_id):
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
 
     # store message that got sent
     if not dbhandler.save_in_db(
             time=time.time(),
-            username=username,
+            userId=userId,
             chatroom_id = chatroom_id,
             message_type='text',
             message=message
@@ -49,7 +49,7 @@ def message_send(json_data):
 
 def message_get(headers):
     try:
-        username = headers['username']
+        userId = headers['userId']
         chatroom_id = headers['chatroom']
         last_time = headers['time']
     except:
@@ -64,7 +64,7 @@ def message_get(headers):
         return 'value for time is not a number', 400
 
     # check chatroom permission
-    if not dbhandler.check_access(username , chatroom_id):
+    if not dbhandler.check_access(userId , chatroom_id):
         log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
@@ -75,13 +75,16 @@ def message_get(headers):
         return "server error while getting messages", 500
 
 
-    #print(d(username), d(cookie), d(last_time), d(convId))
+    # NOTE: somehow get the nickname back to the user
+
+
+    #print(d(userId), d(cookie), d(last_time), d(convId))
     return return_data, 200
 
 
 def upload_file(json_data):
     try:
-        username = json_data['username']
+        userId = json_data['userId']
         chatroom_id = json_data['chatroom']
         message_type = json_data['type']
         data = json_data['data']
@@ -96,8 +99,8 @@ def upload_file(json_data):
         return "posting non-'file' type to /file is forbidden", 400
 
     # check chatroom permission, and existance
-    if not dbhandler.check_access(username , chatroom_id):
-        log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
+    if not dbhandler.check_access(userId , chatroom_id):
+        log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {userId} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
     filename = str(uuid.uuid1())
@@ -111,7 +114,7 @@ def upload_file(json_data):
     # save a reference to the file in the chatroom database
     return_data = dbhandler.save_in_db(
             time=time.time(),
-            username=username,
+            userId=userId,
             chatroom_id=chatroom_id,
             message_type=message_type,
             filename=filename,
@@ -128,19 +131,19 @@ def upload_file(json_data):
 
 def download_file(headers):
     try:
-        username = headers['username']
+        userId = headers['userId']
         chatroom_id = headers['chatroom']
         filename = headers['filename']
     except:
-        log(level='warning', msg='[server/api/download_file/0] client did not supply all the needed arguments for this function [username, chatroom, filename]')
+        log(level='warning', msg='[server/api/download_file/0] client did not supply all the needed arguments for this function [userId, chatroom, filename]')
         return 'one or more of the required arguments are not supplied', 400
 
     # we gotta be safe
     chatroom_id = security.sanitize_chatroomId(chatroom_id)
 
     # check chatroom permission, and existance
-    if not dbhandler.check_access(username , chatroom_id):
-        log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
+    if not dbhandler.check_access(userId , chatroom_id):
+        log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {userId} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 401
 
 

@@ -31,7 +31,7 @@ class login(Resource):
         return "not implemented yet [login page for website]", 501
 
     def post(self):
-        cookie = set_cookie()
+        cookie = set_cookie(request.get_json())
         res = make_response("assigning new cookie")
         res.set_cookie('token', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, i will research what is best for this later
         return res, 200

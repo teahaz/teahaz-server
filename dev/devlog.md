@@ -33,7 +33,7 @@ also maybe such a 2fa hash should be used as some sort of salt, so if masterpass
 
 
 
-# 23 jan 2021
+# 22 jan 2021
 ## working on cookies
 new idea for cookies
 the former idea i had for cookies would be really slow, as well as would have the potential of exposing the master password
@@ -56,4 +56,20 @@ i think i will also add a users.db
     pros:
         all the data in one place
         makes it easier to manage
+
+
+
+
+# 23 jan 2021
+im going to try and implement the 2nd idea for the users database
+
+## username vs userid
+a new thing that i have come up with is to replace username with userid intermally
+infact there will no longer be a username but rather just a nickname to represent that it has no real value
+
+the userid will not be shown to the end user, but it will be what the server uses for client server communication, authentication, and literarly everything else
+
+if possible ill try make it so that other ppl can never find your userid, this might not be very easy tho and is not high on my list of priorities
+
+on that note i will cut cookies in half again to replace everythign i have done so far with userID instead of username
 

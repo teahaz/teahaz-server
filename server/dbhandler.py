@@ -9,7 +9,7 @@ from logging_l import logger as log
 
 
 
-#------------------------------------------------------------------------------- encoding ------------------------------------------------------------------------------------
+#--------------------------------------------- encoding ---------------------------------------------
 # encode/decode shit to stop any sort of injection
 def b(a):
     return base64.b64encode(a.encode('utf-8')).decode('utf-8')
@@ -18,59 +18,8 @@ def d(a):
     return base64.b64decode(a.encode('utf-8')).decode('utf-8')
 
 
-
-#################################################### IMPORTANT #########################################################
-#============================ this stuff needs to be removed/secured before release [no toctou]=========================
-# never called from program, only for testing stuff
-def adduser(username, password):
-    # username is user controlled so it should be encoded
-    username = b(username)
-
-    # password hashed with bcrypt, which contains the salt as well
-    password = security.hashpw(password)
-
-    # userID is a static uuid that cannot be changed
-    #   this is important bc the user can change their username, without it having to be updated in access logs
-    #   userID PROBABLY should never leave the server
-    userID = str(uuid.uuid1())
-
-    # connect to the users database
-    #    files are local so rather just "open db file"
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    # 2fa = bool true/false; 2fa_key = key value
-    db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?, ?)", (username, password, userID, None, None))
-    #:wq
-    db_connection.commit()
-    db_connection.close()
-
-
-
-
-
-#-------------------------------------------------------------------------------  testing ------------------------------------------------------------------------------------
-# tis only for testing
-def get_all_messages(chatroom_id):
-    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT * FROM messages")
-    a = db_cursor.fetchall()
-    for b in a:
-        print(b)
-    db_connection.close()
-
-
-
-# tis only for testing
-def get_all_users():
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT * FROM users")
-    print(db_cursor.fetchall())
-    db_connection.close()
-
-
-#-------------------------------------------------------------------------------  init ------------------------------------------------------------------------------------
+################################################# user stuff ###############################################
+#-------------------------------------------------  init ----------------------------------------------------
 # creates a users database
 def init_user_db():
     if os.path.exists(f'storage/users.db'):
@@ -81,15 +30,79 @@ def init_user_db():
 
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
-    db_cursor.execute(f"CREATE TABLE users ('name', 'password', 'userID', '2fa', '2fa_key')")
+    # cookies is a list of cookies, that is turned into a string with json, and base64/hex encoded
+    db_cursor.execute(f"CREATE TABLE users ('userID', 'nickname', 'password', cookies)")
     db_connection.commit()
     db_connection.close()
     return True
 
 
+#------------------------------------------------  testing --------------------------------------------------
+# tis only for testing
+def get_all_users():
+    db_connection = sqlite3.connect(f'storage/users.db')
+    db_cursor = db_connection.cursor()
+    db_cursor.execute(f"SELECT * FROM users")
+    print(db_cursor.fetchall())
+    db_connection.close()
 
+
+def adduser_internal(userId=None, nickname=None, password=None, cookie=None):
+    db_connection = sqlite3.connect(f'storage/users.db')
+    db_cursor = db_connection.cursor()
+    db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?)", (userId, nickname, password, cookie))
+    db_connection.commit()
+    db_connection.close()
+
+#-------------------------------------------------- access control ------------------------------------------
+def checkuser(userId, password):
+    if not os.path.isfile(f'storage/users.db'):
+        log(level='error', msg=f'users.db does not exits')
+        init_user_db()
+
+    userId = b(userId)
+
+    db_connection = sqlite3.connect(f'storage/users.db')
+    db_cursor = db_connection.cursor()
+    db_cursor.execute(f"SELECT password FROM users WHERE userId = ? AND password = ?", (userId, password))
+    db_connection.commit()
+    db_connection.close()
+
+    return True
+
+# this function should not be in dbhandler
+def check_access(userId, chatroom_id):
+    return True
+
+
+def get_nickname(userId):
+    db_connection = sqlite3.connect(f'storage/users.db')
+    db_cursor = db_connection.cursor()
+    db_cursor.execute(f"SELECT nickname FROM users WHERE userId = ?", (userId,))
+    data = db_cursor.fetchall()
+    db_connection.close()
+
+    # sqlite3 wraps the username in a tuple inside of a list
+    return data[0][0]
+
+
+
+
+################################################# chat stuff ###############################################
+#------------------------------------------------  testing ---------------------------------------------------
+# tis only for testing
+def get_all_messages(chatroom_id):
+    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+    db_cursor = db_connection.cursor()
+    db_cursor.execute(f"SELECT * FROM messages")
+    a = db_cursor.fetchall()
+    for b in a:
+        print(b)
+    db_connection.close()
+
+#-------------------------------------------------  init ------------------------------------------------------
 def init_chat(chatroom_id):
-    if os.path.exists(f'storage/{chatroom_id}'):
+    if os.path.isfile(f'storage/{chatroom_id}'):
         log(level='error', msg=f'attempting to redifine chatroom:  {chatroom_id}')
         return False
     else:
@@ -99,33 +112,20 @@ def init_chat(chatroom_id):
 
     db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
     db_cursor = db_connection.cursor()
-    db_cursor.execute(f"CREATE TABLE users ('name', 'colour')")
-    db_cursor.execute(f"CREATE TABLE messages ('time', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
+    # removed list of users here, might need this later
+    db_cursor.execute(f"CREATE TABLE messages ('time', 'userId', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
     db_connection.commit()
     db_connection.close()
     return True
 
 
-#------------------------------------------------------------------------------- access control ------------------------------------------------------------------------------------
-
-def checkuser(username, password):
-    return True
-
-
-# this function should not be in dbhandler
-def check_access(username, chatroom_id):
-    return True
-
-
-
-#------------------------------------------------------------------------------- messages ------------------------------------------------------------------------------------
-
+#---------------------------------------------------- messages ------------------------------------------------
 # va=None means that the fild is not used
 # var=0 means that the field is not set AND IS NEEDED FOR THE FUNCTION
 # this destiction is for readability, the None values are not required but the 0 ones are
-def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, filename=None, extension=None ):
-    if time == 0 or username == 0 or chatroom_id == 0 or message_type == 0:
-        log(level='error', msg='[server/dbhandler/save_in_db/0] one or more of the required fields passed to function "save_in_db" are not present [time, username, chatroom_id, message_type]')
+def save_in_db(time=0, userId=0, chatroom_id=0, message_type=0, message=None, filename=None, extension=None ):
+    if time == 0 or userId == 0 or chatroom_id == 0 or message_type == 0:
+        log(level='error', msg='[server/dbhandler/save_in_db/0] one or more of the required fields passed to function "save_in_db" are not present [time, userId, chatroom_id, message_type]')
         return False
 
     # check if db exists
@@ -138,7 +138,7 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
         return False
     # a safe-ish way of adding sql
     # all of these values should be encoded as a sort of paranoid model
-    db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, username, chatroom_id, message_type, message, filename, extension))
+    db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, userId, chatroom_id, message_type, message, filename, extension))
     # :wq
     db_connection.commit()
     db_connection.close()
@@ -147,8 +147,6 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
     #get_all_messages(chatroom_id)
 
     return True
-
-
 
 
 def get_messages(last_time=0, chatroom_id=''):
@@ -169,18 +167,29 @@ def get_messages(last_time=0, chatroom_id=''):
     # we should convert this back to json
     json_data = []
     for element in data:
+        nickname = get_nickname(element[1])
         a = {
             'time': element[0],
-            'username': element[1],
+            'userId': element[1],
+            'nickname': nickname,
             'chatroom': element[2],
             'type': element[3],
             'message': element[4],
             'filename': element[5],
             'extension': element[6],
                 }
+
+
         json_data.append(a)
 
     return json_data
 
+
+
+# create databases, THIS IS ONLY FOR TESTING
+if __name__ == "__main__":
+    init_user_db()
+    init_chat('conv1')
+    adduser_internal(userId="42138947328947329847", nickname="default", password="password")
 
 

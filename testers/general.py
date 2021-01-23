@@ -18,7 +18,8 @@ def get(s):
 
     headers = {
 
-        "username": "bruh",
+        "userId": "42138947328947329847",
+        "nickname": "bruh",
         "cookie": "AAAA",
         "time": "1604951915.377928",
         "chatroom": "conv1",
@@ -53,7 +54,8 @@ def send_file(s):
 
 
     a = {
-        "username": "me",
+        "userId": "42138947328947329847",
+        "nickname": "bruh",
         "cookie": "test_cookie",
         "chatroom": "conv1",
         "type": 'file',
@@ -73,7 +75,8 @@ def send_message(s):
     message = input(">> ")
 
     a = {
-        "username": "me",
+        "userId": "42138947328947329847",
+        "nickname": "bruh",
         "cookie": "test_cookie",
         "type": "text",
         "chatroom": "conv1",
@@ -90,7 +93,8 @@ def get_file(s):
     url = "http://localhost:5000/api/v0/file/"
 
     headers = {
-            "username": 'me',
+            "userId": "42138947328947329847",
+            "nickname": "bruh",
             "filename": input(">> "),
             "chatroom": 'conv1'
             }

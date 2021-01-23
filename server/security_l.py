@@ -25,12 +25,20 @@ def sanitize_chatroomId(chatroom_id):
 
 
 def generate_cookie():
-    cookie = sha256(seed)
+    cookie = sha256()
     return cookie
 
 
 
 def hashpw(password):
+    password = password.encode("utf-8")
+    password = bcrypt.hashpw(password, bcrypt.gensalt(rounds=16))
+    return password.decode("utf-8")
+
+
+
+# uses bcrypt to check a password
+def checkpw(password):
     password = password.encode("utf-8")
     password = bcrypt.hashpw(password, bcrypt.gensalt(rounds=16))
     return password.decode("utf-8")
