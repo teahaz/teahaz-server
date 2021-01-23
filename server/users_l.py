@@ -10,7 +10,7 @@ from logging_l import logger as log
 
 
 
-def assign_cookie(json_data):
+def set_cookie(json_data):
     # get the data needed for this function
     try:
         username = json_data['username']

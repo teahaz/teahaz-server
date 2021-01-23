@@ -9,6 +9,7 @@ from api import message_get
 from api import upload_file
 from api import download_file
 
+from users_l import set_cookie
 
 
 app = Flask(__name__)
@@ -30,8 +31,9 @@ class login(Resource):
         return "not implemented yet [login page for website]", 501
 
     def post(self):
+        cookie = set_cookie()
         res = make_response("assigning new cookie")
-        res.set_cookie('token', 'flag{probably should not have a static cookiei really need to set a better cookie}', max_age=60*60*24*100) # cookie age is rn 100 days, i will research what is best for this later
+        res.set_cookie('token', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, i will research what is best for this later
         return res, 200
 
 
@@ -66,6 +68,7 @@ api.add_resource(api__files, '/api/v0/file/')
 api.add_resource(api__messages, '/api/v0/message/')
 
 
+
 if __name__ == "__main__":
     #!!!!!!!!! important:
     # everything the server relies heavily on this master password, and it must be kept really well guarded
@@ -74,6 +77,12 @@ if __name__ == "__main__":
     # the key needs to be accessed everywhere on the server
         # i may in future restrict this so only a few functions can access it
     global master_key
+
+    #THIS IS HORRIBLE
+    # and ik it is im just not sure how to do it better yet
+    # there should be some sort of key/secret, something athat might change constantly, but something that can only be decoded on this server
+    global _2fa_key
+    _2fa_key = "this is not a key, i need to think more on its implementation, its only like this for now but will probably be something a lot better in the end"
 
     # check if TEAHAZ_MASTER_KEY enviroment variable exists
     if not "TEAHAZ_MASTER_KEY" in environ:

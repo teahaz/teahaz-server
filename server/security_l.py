@@ -25,8 +25,7 @@ def sanitize_chatroomId(chatroom_id):
 
 
 def generate_cookie():
-    seed = os.urandom(512)
-    cookie = sha256(seed).hexdigest()
+    cookie = sha256(seed)
     return cookie
 
 

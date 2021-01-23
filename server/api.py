@@ -15,8 +15,7 @@ from logging_l import logger as log
 
 
 def message_send(json_data):
-    # get the data needed for this function
-    try:
+    try: # get the data needed for this function
         username = json_data['username']
         chatroom_id = json_data['chatroom']
         message_type = json_data['type']

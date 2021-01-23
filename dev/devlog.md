@@ -6,7 +6,7 @@ usually something about what im working on, what i recently finished, or random 
 
 
 
-# jan 18 2021
+# 18 jan 2021
 with the project being about 4 months old, maybe its a bit late to stat a devlog, 
 but i guess better late then never
 i took about a month long break, and i have no idea what i was working on
@@ -14,9 +14,9 @@ apparently the server has a master password now
 
 
 
-# jan 19 2021
+# 19 jan 2021
 ## working on cookies
-idea is that we should not store cookies, but rather get decypher them
+idea is that we should not store cookies, but have hashes, that the server can verify
 this would look something like a jwt token, except the user would not be able to decode it
 the cookie would be a hash of the users (something: username, id, password) and the master passowrd of the server
 
@@ -29,3 +29,31 @@ so far ideas of 2fa (this would mean that anywhere the master password is hashed
     some file on the server, outside of the server directory
 
 also maybe such a 2fa hash should be used as some sort of salt, so if masterpassword is leaked from some other function it cannot actually use it until it leaks the 2fa key
+
+
+
+
+# 23 jan 2021
+## working on cookies
+new idea for cookies
+the former idea i had for cookies would be really slow, as well as would have the potential of exposing the master password
+also it seemed like re-inventing jwt tokens
+so, although i dont like it, i think im going to go for good old session cookies
+i think i will also add a users.db 
+2 main ideas for users.db
+* 1
+    id = cookie
+    this would mean that each entry in the db would have an id that is the cookie of the user
+    a user could have more then one entry, if they have more then one device.
+    entry would store a small amount of information, probably just `<id/cookie, user id>`
+    pros:
+        probably faster than the other one
+
+* 2
+    id = user id
+    in this implementation each entry would have the users unique id, along with all cookies connecting to them
+    this could store more information, including all user specific data, like colour, avatar, password(hash), nickname, etc
+    pros:
+        all the data in one place
+        makes it easier to manage
+
