@@ -8,9 +8,9 @@ from os.path import isfile as checkfile
 
 # local
 import dbhandler
-import security_l as security
-import filesystem_l as filehander
-from logging_l import logger as log
+import security_th as security
+import filesystem_th as filehander
+from logging_th import logger as log
 
 
 

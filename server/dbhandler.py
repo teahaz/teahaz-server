@@ -4,8 +4,8 @@ import os
 import sqlite3
 
 
-import security_l as security
-from logging_l import logger as log
+import security_th as security
+from logging_th import logger as log
 
 
 

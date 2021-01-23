@@ -4,9 +4,9 @@
 import sqlite3
 
 # local
-import security_l as security
+import security_th as security
 import dbhandler as database
-from logging_l import logger as log
+from logging_th import logger as log
 
 
 

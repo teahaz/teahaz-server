@@ -4,7 +4,7 @@ import os
 import bcrypt
 from hashlib import sha256
 
-from logging_l import logger as log
+from logging_th import logger as log
 
 def sanitize_filename(filename):
     filename = filename.replace('..', '')

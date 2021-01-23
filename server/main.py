@@ -9,7 +9,7 @@ from api import message_get
 from api import upload_file
 from api import download_file
 
-from users_l import set_cookie
+from users_th import set_cookie
 
 
 app = Flask(__name__)
