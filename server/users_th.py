@@ -1,4 +1,4 @@
-# this file should sort out everything related to users
+#this file should sort out everything related to users
 
 #globls
 import sqlite3
@@ -26,15 +26,17 @@ def set_cookie(json_data):
     elif len(password) < 10:
         return 'password must be at least 10 chars', 400
 
+    print(1)
     # check if the username and password combination exists
     if not database.checkuser(userId, password):
         return "username or password incorrect, login failed", 401
 
     cookie = security.generate_cookie()
+    print('cookie: ',cookie , type(cookie))
 
     database.store_cookie(userId, cookie)
 
-    return cookie
+    return cookie, 200
 
 
 

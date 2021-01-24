@@ -103,8 +103,34 @@ def get_file(s):
 
     return res.text
 
+
+
+def login(s):
+    url = "http://localhost:5000/login"
+
+    a = {
+        "userId": "1234567890",
+        "password" : input("password: ")
+    }
+
+    res = s.post(url=url, json=a)
+    print(res.text)
+    print(res.cookies)
+
+
+
+
+
+
 s = requests.Session()
 while 1:
+
+    # login
+
+    login(s)
+
+
+
     choice = input('type: ')
     if choice == 'sfile':
         print(send_file(s))

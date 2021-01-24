@@ -43,11 +43,18 @@ def get_all_users():
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
     db_cursor.execute(f"SELECT * FROM users")
-    print(db_cursor.fetchall())
+    a = db_cursor.fetchall()
     db_connection.close()
+    for i in a:
+        print(i)
 
 
-def adduser_internal(userId=None, nickname=None, password=None, cookie='[]'):
+def adduser_internal(userId=None, nickname=None, password=None):
+    userId = b(userId)
+    nickname = b(nickname)
+    password = b(security.hashpw(password))
+    cookie = b('[]')
+
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
     # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
@@ -63,13 +70,24 @@ def checkuser(userId, password):
         init_user_db()
 
     userId = b(userId)
+    print('userId: ',userId , type(userId))
 
+    # get all passwords for the user from the db
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT password FROM users WHERE userId = ? AND password = ?", (userId, password))
+    db_cursor.execute(f"SELECT password FROM users WHERE userId = ?", (userId,))
     storedPassword = db_cursor.fetchall()
     db_connection.close()
 
+    # check if the user has a password set
+    print('storedPassword: ',storedPassword , type(storedPassword))
+    # string has to be greater than 10 to have a password in it (password + [])
+    if len(storedPassword) > 0:
+        storedPassword = d(storedPassword[0][0])
+    else:
+        return False
+
+    # check if the password is correct
     if security.checkpw(password, storedPassword):
         return True
     else:
@@ -95,16 +113,21 @@ def get_nickname(userId):
 def store_cookie(userId, new_cookie):
     db_connection = sqlite3.connect("storage/users.db")
     db_cursor = db_connection.cursor()
-    db_cursor.execute("SELECT cookie FROM users WHERE userId = ?", (userId,))
+    db_cursor.execute("SELECT cookies FROM users WHERE userId = ?", (userId,))
     cookies = db_cursor.fetchall()
 
     # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
+    print('cookies: ',cookies , type(cookies))
     cookies = list(cookies)
+    print('0cookies: ',cookies , type(cookies))
     cookies.append(new_cookie)
+    print('1cookies: ',cookies , type(cookies))
     cookies = str(cookies)
+    print('2cookies: ',cookies , type(cookies))
 
     # return the new cookies list back
     db_cursor.execute('UPDATE users SET cookies = ? WHERE userId = ?', (cookies, userId))
+    print(3)
     db_connection.commit()
     db_connection.close()
 
@@ -127,6 +150,7 @@ def get_all_messages(chatroom_id):
     for b in a:
         print(b)
     db_connection.close()
+
 
 #-------------------------------------------------  init ------------------------------------------------------
 def init_chat(chatroom_id):

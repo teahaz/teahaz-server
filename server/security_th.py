@@ -43,7 +43,7 @@ def hashpw(password):
 def checkpw(password, storedPassword):
     password = password.encode("utf-8")
     storedPassword = storedPassword.encode("utf-8")
-    return bcrypt.hashpw(password, bcrypt.gensalt(rounds=16))
+    return bcrypt.checkpw(password, storedPassword)
 
 
 

@@ -28,34 +28,40 @@ class index(Resource):
 # checks password and returns auth cookie for use in other places
 class login(Resource):
     def post(self):
-        cookie = set_cookie(request.get_json())
-        res = make_response("assigning new cookie")
-        res.set_cookie('token', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, i will research what is best for this later
-        return res, 200
+        cookie, status_code = set_cookie(request.get_json())
+        print(cookie, status_code)
+
+        if status_code == 200:
+            res = make_response("assigning new cookie")
+            res.set_cookie('token', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, im not sure what it should be
+            return res
+        else:
+            # if the cookie fails to set then this is not actaully a cookie but an error message
+            return cookie, status_code
 
 
 # handles messages
 class api__messages(Resource):
     # gets messages since {time.time()}
     def get(self):
-        data, response = message_get(request.headers)
-        return data, response
+        data, status_code = message_get(request.headers)
+        return data, status_code
     # sends message
     def post(self):
-        data, response = message_send(request.get_json())
-        return data, response
+        data, status_code = message_send(request.get_json())
+        return data, status_code
 
 
 # handles file
 class api__files(Resource):
     #gets file
     def get(self):
-        data, response = download_file(request.headers)
-        return data, response
+        data, status_code = download_file(request.headers)
+        return data, status_code
     # sends file
     def post(self):
-        data, response = upload_file(request.get_json())
-        return data, response
+        data, status_code = upload_file(request.get_json())
+        return data, status_code
 
 
 
