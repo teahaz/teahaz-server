@@ -27,9 +27,6 @@ class index(Resource):
 
 # checks password and returns auth cookie for use in other places
 class login(Resource):
-    def get(self):
-        return "not implemented yet [login page for website]", 501
-
     def post(self):
         cookie = set_cookie(request.get_json())
         res = make_response("assigning new cookie")
@@ -70,30 +67,5 @@ api.add_resource(api__messages, '/api/v0/message/')
 
 
 if __name__ == "__main__":
-    #!!!!!!!!! important:
-    # everything the server relies heavily on this master password, and it must be kept really well guarded
-        # if the master password is leaked then everyone is compromised
-        # maybe i should implement some sort of 2fa
-    # the key needs to be accessed everywhere on the server
-        # i may in future restrict this so only a few functions can access it
-    global master_key
-
-    #THIS IS HORRIBLE
-    # and ik it is im just not sure how to do it better yet
-    # there should be some sort of key/secret, something athat might change constantly, but something that can only be decoded on this server
-    global _2fa_key
-    _2fa_key = "this is not a key, i need to think more on its implementation, its only like this for now but will probably be something a lot better in the end"
-
-    # check if TEAHAZ_MASTER_KEY enviroment variable exists
-    if not "TEAHAZ_MASTER_KEY" in environ:
-        # if it doesnt then ask for password
-        print("please give master password, or insert authentication key")
-        master_key = input(":: ")
-        # set variable, because flask often restarts and we dont want to type the password in each time
-        environ["TEAHAZ_MASTER_KEY"] = master_key
-    else:
-        # if it exists then just get it
-        master_key = environ["TEAHAZ_MASTER_KEY"]
-
-    # start the server, in debug mode
+    ## start the server, in debug mode
     app.run(host='localhost', port=5000, debug=True)

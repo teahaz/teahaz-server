@@ -1,35 +1,45 @@
 #devlog
-this is a document written mostly for myself. 
+this is a document written mostly for myself.
 ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
 
+# 23 jan 2021
+## working with cookies
+im going to try and implement the 2nd idea for the users database
+
+## username vs userid
+a new thing that i have come up with is to replace username with userid intermally
+infact there will no longer be a username but rather just a nickname to represent that it has no real value
+
+the userid will not be shown to the end user, but it will be what the server uses for client server communication, authentication, and literarly everything else
+
+if possible ill try make it so that other ppl can never find your userid, this might not be very easy tho and is not high on my list of priorities
+
+on that note i will cut cookies in half again to replace everythign i have done so far with userID instead of username
 
 
-# 18 jan 2021
-with the project being about 4 months old, maybe its a bit late to stat a devlog, 
-but i guess better late then never
-i took about a month long break, and i have no idea what i was working on
-apparently the server has a master password now
+## removed master passord
+as it stands now the master passowrd was not being used and just made the whole main.py file feel messy
+i have this code here bc i think the idea was alright and later when we actually need the password then ill be happy not to have to re-write it
+    ##!!!!!!!!! important:
+    ## everything the server relies heavily on this master password, and it must be kept really well guarded
+    #    # if the master password is leaked then everyone is compromised
+    #    # maybe i should implement some sort of 2fa
+    ## the key needs to be accessed everywhere on the server
+    #    # i may in future restrict this so only a few functions can access it
+    #global master_key
 
-
-
-# 19 jan 2021
-## working on cookies
-idea is that we should not store cookies, but have hashes, that the server can verify
-this would look something like a jwt token, except the user would not be able to decode it
-the cookie would be a hash of the users (something: username, id, password) and the master passowrd of the server
-
-## master passwod
-the server relies heavily relies/will rely heavily on the master password
-    i dont think there is a sain better way to do this, other then offer an option for multiple passwords
-that said we need a way for the master password to be secure, im thinking of adding some measure of 2fa into it.
-so far ideas of 2fa (this would mean that anywhere the master password is hashed with <_2favalue> before it is used anywhere):
-    some hwid
-    some file on the server, outside of the server directory
-
-also maybe such a 2fa hash should be used as some sort of salt, so if masterpassword is leaked from some other function it cannot actually use it until it leaks the 2fa key
-
+    ## check if TEAHAZ_MASTER_KEY enviroment variable exists
+    #if not "TEAHAZ_MASTER_KEY" in environ:
+    #    # if it doesnt then ask for password
+    #    print("please give master password, or insert authentication key")
+    #    master_key = input(":: ")
+    #    # set variable, because flask often restarts and we dont want to type the password in each time
+    #    environ["TEAHAZ_MASTER_KEY"] = master_key
+    #else:
+    #    # if it exists then just get it
+    #    master_key = environ["TEAHAZ_MASTER_KEY"]
 
 
 
@@ -60,16 +70,30 @@ i think i will also add a users.db
 
 
 
-# 23 jan 2021
-im going to try and implement the 2nd idea for the users database
 
-## username vs userid
-a new thing that i have come up with is to replace username with userid intermally
-infact there will no longer be a username but rather just a nickname to represent that it has no real value
+# 19 jan 2021
+## working on cookies
+idea is that we should not store cookies, but have hashes, that the server can verify
+this would look something like a jwt token, except the user would not be able to decode it
+the cookie would be a hash of the users (something: username, id, password) and the master passowrd of the server
 
-the userid will not be shown to the end user, but it will be what the server uses for client server communication, authentication, and literarly everything else
+## master passwod
+the server relies heavily relies/will rely heavily on the master password
+    i dont think there is a sain better way to do this, other then offer an option for multiple passwords
+that said we need a way for the master password to be secure, im thinking of adding some measure of 2fa into it.
+so far ideas of 2fa (this would mean that anywhere the master password is hashed with <_2favalue> before it is used anywhere):
+    some hwid
+    some file on the server, outside of the server directory
 
-if possible ill try make it so that other ppl can never find your userid, this might not be very easy tho and is not high on my list of priorities
+also maybe such a 2fa hash should be used as some sort of salt, so if masterpassword is leaked from some other function it cannot actually use it until it leaks the 2fa key
 
-on that note i will cut cookies in half again to replace everythign i have done so far with userID instead of username
+
+
+
+
+# 18 jan 2021
+with the project being about 4 months old, maybe its a bit late to stat a devlog, 
+but i guess better late then never
+i took about a month long break, and i have no idea what i was working on
+apparently the server has a master password now
 

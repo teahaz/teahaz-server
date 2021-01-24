@@ -1,6 +1,6 @@
-import base64
-import uuid
 import os
+import uuid
+import base64
 import sqlite3
 
 
@@ -47,12 +47,14 @@ def get_all_users():
     db_connection.close()
 
 
-def adduser_internal(userId=None, nickname=None, password=None, cookie=None):
+def adduser_internal(userId=None, nickname=None, password=None, cookie='[]'):
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
+    # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
     db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?)", (userId, nickname, password, cookie))
     db_connection.commit()
     db_connection.close()
+
 
 #-------------------------------------------------- access control ------------------------------------------
 def checkuser(userId, password):
@@ -65,10 +67,14 @@ def checkuser(userId, password):
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
     db_cursor.execute(f"SELECT password FROM users WHERE userId = ? AND password = ?", (userId, password))
-    db_connection.commit()
+    storedPassword = db_cursor.fetchall()
     db_connection.close()
 
-    return True
+    if security.checkpw(password, storedPassword):
+        return True
+    else:
+        return False
+
 
 # this function should not be in dbhandler
 def check_access(userId, chatroom_id):
@@ -84,6 +90,28 @@ def get_nickname(userId):
 
     # sqlite3 wraps the username in a tuple inside of a list
     return data[0][0]
+
+
+def store_cookie(userId, new_cookie):
+    db_connection = sqlite3.connect("storage/users.db")
+    db_cursor = db_connection.cursor()
+    db_cursor.execute("SELECT cookie FROM users WHERE userId = ?", (userId,))
+    cookies = db_cursor.fetchall()
+
+    # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
+    cookies = list(cookies)
+    cookies.append(new_cookie)
+    cookies = str(cookies)
+
+    # return the new cookies list back
+    db_cursor.execute('UPDATE users SET cookies = ? WHERE userId = ?', (cookies, userId))
+    db_connection.commit()
+    db_connection.close()
+
+    return True
+
+
+
 
 
 

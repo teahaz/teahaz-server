@@ -1,6 +1,7 @@
 # this file is for sanitization, ecryption and etc
     # some functions seem small but are here for modularity purposes
 import os
+import uuid
 import bcrypt
 from hashlib import sha256
 
@@ -24,8 +25,9 @@ def sanitize_chatroomId(chatroom_id):
     return chatroom_id
 
 
+# yes this is overly simple, and yes its like this bc im pretty sure it wont be this simple for long
 def generate_cookie():
-    cookie = sha256()
+    cookie = str(uuid.uuid1())
     return cookie
 
 
@@ -38,10 +40,10 @@ def hashpw(password):
 
 
 # uses bcrypt to check a password
-def checkpw(password):
+def checkpw(password, storedPassword):
     password = password.encode("utf-8")
-    password = bcrypt.hashpw(password, bcrypt.gensalt(rounds=16))
-    return password.decode("utf-8")
+    storedPassword = storedPassword.encode("utf-8")
+    return bcrypt.hashpw(password, bcrypt.gensalt(rounds=16))
 
 
 
