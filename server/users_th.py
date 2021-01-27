@@ -46,6 +46,8 @@ def check_cookie(request):
     print('userId: ',userId , type(userId))
 
 
-    print(database.get_cookies(userId))
+    print("getting cookies -------------------------------------------")
+    cookies = database.get_cookies(userId)
+    print('cookies: ',cookies , type(cookies))
 
     return True

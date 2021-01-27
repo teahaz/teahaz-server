@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import uuid
 import base64
 import sqlite3
@@ -13,10 +14,10 @@ from logging_th import logger as log
 #--------------------------------------------- encoding ---------------------------------------------
 # encode/decode shit to stop any sort of injection
 def b(a):
-    return base64.b64encode(a.encode('utf-8')).decode('utf-8')
+    return base64.b64encode(str(a).encode('utf-8')).decode('utf-8')
 
 def d(a):
-    return base64.b64decode(a.encode('utf-8')).decode('utf-8')
+    return base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
 
 
 
@@ -56,7 +57,7 @@ def adduser_internal(userId=None, nickname=None, password=None):
     userId = b(userId)
     nickname = b(nickname)
     password = b(security.hashpw(password))
-    cookie = b('[]')
+    cookie = b(json.dumps(['cookie time']))
 
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
@@ -73,7 +74,7 @@ def checkuser(userId, password):
         init_user_db()
 
     userId = b(userId)
-    print('userId: ',userId , type(userId))
+    #print('userId: ',userId , type(userId))
 
     # get all passwords for the user from the db
     db_connection = sqlite3.connect(f'storage/users.db')
@@ -83,7 +84,7 @@ def checkuser(userId, password):
     db_connection.close()
 
     # check if the user has a password set
-    print('storedPassword: ',storedPassword , type(storedPassword))
+    #print('storedPassword: ',storedPassword , type(storedPassword))
     # string has to be greater than 10 to have a password in it (password + [])
     if len(storedPassword) > 0:
         storedPassword = d(storedPassword[0][0])
@@ -111,30 +112,42 @@ def get_nickname(userId):
     db_connection.close()
 
     # sqlite3 wraps the username in a tuple inside of a list
-    print(data)
+    #print(data)
     return d(data[0][0])
 
 
 def store_cookie(userId, new_cookie):
-    print("storing cookies -------------------------------------------")
+    userId = b(userId)
+
+    # get stored cookies
     db_connection = sqlite3.connect("storage/users.db")
     db_cursor = db_connection.cursor()
     db_cursor.execute("SELECT cookies FROM users WHERE userId = ?", (userId,))
     cookies = db_cursor.fetchall()
+    db_connection.close()
 
-    # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
-    cookies = list(cookies)
+    # double check
+    if len(cookies) == 0:
+        return False, "user does not exists"
+
+    ## cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
+    #decode
+    cookies = d(cookies[0][0])
+
+    #append
+    cookies = json.loads(cookies)
     cookies.append(new_cookie)
-    cookies = str(cookies)
-    print('cookies: ',cookies , type(cookies))
+    cookies = json.dumps(cookies)
+
+    # encode
+    cookies = b(cookies)
 
     # return the new cookies list back
+    db_connection = sqlite3.connect("storage/users.db")
     db_cursor = db_connection.cursor()
     db_cursor.execute('UPDATE users SET cookies = ? WHERE userId = ?', (cookies, userId))
     db_connection.commit()
     db_connection.close()
-
-    get_all_users()
 
     return True
 
@@ -150,11 +163,12 @@ def get_cookies(userId):
 
     # cookies are stored in a base64 encoded str(list)
     print(data)
-    sys.exit()
-    data = list(d(data))
+    data = d(data)
+    print('data: ',data , type(data))
+    data = json.loads(data)
 
     # sqlite3 wraps the username in a tuple inside of a list
-    return data[0][0]
+    return data
 
 
 
