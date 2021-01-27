@@ -31,7 +31,7 @@ def message_send(json_data):
 
     # check chatroom permission
     if not dbhandler.check_access(userId , chatroom_id):
-        return "chatroom doesnt exist or user doesnt have access to view it", 401
+        return "chatroom doesnt exist or user doesnt have access to view it", 404
 
 
     # store message that got sent
@@ -101,7 +101,7 @@ def upload_file(json_data):
     # check chatroom permission, and existance
     if not dbhandler.check_access(userId , chatroom_id):
         log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {userId} doesnt have access to view it')
-        return "chatroom doesnt exist or user doesnt have access to view it", 401
+        return "chatroom doesnt exist or user doesnt have access to view it", 404
 
     filename = str(uuid.uuid1())
 
@@ -144,7 +144,7 @@ def download_file(headers):
     # check chatroom permission, and existance
     if not dbhandler.check_access(userId , chatroom_id):
         log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {userId} doesnt have access to view it')
-        return "chatroom doesnt exist or user doesnt have access to view it", 401
+        return "chatroom doesnt exist or user doesnt have access to view it", 404
 
 
     # gotta sanitize shit
@@ -159,13 +159,13 @@ def download_file(headers):
     # checkfile is an alias to os.path.isfile
     if not checkfile(f'storage/{chatroom_id}/uploads/{filename}'):
         log(level='error', msg=f'[server/api/download_file/3] file storage/{chatroom_id}/uploads/{filename} does not exist')
-        return "file requested by client does not exist", 401
+        return "file requested by client does not exist", 404
 
     data = filehander.read_file(chatroom_id, filename)
     # read failed
     if data == False:
         log(level='error', msg=f'[server/api/download_file/4] error while reading file: {filename}')
-        return "internal server error while reading user requested file", 401
+        return "internal server error while reading user requested file", 404
 
 
     return data, 200

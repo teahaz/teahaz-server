@@ -26,13 +26,11 @@ def set_cookie(json_data):
     elif len(password) < 10:
         return 'password must be at least 10 chars', 400
 
-    print(1)
     # check if the username and password combination exists
     if not database.checkuser(userId, password):
         return "username or password incorrect, login failed", 401
 
     cookie = security.generate_cookie()
-    print('cookie: ',cookie , type(cookie))
 
     database.store_cookie(userId, cookie)
 
@@ -41,3 +39,13 @@ def set_cookie(json_data):
 
 
 
+def check_cookie(request):
+    cookie = request.cookies.get('access')
+    json_data = request.headers
+    userId = json_data['userId']
+    print('userId: ',userId , type(userId))
+
+
+    print(database.get_cookies(userId))
+
+    return True

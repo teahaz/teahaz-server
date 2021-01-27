@@ -1,8 +1,7 @@
 from os import environ
 
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, redirect
 from flask_restful import Resource, Api
-
 
 from api import message_send
 from api import message_get
@@ -10,6 +9,7 @@ from api import upload_file
 from api import download_file
 
 from users_th import set_cookie
+from users_th import check_cookie
 
 
 app = Flask(__name__)
@@ -29,11 +29,10 @@ class index(Resource):
 class login(Resource):
     def post(self):
         cookie, status_code = set_cookie(request.get_json())
-        print(cookie, status_code)
 
         if status_code == 200:
             res = make_response("assigning new cookie")
-            res.set_cookie('token', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, im not sure what it should be
+            res.set_cookie('access', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, im not sure what it should be
             return res
         else:
             # if the cookie fails to set then this is not actaully a cookie but an error message
@@ -44,10 +43,15 @@ class login(Resource):
 class api__messages(Resource):
     # gets messages since {time.time()}
     def get(self):
+        if not check_cookie(request): return "client not logged in", 401
+
         data, status_code = message_get(request.headers)
         return data, status_code
+
     # sends message
     def post(self):
+        if not check_cookie(request): return "client not logged in", 401
+
         data, status_code = message_send(request.get_json())
         return data, status_code
 
@@ -56,10 +60,15 @@ class api__messages(Resource):
 class api__files(Resource):
     #gets file
     def get(self):
+        if not check_cookie(request): return "client not logged in", 401
+
         data, status_code = download_file(request.headers)
+        print(data)
         return data, status_code
     # sends file
     def post(self):
+        if not check_cookie(request): return "client not logged in", 401
+
         data, status_code = upload_file(request.get_json())
         return data, status_code
 

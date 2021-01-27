@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import base64
 import sqlite3
@@ -16,6 +17,8 @@ def b(a):
 
 def d(a):
     return base64.b64decode(a.encode('utf-8')).decode('utf-8')
+
+
 
 
 ################################################# user stuff ###############################################
@@ -100,6 +103,7 @@ def check_access(userId, chatroom_id):
 
 
 def get_nickname(userId):
+    userId = b(userId)
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
     db_cursor.execute(f"SELECT nickname FROM users WHERE userId = ?", (userId,))
@@ -107,31 +111,51 @@ def get_nickname(userId):
     db_connection.close()
 
     # sqlite3 wraps the username in a tuple inside of a list
-    return data[0][0]
+    print(data)
+    return d(data[0][0])
 
 
 def store_cookie(userId, new_cookie):
+    print("storing cookies -------------------------------------------")
     db_connection = sqlite3.connect("storage/users.db")
     db_cursor = db_connection.cursor()
     db_cursor.execute("SELECT cookies FROM users WHERE userId = ?", (userId,))
     cookies = db_cursor.fetchall()
 
     # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
-    print('cookies: ',cookies , type(cookies))
     cookies = list(cookies)
-    print('0cookies: ',cookies , type(cookies))
     cookies.append(new_cookie)
-    print('1cookies: ',cookies , type(cookies))
     cookies = str(cookies)
-    print('2cookies: ',cookies , type(cookies))
+    print('cookies: ',cookies , type(cookies))
 
     # return the new cookies list back
+    db_cursor = db_connection.cursor()
     db_cursor.execute('UPDATE users SET cookies = ? WHERE userId = ?', (cookies, userId))
-    print(3)
     db_connection.commit()
     db_connection.close()
 
+    get_all_users()
+
     return True
+
+
+def get_cookies(userId):
+    userId = b(userId)
+
+    db_connection = sqlite3.connect(f'storage/users.db')
+    db_cursor = db_connection.cursor()
+    db_cursor.execute(f"SELECT cookies FROM users WHERE userId = ?", (userId,))
+    data = db_cursor.fetchall()
+    db_connection.close()
+
+    # cookies are stored in a base64 encoded str(list)
+    print(data)
+    sys.exit()
+    data = list(d(data))
+
+    # sqlite3 wraps the username in a tuple inside of a list
+    return data[0][0]
+
 
 
 

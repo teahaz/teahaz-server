@@ -20,7 +20,6 @@ def get(s):
 
         "userId": "42138947328947329847",
         "nickname": "bruh",
-        "cookie": "AAAA",
         "time": "1604951915.377928",
         "chatroom": "conv1",
     }
@@ -56,7 +55,6 @@ def send_file(s):
     a = {
         "userId": "42138947328947329847",
         "nickname": "bruh",
-        "cookie": "test_cookie",
         "chatroom": "conv1",
         "type": 'file',
         'extension': extension,
@@ -77,7 +75,6 @@ def send_message(s):
     a = {
         "userId": "42138947328947329847",
         "nickname": "bruh",
-        "cookie": "test_cookie",
         "type": "text",
         "chatroom": "conv1",
         "message": encode(message)
@@ -116,20 +113,18 @@ def login(s):
     res = s.post(url=url, json=a)
     print(res.text)
     print(res.cookies)
-
+    return s
 
 
 
 
 
 s = requests.Session()
+cookies = ''
+s = login(s)
 while 1:
-
-    # login
-
-    login(s)
-
-
+    
+    print("cookies: ", s.cookies)
 
     choice = input('type: ')
     if choice == 'sfile':
