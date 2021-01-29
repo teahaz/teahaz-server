@@ -39,15 +39,11 @@ def set_cookie(json_data):
 
 
 
-def check_cookie(request):
-    cookie = request.cookies.get('access')
-    json_data = request.headers
-    userId = json_data['userId']
-    print('userId: ',userId , type(userId))
+def check_cookie(cookie, data):
+    userId = data['userId']
+    stored_cookies = database.get_cookies(userId)
 
-
-    print("getting cookies -------------------------------------------")
-    cookies = database.get_cookies(userId)
-    print('cookies: ',cookies , type(cookies))
-
-    return True
+    if cookie in stored_cookies:
+        return True
+    else:
+        return False

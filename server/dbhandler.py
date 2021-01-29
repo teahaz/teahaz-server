@@ -30,7 +30,7 @@ def init_user_db():
         log(level='warning', msg=f'[server/dbhandler/init_user_db] cannot redifine userdb')
         return False
     else:
-        log(level='log', msg=f"creating usersdb")
+        log(level='warning', msg=f"creating usersdb")
 
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
@@ -117,6 +117,7 @@ def get_nickname(userId):
 
 
 def store_cookie(userId, new_cookie):
+    log(level="log", msg=f"user {userId} just logged in")
     userId = b(userId)
 
     # get stored cookies
@@ -162,12 +163,11 @@ def get_cookies(userId):
     db_connection.close()
 
     # cookies are stored in a base64 encoded str(list)
-    print(data)
     data = d(data)
-    print('data: ',data , type(data))
     data = json.loads(data)
 
     # sqlite3 wraps the username in a tuple inside of a list
+    
     return data
 
 

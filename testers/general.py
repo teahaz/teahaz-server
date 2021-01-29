@@ -18,7 +18,7 @@ def get(s):
 
     headers = {
 
-        "userId": "42138947328947329847",
+        "userId": "1234567890",
         "nickname": "bruh",
         "time": "1604951915.377928",
         "chatroom": "conv1",
@@ -53,7 +53,7 @@ def send_file(s):
 
 
     a = {
-        "userId": "42138947328947329847",
+        "userId": "1234567890",
         "nickname": "bruh",
         "chatroom": "conv1",
         "type": 'file',
@@ -73,7 +73,7 @@ def send_message(s):
     message = input(">> ")
 
     a = {
-        "userId": "42138947328947329847",
+        "userId": "1234567890",
         "nickname": "bruh",
         "type": "text",
         "chatroom": "conv1",
@@ -90,7 +90,7 @@ def get_file(s):
     url = "http://localhost:5000/api/v0/file/"
 
     headers = {
-            "userId": "42138947328947329847",
+            "userId": "1234567890",
             "nickname": "bruh",
             "filename": input(">> "),
             "chatroom": 'conv1'
@@ -135,4 +135,7 @@ while 1:
         print(send_message(s))
     elif choice == 'get':
         print(get(s))
+    elif choice == 'remove':
+        # remove cookies
+        s = requests.Session()
 

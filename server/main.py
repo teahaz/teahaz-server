@@ -44,14 +44,14 @@ class login(Resource):
 class api__messages(Resource):
     # gets messages since {time.time()}
     def get(self):
-        if not check_cookie(request): return "client not logged in", 401
+        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
         data, status_code = message_get(request.headers)
         return data, status_code
 
     # sends message
     def post(self):
-        if not check_cookie(request): return "client not logged in", 401
+        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
 
         data, status_code = message_send(request.get_json())
         return data, status_code
@@ -61,14 +61,13 @@ class api__messages(Resource):
 class api__files(Resource):
     #gets file
     def get(self):
-        if not check_cookie(request): return "client not logged in", 401
+        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
         data, status_code = download_file(request.headers)
-        print(data)
         return data, status_code
     # sends file
     def post(self):
-        if not check_cookie(request): return "client not logged in", 401
+        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
 
         data, status_code = upload_file(request.get_json())
         return data, status_code
