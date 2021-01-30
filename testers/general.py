@@ -106,7 +106,7 @@ def login(s):
     url = "http://localhost:5000/login"
 
     a = {
-        "userId": "1234567890",
+        "userId": input("username: "),
         "password" : input("password: ")
     }
 
@@ -115,6 +115,18 @@ def login(s):
     print(res.cookies)
     return s
 
+
+def register(s):
+    url = "http://localhost:5000/register"
+
+    a = {
+        "nickname": input("username: "),
+        "password" : input("password: ")
+    }
+
+    res = s.post(url=url, json=a)
+    print(res.text)
+    return s
 
 
 
@@ -138,4 +150,6 @@ while 1:
     elif choice == 'remove':
         # remove cookies
         s = requests.Session()
+    elif choice == 'register':
+        s = register(s)
 

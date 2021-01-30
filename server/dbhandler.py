@@ -53,21 +53,28 @@ def get_all_users():
         print(i)
 
 
-def adduser_internal(userId=None, nickname=None, password=None):
-    userId = b(userId)
-    nickname = b(nickname)
-    password = b(security.hashpw(password))
-    cookie = b(json.dumps(['cookie time']))
-
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
-    db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?)", (userId, nickname, password, cookie))
-    db_connection.commit()
-    db_connection.close()
-
-
 #-------------------------------------------------- access control ------------------------------------------
+def save_new_user(userId=None, nickname=None, password=None):
+    try:
+        userId = b(userId)
+        nickname = b(nickname)
+        password = b(security.hashpw(password))
+        cookie = b(json.dumps(['cookie time']))
+
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+        # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
+        db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?)", (userId, nickname, password, cookie))
+        db_connection.commit()
+        db_connection.close()
+
+    except Exception as e:
+        log(level='fail', msg='[server/dbhandler/save_new_user/0] failed to save user, Traceback:\n{e}')
+        return False
+
+    return True
+
+
 def checkuser(userId, password):
     if not os.path.isfile(f'storage/users.db'):
         log(level='error', msg=f'users.db does not exits')

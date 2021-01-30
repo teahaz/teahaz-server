@@ -47,3 +47,38 @@ def check_cookie(cookie, data):
         return True
     else:
         return False
+
+
+
+def add_user(json_data):
+    log(level="log", msg="adding new user")
+    log(level="warning", msg="rn new users are not checked and not verified, users can be added freely")
+
+    userId = security.generate_userId()
+    try:
+        nickname = json_data['nickname']
+        password = json_data['password']
+    except:
+        log(level='warning', msg='[server/users/register/0] one or more of the required arguments are not supplied')
+        return 'username or password not supplied', 400
+
+    if not nickname or not password:
+        log(level='warning', msg='[server/users/register/1] one or more of the required arguments are not supplied')
+        return 'username or password not supplied', 400
+
+    if not userId:
+        log(level='fail', msg='[server/users/register/2] did not create userId')
+        return "internal server error", 500
+
+
+    if not database.save_new_user(userId, nickname, password):
+        log(level='fail', msg='[server/users/register/3] could not save user for some reason')
+        return "internal server error", 500
+
+
+    return "succesfully registered", 200
+
+
+
+
+

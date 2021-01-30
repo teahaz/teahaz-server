@@ -1,13 +1,20 @@
 from os import environ
 
-from flask import Flask, render_template, request, make_response, redirect
-from flask_restful import Resource, Api
+from flask import Flask
+from flask import request
+from flask import redirect
+from flask import make_response
+from flask import render_template
 
-from api import message_send
-from api import message_get
+from flask_restful import Api
+from flask_restful import Resource
+
 from api import upload_file
+from api import message_get
+from api import message_send
 from api import download_file
 
+from users_th import add_user
 from users_th import set_cookie
 from users_th import check_cookie
 
@@ -26,6 +33,12 @@ class index(Resource):
         return render_template("index.html")
 
 
+
+class register(Resource):
+    def post(self):
+        return add_user(request.get_json())
+
+
 # checks password and returns auth cookie for use in other places
 class login(Resource):
     def post(self):
@@ -38,6 +51,7 @@ class login(Resource):
         else:
             # if the cookie fails to set then this is not actaully a cookie but an error message
             return cookie, status_code
+
 
 
 # handles messages
@@ -76,6 +90,7 @@ class api__files(Resource):
 
 api.add_resource(index, '/')
 api.add_resource(login, '/login')
+api.add_resource(register, '/register')
 api.add_resource(api__files, '/api/v0/file/')
 api.add_resource(api__messages, '/api/v0/message/')
 
