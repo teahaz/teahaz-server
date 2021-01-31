@@ -3,6 +3,19 @@ this is a document written mostly for myself.
 ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
+
+# 31 jan 2021
+
+## username vs userId
+this refers back to an entry with the same name on jan 30
+
+userid should be either username or email depending on server settings
+for more lax servers it could be just a username, but if a server wants to verify all its users then it has to be and email address
+
+i want to implement it so that even if there is an email given the username is still present so users can find eachothers permanent names 
+
+it should be the users choice whether he/she logs in with a username or a password
+
 # 30 jan 2021
 ## logs
 currently logs are an utter mess
@@ -34,6 +47,7 @@ pros:
 
 
 for now i will jsut have a userId string that could be anything, but should be refered to as email for the most part
+
 
 
 

@@ -17,7 +17,7 @@ def get(s, username):
     url = "http://localhost:5000/api/v0/message/"
 
     headers = {
-        "userId": username,
+        "username": username,
         "time": "1604951915.377928",
         "chatroom": "conv1",
     }
@@ -51,7 +51,7 @@ def send_file(s, username):
 
 
     a = {
-        "userId": username,
+        "username": username,
         "chatroom": "conv1",
         "type": 'file',
         'extension': extension,
@@ -70,7 +70,7 @@ def send_message(s, username):
     message = input(">> ")
 
     a = {
-        "userId": username,
+        "username": username,
         "nickname": "bruh",
         "type": "text",
         "chatroom": "conv1",
@@ -87,7 +87,7 @@ def get_file(s, username):
     url = "http://localhost:5000/api/v0/file/"
 
     headers = {
-            "userId": username,
+            "username": username,
             "filename": input(">> "),
             "chatroom": 'conv1'
             }
@@ -102,23 +102,23 @@ def login(s):
     url = "http://localhost:5000/login"
 
     a = {
-        "userId": input("username: "),
+        "username": input("username: "),
         "password" : input("password: ")
     }
 
     res = s.post(url=url, json=a)
     print(res.text)
     print(res.cookies)
-    return s, a['userId']
+    return s, a['username']
 
 
 def register(s):
     url = "http://localhost:5000/register"
 
-    print("please not that the username / email that you enter below cannot be changed. This will not be shown to other users")
     a = {
-        "userId": input("email/username: "),
-        "nickname": input("nickname will be what is shown to other users\nnickname: "),
+        "username": input("username: "),
+        "email": input("email: "),
+        "nickname": input("nickname: "),
         "password" : input("password: ")
     }
 
@@ -131,24 +131,24 @@ def register(s):
 
 s = requests.Session()
 cookies = ''
-userId = ''
+username = ''
 while 1:
     
     print("cookies: ", s.cookies)
 
     choice = input('type: ')
     if choice == 'sfile':
-        print(send_file(s, userId))
+        print(send_file(s, username))
     if choice == 'gfile':
-        print(get_file(s, userId))
+        print(get_file(s, username))
     elif choice == 'send':
-        print(send_message(s, userId))
+        print(send_message(s, username))
     elif choice == 'get':
-        print(get(s, userId))
+        print(get(s, username))
     elif choice == 'logout':
         s = requests.Session()
     elif choice == 'register':
         s = register(s)
     elif choice == 'login':
-        s, userId = login(s)
+        s, username = login(s)
 
