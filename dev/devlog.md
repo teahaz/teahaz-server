@@ -11,10 +11,10 @@ this refers back to an entry with the same name on jan 30
 
 userid should be either username or email depending on server settings
 for more lax servers it could be just a username, but if a server wants to verify all its users then it has to be and email address
-
 i want to implement it so that even if there is an email given the username is still present so users can find eachothers permanent names 
-
 it should be the users choice whether he/she logs in with a username or a password
+
+##### both the username and the email should be checked for duplicats before registering
 
 # 30 jan 2021
 ## logs
