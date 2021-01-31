@@ -13,13 +13,11 @@ def encode_binary(a):
 
 
 
-def get(s):
+def get(s, username):
     url = "http://localhost:5000/api/v0/message/"
 
     headers = {
-
-        "userId": "1234567890",
-        "nickname": "bruh",
+        "userId": username,
         "time": "1604951915.377928",
         "chatroom": "conv1",
     }
@@ -31,7 +29,7 @@ def get(s):
     #print(base64.b64decode(res.text).decode('utf-8'))
 
 
-def send_file(s):
+def send_file(s, username):
     url = "http://localhost:5000/api/v0/file/"
     # get filename from user
     filename = input(">> ")
@@ -53,8 +51,7 @@ def send_file(s):
 
 
     a = {
-        "userId": "1234567890",
-        "nickname": "bruh",
+        "userId": username,
         "chatroom": "conv1",
         "type": 'file',
         'extension': extension,
@@ -67,13 +64,13 @@ def send_file(s):
 
 
 
-def send_message(s):
+def send_message(s, username):
     url = "http://localhost:5000/api/v0/message/"
 
     message = input(">> ")
 
     a = {
-        "userId": "1234567890",
+        "userId": username,
         "nickname": "bruh",
         "type": "text",
         "chatroom": "conv1",
@@ -86,12 +83,11 @@ def send_message(s):
     return res.text
 
 
-def get_file(s):
+def get_file(s, username):
     url = "http://localhost:5000/api/v0/file/"
 
     headers = {
-            "userId": "1234567890",
-            "nickname": "bruh",
+            "userId": username,
             "filename": input(">> "),
             "chatroom": 'conv1'
             }
@@ -113,14 +109,16 @@ def login(s):
     res = s.post(url=url, json=a)
     print(res.text)
     print(res.cookies)
-    return s
+    return s, a['userId']
 
 
 def register(s):
     url = "http://localhost:5000/register"
 
+    print("please not that the username / email that you enter below cannot be changed. This will not be shown to other users")
     a = {
-        "nickname": input("username: "),
+        "userId": input("email/username: "),
+        "nickname": input("nickname will be what is shown to other users\nnickname: "),
         "password" : input("password: ")
     }
 
@@ -133,23 +131,24 @@ def register(s):
 
 s = requests.Session()
 cookies = ''
-s = login(s)
+userId = ''
 while 1:
     
     print("cookies: ", s.cookies)
 
     choice = input('type: ')
     if choice == 'sfile':
-        print(send_file(s))
+        print(send_file(s, userId))
     if choice == 'gfile':
-        print(get_file(s))
+        print(get_file(s, userId))
     elif choice == 'send':
-        print(send_message(s))
+        print(send_message(s, userId))
     elif choice == 'get':
-        print(get(s))
-    elif choice == 'remove':
-        # remove cookies
+        print(get(s, userId))
+    elif choice == 'logout':
         s = requests.Session()
     elif choice == 'register':
         s = register(s)
+    elif choice == 'login':
+        s, userId = login(s)
 

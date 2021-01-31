@@ -27,7 +27,7 @@ def d(a):
 # creates a users database
 def init_user_db():
     if os.path.exists(f'storage/users.db'):
-        log(level='warning', msg=f'[server/dbhandler/init_user_db] cannot redifine userdb')
+        log(level='fail', msg=f'[server/dbhandler/init_user_db] cannot redifine userdb')
         return False
     else:
         log(level='warning', msg=f"creating usersdb")
@@ -42,7 +42,7 @@ def init_user_db():
 
 
 #------------------------------------------------  testing --------------------------------------------------
-# tis only for testing
+# tis only for testinerror
 def get_all_users():
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
@@ -69,7 +69,7 @@ def save_new_user(userId=None, nickname=None, password=None):
         db_connection.close()
 
     except Exception as e:
-        log(level='fail', msg='[server/dbhandler/save_new_user/0] failed to save user, Traceback:\n{e}')
+        log(level='error', msg='[server/dbhandler/save_new_user/0] failed to save user, Traceback:\n{e}')
         return False
 
     return True
@@ -163,6 +163,7 @@ def store_cookie(userId, new_cookie):
 def get_cookies(userId):
     userId = b(userId)
 
+    # get all  stored cookies of the user
     db_connection = sqlite3.connect(f'storage/users.db')
     db_cursor = db_connection.cursor()
     db_cursor.execute(f"SELECT cookies FROM users WHERE userId = ?", (userId,))
@@ -170,13 +171,17 @@ def get_cookies(userId):
     db_connection.close()
 
     # cookies are stored in a base64 encoded str(list)
-    data = d(data)
-    data = json.loads(data)
+    if len(data) == 0:
+        return False
 
-    # sqlite3 wraps the username in a tuple inside of a list
-    
+    # decode and load the data as json
+    try:
+        data = d(data)
+        data = json.loads(data)
+    except:
+        log(level='error', msg=f'[server/dbhandler/get_cookies/0] failed to process cookie data of user {userId}\n Data is probably corrupted')
+
     return data
-
 
 
 
@@ -267,7 +272,6 @@ def get_messages(last_time=0, chatroom_id=''):
         nickname = get_nickname(element[1])
         a = {
             'time': element[0],
-            'userId': element[1],
             'nickname': nickname,
             'chatroom': element[2],
             'type': element[3],
@@ -287,6 +291,6 @@ def get_messages(last_time=0, chatroom_id=''):
 if __name__ == "__main__":
     init_user_db()
     init_chat('conv1')
-    adduser_internal(userId="42138947328947329847", nickname="default", password="password")
+    save_new_user(userId="defaultId", nickname="default", password="password")
 
 

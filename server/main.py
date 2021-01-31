@@ -36,7 +36,9 @@ class index(Resource):
 
 class register(Resource):
     def post(self):
+        # this should have checks and stuff, just havent implemented them yet
         return add_user(request.get_json())
+
 
 
 # checks password and returns auth cookie for use in other places

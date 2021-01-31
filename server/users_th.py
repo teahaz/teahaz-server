@@ -21,13 +21,16 @@ def set_cookie(json_data):
 
     # check that all data is given
     if len(userId) == 0:
+        log(level='warning', msg=f'failed login from user: {userId}')
         return 'no username sent', 400
     # password has to be at least 10 chars, this will also be checked during sign up
     elif len(password) < 10:
+        log(level='warning', msg=f'failed login from user: {userId}')
         return 'password must be at least 10 chars', 400
 
     # check if the username and password combination exists
     if not database.checkuser(userId, password):
+        log(level='warning', msg=f'failed login from user: {userId}')
         return "username or password incorrect, login failed", 401
 
     cookie = security.generate_cookie()
@@ -43,6 +46,11 @@ def check_cookie(cookie, data):
     userId = data['userId']
     stored_cookies = database.get_cookies(userId)
 
+    # if the user has no stored cookies
+    if not stored_cookies:
+        return False
+
+    # check if the cookie of the user is among the stored ones
     if cookie in stored_cookies:
         return True
     else:
@@ -54,25 +62,20 @@ def add_user(json_data):
     log(level="log", msg="adding new user")
     log(level="warning", msg="rn new users are not checked and not verified, users can be added freely")
 
-    userId = security.generate_userId()
     try:
+        userId = json_data['userId']
         nickname = json_data['nickname']
         password = json_data['password']
     except:
         log(level='warning', msg='[server/users/register/0] one or more of the required arguments are not supplied')
         return 'username or password not supplied', 400
 
-    if not nickname or not password:
+    if not userId or not nickname or not password:
         log(level='warning', msg='[server/users/register/1] one or more of the required arguments are not supplied')
-        return 'username or password not supplied', 400
-
-    if not userId:
-        log(level='fail', msg='[server/users/register/2] did not create userId')
-        return "internal server error", 500
-
+        return 'username, nickname or password not supplied', 400
 
     if not database.save_new_user(userId, nickname, password):
-        log(level='fail', msg='[server/users/register/3] could not save user for some reason')
+        log(level='fail', msg='[server/users/register/2] could not save user for some reason')
         return "internal server error", 500
 
 

@@ -30,12 +30,6 @@ def generate_cookie():
     cookie = str(uuid.uuid1())
     return cookie
 
-# yes this is overly simple, and yes its like this bc im pretty sure it wont be this simple for long
-def generate_userId():
-    userId = str(uuid.uuid1())
-    return userId
-
-
 
 def hashpw(password):
     password = password.encode("utf-8")

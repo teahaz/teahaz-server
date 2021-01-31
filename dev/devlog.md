@@ -3,6 +3,39 @@ this is a document written mostly for myself.
 ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
+# 30 jan 2021
+## logs
+currently logs are an utter mess
+the main problem is that some logs try provide inforamtion for ppl testing the server, and yet other logs seem production ready
+my current plan is to do more dev-friendly logs, and later i can re-write all to make more sense for the production ready server
+
+
+## username vs userId
+this refers back to an entry with the same name on jan 23
+the status now is as described in the previous entry, there is a userId that doesnt change, and a nickname that can be changed at any time
+this raises one big issue: how does the user log in?
+
+to put it simply we cannot use the nickname for logging in, but we also cannot expect a user to memorize their userId
+we need something in the middle, most platforms use an email address
+
+my idea is to have a nickname and an unchangable username/email
+
+#### username or email
+###### username
+pros:
+* privacy
+
+###### email
+pros:
+* could make a verification system to avoid people having thousands of alt accounts
+* emails change rarely and users are very likely to remember them
+* emails are unique and we wont have internal collisions (obviously would still need to check tho)
+* emails being unique avoid cross-server collisions
+
+
+for now i will jsut have a userId string that could be anything, but should be refered to as email for the most part
+
+
 
 # 23 jan 2021
 ## working with cookies
