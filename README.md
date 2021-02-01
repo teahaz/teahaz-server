@@ -1,6 +1,15 @@
+teahaz: a collaborative emacs clone
+====================================
+with messaging 
+
+
+
 this readme is very outdated
 ----------------------------
 TODO: fix this ^^
+
+
+do not look at the rest of the readme Please
 # request structure
 requests will send json data with them
 
