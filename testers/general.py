@@ -101,15 +101,28 @@ def get_file(s, username):
 def login(s):
     url = "http://localhost:5000/login"
 
-    a = {
-        "username": input("username: "),
-        "password" : input("password: ")
-    }
+    choice = input("login with email or username? [e/u]")
+
+    if 'E' in choice.upper():
+        a = {
+            "email": input("email: "),
+            "password" : input("password: ")
+        }
+    else:
+        a = {
+            "username": input("username: "),
+            "password" : input("password: ")
+        }
+
+    if a.get('username'):
+        username = a.get('username')
+    else:
+        username = input("you logged in with email, but my shitty client needs a username to work.\npls give username: ")
 
     res = s.post(url=url, json=a)
     print(res.text)
     print(res.cookies)
-    return s, a['username']
+    return s, username
 
 
 def register(s):
@@ -133,7 +146,6 @@ s = requests.Session()
 cookies = ''
 username = ''
 while 1:
-    
     print("cookies: ", s.cookies)
 
     choice = input('type: ')

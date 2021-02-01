@@ -108,11 +108,15 @@ def checkuser(username=None, email=None, password=None):
     #print('username: ',username , type(username))
 
     # get all passwords for the user from the db
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT password FROM users WHERE {using} = ?", (key,))
-    storedPassword = db_cursor.fetchall()
-    db_connection.close()
+    try:
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT password FROM users WHERE {using} = ?", (key,))
+        storedPassword = db_cursor.fetchall()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/checkuser/3] database operation failed:  {e}')
+        return False
 
     # check if the user has a password set
     #print('storedPassword: ',storedPassword , type(storedPassword))
@@ -135,12 +139,16 @@ def check_access(username, chatroom_id):
 
 
 def get_nickname(username):
-    username = b(username)
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT nickname FROM users WHERE username = ?", (username,))
-    data = db_cursor.fetchall()
-    db_connection.close()
+    try:
+        username = b(username)
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT nickname FROM users WHERE username = ?", (username,))
+        data = db_cursor.fetchall()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
+        return False
 
     # sqlite3 wraps the username in a tuple inside of a list
     #print(data)
@@ -164,12 +172,18 @@ def store_cookie(username=None, email=None, new_cookie=None):
         key = b(username)
         using = 'username'
 
+
     # get stored cookies
-    db_connection = sqlite3.connect("storage/users.db")
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT cookies FROM users WHERE {using} = ?", (key,))
-    cookies = db_cursor.fetchall()
-    db_connection.close()
+    try:
+        db_connection = sqlite3.connect("storage/users.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT cookies FROM users WHERE {using} = ?", (key,))
+        cookies = db_cursor.fetchall()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/store_cookie/1] database operation failed:  {e}')
+        return False, "internal database error"
+
 
     # double check
     if len(cookies) == 0:
@@ -188,11 +202,15 @@ def store_cookie(username=None, email=None, new_cookie=None):
     cookies = b(cookies)
 
     # return the new cookies list back
-    db_connection = sqlite3.connect("storage/users.db")
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f'UPDATE users SET cookies = ? WHERE {using} = ?', (cookies, key))
-    db_connection.commit()
-    db_connection.close()
+    try:
+        db_connection = sqlite3.connect("storage/users.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f'UPDATE users SET cookies = ? WHERE {using} = ?', (cookies, key))
+        db_connection.commit()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/store_cookie/2] database operation failed:  {e}')
+        return False
 
     return True
 
@@ -201,11 +219,15 @@ def get_cookies(username):
     username = b(username)
 
     # get all  stored cookies of the user
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT cookies FROM users WHERE username = ?", (username,))
-    data = db_cursor.fetchall()
-    db_connection.close()
+    try:
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT cookies FROM users WHERE username = ?", (username,))
+        data = db_cursor.fetchall()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_cookies/2] database operation failed:  {e}')
+        return False
 
     # cookies are stored in a base64 encoded str(list)
     if len(data) == 0:
@@ -230,9 +252,14 @@ def get_cookies(username):
 #------------------------------------------------  testing ---------------------------------------------------
 # tis only for testing
 def get_all_messages(chatroom_id):
-    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT * FROM messages")
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM messages")
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_all_users/0] database operation failed:  {e}')
+        return False
+
     a = db_cursor.fetchall()
     for b in a:
         print(b)
@@ -255,6 +282,7 @@ def init_chat(chatroom_id):
     db_cursor.execute(f"CREATE TABLE messages ('time', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
     db_connection.commit()
     db_connection.close()
+
     return True
 
 
@@ -277,10 +305,14 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
         return False
     # a safe-ish way of adding sql
     # all of these values should be encoded as a sort of paranoid model
-    db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, username, chatroom_id, message_type, message, filename, extension))
-    # :wq
-    db_connection.commit()
-    db_connection.close()
+    try:
+        db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, username, chatroom_id, message_type, message, filename, extension))
+        # :wq
+        db_connection.commit()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/save_in_db/2] database operation failed:  {e}')
+        return False
 
     # this call is only here for debugging, pls ignore
     #get_all_messages(chatroom_id)
@@ -296,11 +328,15 @@ def get_messages(last_time=0, chatroom_id=''):
         log(level='error', msg=f'[server/dbhandler/get_messages/0] server could not connect to database')
         return False
 
-    # im not putting try here bc there could be many erorrs with the db and i need to know them
-    db_cursor.execute("SELECT * FROM messages WHERE time >= ?", (last_time,))
+    try:
+        # im not putting try here bc there could be many erorrs with the db and i need to know them
+        db_cursor.execute("SELECT * FROM messages WHERE time >= ?", (last_time,))
 
-    data = db_cursor.fetchall()
-    db_connection.close()
+        data = db_cursor.fetchall()
+        db_connection.close()
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_messages/1] database operation failed:  {e}')
+        return False
 
     # sqlite returns a list of lists
     # we should convert this back to json
