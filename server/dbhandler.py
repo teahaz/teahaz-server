@@ -56,22 +56,34 @@ def get_all_users():
 #-------------------------------------------------- access control ------------------------------------------
 def save_new_user(username=None, email=None, nickname=None, password=None):
     try:
+
         # encode email if compulsary
         if email != None:
             email = b(email)
-        else:
-            log(level="warning", msg="temp warning that email has not been set")
+
 
         # encode username and nickname (no injection pls)
         username = b(username)
         nickname = b(nickname)
 
+
         # hash pw (no plain-text pls)
         password = b(security.hashpw(password))
+
+
+        # NOTE: issue in todo.md
         # default cookie should be removed soon
         cookie = b(json.dumps(['cookie time']))
 
-        # save all of this in db
+
+    # if some of the data was corrupt and couldnt be encoded/hahsed
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/save_new_user/0] malformed data, could not be encloded\nTraceback: {e}")
+        return "Internal server error", 500
+
+
+    # save all the encoded data in the database
+    try:
         db_connection = sqlite3.connect(f'storage/users.db')
         db_cursor = db_connection.cursor()
         # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
@@ -79,58 +91,73 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
         db_connection.commit()
         db_connection.close()
 
-    except Exception as e:
-        log(level='error', msg=f'[server/dbhandler/save_new_user/0] failed to save user, Traceback:\n{e}')
-        return False
 
-    return True
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/checkuser/3] database operation failed:  {e}')
+        return "Login failed. Internal database error", 500
+
+
+    # everything okay
+    return "OK", 200
+
 
 
 def checkuser(username=None, email=None, password=None):
-    if not os.path.isfile(f'storage/users.db'):
-        log(level='error', msg=f'users.db does not exits')
-        init_user_db()
+    if not os.path.isfile(f'storage/users.db'): #  check if there is a database
+        # i dont think database should be autoinitialized bc on some error it could delete the old database
+        log(level='fail', msg=f'could not find users.db')
+        return "Login failed. Internal server error", 500
 
+
+    # check if password exists
+    # this should not happen as there are tests before, but it doesnt hurt to check again :)
     if password == None:
         log(level="warning", msg="no password")
-        return False
+        return "Login failed. no password sent", 400
 
-    # if email is present then log in with that
+
+    # email takes priority over username, so if email is present then use that for login
     if email != None:
         key = b(email)
         using = 'email'
 
-    # otherwise user username
+
+    # if no email then login with username
     else: 
-        log(level="warning", msg="temp warning that email has not been set")
         key = b(username)
         using = 'username'
-    #print('username: ',username , type(username))
+
 
     # get all passwords for the user from the db
     try:
         db_connection = sqlite3.connect(f'storage/users.db')
         db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT password FROM users WHERE {using} = ?", (key,))
+        db_cursor.execute(f"SELECT password FROM users WHERE ? = ?", (using, key))
         storedPassword = db_cursor.fetchall()
         db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
     except sqlite3.OperationalError as e:
         log(level='fail', msg=f'[server/dbhandler/checkuser/3] database operation failed:  {e}')
-        return False
+        return "Login failed. Internal database error", 500
 
-    # check if the user has a password set
-    #print('storedPassword: ',storedPassword , type(storedPassword))
-    # string has to be greater than 10 to have a password in it (password + [])
+
+    # check for passwords with for said user
+    # if there are none then the user is not registered
     if len(storedPassword) > 0:
         storedPassword = d(storedPassword[0][0])
     else:
-        return False
+        log(level='warning', msg=f'[server/dbhandler/checkuser/4] un-recognised username')
+        return "Login failed. Username/email or password is incorrect!", 401
+
 
     # check if the password is correct
     if security.checkpw(password, storedPassword):
-        return True
+        return "OK", 200
     else:
-        return False
+        return "Login failed. Username/email or password is incorrect!", 401
 
 
 # this function should not be in dbhandler
@@ -158,16 +185,19 @@ def get_nickname(username):
 def store_cookie(username=None, email=None, new_cookie=None):
     log(level="log", msg=f"user {username} just logged in")
 
+    # check if the function was called without cookies, this should only happen if the sever code is brokent
     if new_cookie == None:
-        log(level="error", msg=f'[server/dbhandler/store_cookie/0] new cookie has not been set')
-        return False, "new cookie has not been set"
+        log(level="error", msg=f'[server/dbhandler/store_cookie/0] function was called without a cookie supplied to it')
+        return "Internal server error", 500
 
-    # if email is present then log in with that
+
+    # email takes priority over username, so if email is present then use that as the key
     if email != None:
         key = b(email)
         using = 'email'
 
-    # otherwise user username
+
+    # if no email then key is username
     else: 
         key = b(username)
         using = 'username'
@@ -177,42 +207,61 @@ def store_cookie(username=None, email=None, new_cookie=None):
     try:
         db_connection = sqlite3.connect("storage/users.db")
         db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT cookies FROM users WHERE {using} = ?", (key,))
+        db_cursor.execute(f"SELECT cookies FROM users WHERE ? = ?", (using, key))
         cookies = db_cursor.fetchall()
         db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
     except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/store_cookie/1] database operation failed:  {e}')
-        return False, "internal database error"
+        log(level='fail', msg=f'[server/dbhandler/store_cookie/1] database operation getting cookies failed:  {e}')
+        return "Internal database error", 500
 
 
-    # double check
+    # al users should have at least '[]' stored as cookes, if they dont then the database is corrupted somehow
     if len(cookies) == 0:
-        return False, "user does not exists"
+        log(level='error', msg=f'[server/dbhandler/store_cookie/2] user does not exists or did not get initialized properly\n (database cookies entry doesnt exist)')
+        return "Internal database error", 500
 
+
+    # add new cookie to cookies list
     ## cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
-    #decode
-    cookies = d(cookies[0][0])
+    try:
+        #decode
+        cookies = d(cookies[0][0])
 
-    #append
-    cookies = json.loads(cookies)
-    cookies.append(new_cookie)
-    cookies = json.dumps(cookies)
+        #append
+        cookies = json.loads(cookies)
+        cookies.append(new_cookie)
+        cookies = json.dumps(cookies)
 
-    # encode
-    cookies = b(cookies)
+        # encode
+        cookies = b(cookies)
 
-    # return the new cookies list back
+
+    # if the cookies cannot be decoded/encoded than the data is malformed, which is a server issue
+    except:
+        log(level='error', msg=f'[server/dbhandler/store_cookie/3] malformed cookie data in databse')
+        return "Internal database error", 500
+
+
+    # update server with new cookes list
     try:
         db_connection = sqlite3.connect("storage/users.db")
         db_cursor = db_connection.cursor()
         db_cursor.execute(f'UPDATE users SET cookies = ? WHERE {using} = ?', (cookies, key))
         db_connection.commit()
         db_connection.close()
-    except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/store_cookie/2] database operation failed:  {e}')
-        return False
 
-    return True
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/store_cookie/3] database operation, saving cookie: failed:  {e}')
+        return "Internal database error", 5000
+
+
+    # everything worked out fine
+    return "OK", 200
 
 
 def get_cookies(username):

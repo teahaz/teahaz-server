@@ -48,11 +48,12 @@ def message_send(json_data):
 
 
 def message_get(headers):
-    try:
-        username = headers['username']
-        chatroom_id = headers['chatroom']
-        last_time = headers['time']
-    except:
+    last_time = headers.get('time')
+    username = headers.get('username')
+    chatroom_id = headers.get('chatroom')
+
+
+    if not last_time or not username or not chatroom_id:
         log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
         return 'one or more of the required arguments are not supplied', 400
 
@@ -76,7 +77,6 @@ def message_get(headers):
 
 
     # NOTE: somehow get the nickname back to the user
-
 
     #print(d(username), d(cookie), d(last_time), d(convId))
     return return_data, 200

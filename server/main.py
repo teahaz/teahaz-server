@@ -36,19 +36,22 @@ class index(Resource):
 
 class register(Resource):
     def post(self):
-        # this should have checks and stuff, just havent implemented them yet
-        return add_user(request.get_json())
+        response, status_code = add_user(request.get_json())
+        return response, status_code
 
 
 
 # checks password and returns auth cookie for use in other places
 class login(Resource):
     def post(self):
+        # authenticate and get cookie data
         cookie, status_code = set_cookie(request.get_json())
 
+        # using 200 and not True bc it gets sent along to the client
         if status_code == 200:
+            # set cookie
             res = make_response("assigning new cookie")
-            res.set_cookie('access', cookie, max_age=60*60*24*100) # cookie age is rn 100 days, im not sure what it should be
+            res.set_cookie('access', cookie)
             return res
         else:
             # if the cookie fails to set then this is not actaully a cookie but an error message
@@ -71,6 +74,7 @@ class api__messages(Resource):
 
         data, status_code = message_send(request.get_json())
         return data, status_code
+
 
 
 # handles file

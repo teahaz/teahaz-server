@@ -25,7 +25,9 @@ def get(s, username):
 
     res = s.get(url=url, headers=headers)
 
+    print("status_code: ", res.status_code)
     print(res.text)
+
     #print(base64.b64decode(res.text).decode('utf-8'))
 
 
@@ -60,6 +62,7 @@ def send_file(s, username):
 
     res = s.post(url=url, json=a)
 
+    print("status_code: ", res.status_code)
     return res.text
 
 
@@ -78,7 +81,7 @@ def send_message(s, username):
     }
 
     res = s.post(url, json=a)
-
+    print("status_code: ", res.status_code)
 
     return res.text
 
@@ -93,6 +96,7 @@ def get_file(s, username):
             }
 
     res = s.get(url=url, headers=headers)
+
 
     return res.text
 

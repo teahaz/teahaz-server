@@ -18,30 +18,41 @@ def set_cookie(json_data, email=True):
     username = json_data.get('username')
     password = json_data.get('password')
 
-    # if email verification is off then null email even if a user sends one
+    # if the email verification setting is turned off then make email NULL even if the users serts one
     if not email:
         email_ad = None
 
-    # if both email and username are missing then it cannot log in
+
+    # if both email and username are missing then it cannot login
     if not email_ad and not username:
-        log(level='warning', msg=f'[server/users_th/set_cookie/0] no email or username sent')
-        return 'no email or username sent', 400
+        return 'no email or username sent', 401
+
 
     # password has to be at least 10 chars, this will also be checked during sign up
     elif len(password) < 10:
         log(level='warning', msg=f'failed login from user: {username}')
-        return 'password must be at least 10 chars', 400
+        return 'password must be at least 10 chars', 401
+
 
     # check if the username and password combination exists
-    if not database.checkuser(username=username, email=email_ad, password=password):
-        log(level='warning', msg=f'failed login from user: {username}')
-        return "username/email or password incorrect, login failed", 401
+    response, status = database.checkuser(username=username, email=email_ad, password=password)
+    if status != 200:
+        log(level='warning', msg=f'failed login from user: {username}\nTraceback: {response} ')
+        return response, status
 
+
+    #get a randomly generated cookie
     cookie = security.generate_cookie()
 
-    database.store_cookie(username=username, email=email_ad, new_cookie=cookie)
+    # store the cookies in teh database
+    response, status = database.store_cookie(username=username, email=email_ad, new_cookie=cookie)
 
-    return cookie, 200
+    # check if storing was succesful
+    if status == 200:
+        return cookie, 200
+    else:
+        # if not succesful, send the response back to the user
+        return response, status
 
 
 
@@ -66,25 +77,38 @@ def add_user(json_data, email=True):
     log(level="log", msg="adding new user")
     log(level="warning", msg="rn new users are not checked and not verified, users can be added freely")
 
+    # get all needed data
     email_ad = json_data.get('email')
     username = json_data.get('username')
     nickname = json_data.get('nickname')
     password = json_data.get('password')
 
+
+    # username, nickname, and password are required. Thus server will error if not supplied
     if not username or not nickname or not password:
-        log(level='warning', msg='[server/users/register/1] one or more of the required arguments are not supplied')
-        return 'username, nickname or password not supplied', 400
+        return 'username, nickname or password empty', 400
 
+
+    # if the server policy requires an email then it must be sent, and will fail if not
     if email == True and not email_ad:
-        log(level='warning', msg='[server/users/register/1] email not sent')
-        return 'thi servers policy requires you to send an email address', 400
+        return 'This servers policy requires an email address for registering', 400
+
+    # if the server doesnt require and email then it should not be set, and should be cleared just in case stupid users set it
+    if email == False:
+        email_ad = None
 
 
-    if not database.save_new_user(username=username, email=email_ad, nickname=nickname, password=password):
-        log(level='fail', msg='[server/users/register/2] could not save user for some reason')
-        return "internal server error", 500
+    # save details of new user
+    response, status = database.save_new_user(username=username, email=email_ad, nickname=nickname, password=password)
 
 
+    # if saving failed
+    if status != 200:
+        log(level='fail', msg='[server/users/register/2] error while saving new user. Traceback: {response}')
+        return response, status
+
+
+    # everything OK, registered
     return "succesfully registered", 200
 
 
