@@ -20,6 +20,4 @@ bug fixes
 
 [ ] crash when json is not sent on login (probably in other places as well), this should just error
 
-[ ] get doesnt seem to work either
-
 [ ] `save_in_db` and `get_messages` doesnt encode as it should

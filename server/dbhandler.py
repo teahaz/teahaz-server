@@ -19,6 +19,15 @@ def b(a):
 def d(a):
     return base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
 
+# decode, but omit errors
+# this is strictly for optional arguments and should not be used anywhere else
+def de(a):
+    try:
+        a = base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
+    except:
+        pass
+    return a
+
 
 
 
@@ -135,7 +144,7 @@ def checkuser(username=None, email=None, password=None):
     try:
         db_connection = sqlite3.connect(f'storage/users.db')
         db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT password FROM users WHERE username = ?", (key,))
+        db_cursor.execute(f"SELECT password FROM users WHERE {using} = ?", (key,))
         storedPassword = db_cursor.fetchall()
         db_connection.close()
 
@@ -152,7 +161,7 @@ def checkuser(username=None, email=None, password=None):
         storedPassword = d(storedPassword[0][0])
     else:
         log(level='warning', msg=f'[server/dbhandler/checkuser/4] un-recognised username')
-        return "Login failed. Username/email or password is incorrect!", 401
+        return "Login failed. User not registered", 401
 
 
     # check if the password is correct
@@ -182,7 +191,12 @@ def get_nickname(username):
 
     # sqlite3 wraps the username in a tuple inside of a list
     #print(data)
-    return d(data[0][0])
+    try:
+        nickname = d(data[0][0])
+    except:
+        nickname = "could not get nickname"
+    return nickname
+
 
 
 def store_cookie(username=None, email=None, new_cookie=None):
@@ -265,6 +279,7 @@ def store_cookie(username=None, email=None, new_cookie=None):
 
     # everything worked out fine
     return "OK", 200
+
 
 
 def get_cookies(username):
@@ -358,6 +373,23 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
         return "internal database error", 500
 
 
+    # encode cumpolsary values
+    try:
+        username = b(username)
+        chatroom_id = b(chatroom_id)
+        message_type = b(message_type)
+
+    # if this fails its bc the user sent bad data
+    except:
+        return "corrupted data sent to server", 400
+
+
+    # encode non compulsary values
+    if message: message = b(message)
+    if filename: filename = b(filename)
+    if extension: extension = b(extension)
+
+
     # all of these values should be encoded as a sort of paranoid model
     try:
         db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, username, chatroom_id, message_type, message, filename, extension))
@@ -378,7 +410,7 @@ def get_messages(last_time=0, chatroom_id=''):
         db_cursor = db_connection.cursor()
     except:
         log(level='error', msg=f'[server/dbhandler/get_messages/0] server could not connect to database')
-        return False
+        return "internal server error", 500
 
     try:
         # im not putting try here bc there could be many erorrs with the db and i need to know them
@@ -388,28 +420,49 @@ def get_messages(last_time=0, chatroom_id=''):
         db_connection.close()
     except sqlite3.OperationalError as e:
         log(level='fail', msg=f'[server/dbhandler/get_messages/1] database operation failed:  {e}')
-        return False
+        return "internal database error", 500
 
     # sqlite returns a list of lists
     # we should convert this back to json
     json_data = []
-    for element in data:
-        nickname = get_nickname(element[1])
-        a = {
-            'time': element[0],
-            'username': element[1],
-            'nickname': nickname,
-            'chatroom': element[2],
-            'type': element[3],
-            'message': element[4],
-            'filename': element[5],
-            'extension': element[6],
-                }
+    #try:
+    if 1:
+        for element in data:
+            nickname = get_nickname(d(element[1]))
+
+            # get compulsary data
+            send_time = element[0]
+            username = d(element[1])
+            chatroom = d(element[2])
+            msg_type = d(element[3])
+
+            # get optional data
+            message = element[4]
+            if message: message = d(message)
+            filename = element[5]
+            if filename: filename = d(filename)
+            extension = element[6]
+            if extension: extension = d(extension)
+
+            a = {
+                'time': send_time,
+                'username': username,
+                'nickname': nickname,
+                'chatroom': chatroom,
+                'type': msg_type,
+                'message': message,
+                'filename': filename,
+                'extension': extension
+                    }
+
+            json_data.append(a)
+    #except Exception as e:
+    else:
+        log(level='error', msg=f"[server/dbhandler/get_messages/2] some data in the database is corrupted and cannot be decoded\n Traceback: {e}")
+        return "internal databse error", 500
 
 
-        json_data.append(a)
-
-    return json_data
+    return json_data, 200
 
 
 

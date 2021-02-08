@@ -76,21 +76,22 @@ def message_get(headers):
         log(level='error', msg='[server/api/message_get/1] value for last get time, could not be converted to a floating point number')
         return 'value for time is not a number', 400
 
+
     # check chatroom permission
-    if not dbhandler.check_access(username , chatroom_id):
+    response, status_code = dbhandler.check_access(username , chatroom_id)
+    if status_code != 200:
         log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
-        return "chatroom doesnt exist or user doesnt have access to view it", 401
-
-    return_data = dbhandler.get_messages(last_time=last_time, chatroom_id=chatroom_id)
-
-    if return_data == False:
-        log(level='error', msg=f'[server/api/message_get/3] server error while getting messages')
-        return "server error while getting messages", 500
+        return response, status_code
 
 
-    # NOTE: somehow get the nickname back to the user
+    return_data, status_code = dbhandler.get_messages(last_time=last_time, chatroom_id=chatroom_id)
 
-    #print(d(username), d(cookie), d(last_time), d(convId))
+
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/message_get/3] server error while getting messages\n Traceback  {return_data}')
+        return return_data, status_code
+
+
     return return_data, 200
 
 
