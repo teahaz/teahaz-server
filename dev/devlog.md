@@ -5,6 +5,9 @@ ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
 
+# 08 feb 2021
+
+
 # 01 feb 2021
 ## cleanup
 i have added a lot of new code in the past month or so and the codebase has become a huge mess. I think its about time to spend some time on cleanup

@@ -15,35 +15,47 @@ from logging_th import logger as log
 
 
 def message_send(json_data):
-    try: # get the data needed for this function
-        username = json_data['username']
-        chatroom_id = json_data['chatroom']
-        message_type = json_data['type']
-        message = json_data['message']
-    except:
+    chatroom_id = json_data.get('chatroom')
+    username = json_data.get('username')
+    message_type = json_data.get('type')
+    message = json_data.get('message')
+
+
+    # make sure all of the needed data is present and is not 'None'
+    if not username or not message or not message_type or not chatroom_id:
         log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
         return 'one or more of the required arguments are not supplied, needed=[chatroom_id, type, message]', 400
 
 
     # check message type
-    if not message_type == "text":
-        return "posting non-'text' type to /message is forbidden", 400
+    if message_type != "text":
+        log(level='warning', msg='[server/api/message_get/0] posting non-"text" type to /message is forbidden')
+        return "posting non-'text' type to /message is forbidden", 405
+
 
     # check chatroom permission
-    if not dbhandler.check_access(username , chatroom_id):
-        return "chatroom doesnt exist or user doesnt have access to view it", 404
+    ## because username and cookie are checked together, its alright to only check the username here, and in the rest of the app
+    response, status_code = dbhandler.check_access(username , chatroom_id)
+    if status_code != 200:
+        return response, status_code
 
 
     # store message that got sent
-    if not dbhandler.save_in_db(
-            time=time.time(),
-            username=username,
-            chatroom_id = chatroom_id,
-            message_type='text',
-            message=message
-            ):
-        return "server failed to save mesage", 500
+    #NOTE
+    response , status_code = dbhandler.save_in_db(
+                                time=time.time(),
+                                username=username,
+                                chatroom_id = chatroom_id,
+                                message_type='text',
+                                message=message
+                                )
 
+
+    # make sure saving worked without any errors
+    if status_code != 200:
+        return response, status_code
+
+    # all is well
     return "OK", 200
 
 
@@ -112,7 +124,7 @@ def upload_file(json_data):
 
 
     # save a reference to the file in the chatroom database
-    return_data = dbhandler.save_in_db(
+    response, status_code = dbhandler.save_in_db(
             time=time.time(),
             username=username,
             chatroom_id=chatroom_id,
@@ -121,12 +133,11 @@ def upload_file(json_data):
             extension=extension
             )
 
-    if return_data == False:
+    if status_code != 200:
         log(level='error', msg=f'[server/api/upload_file/3] failed to save file: {filename}, in database')
-        return "internal server error while indexing your file", 500
+        return response, status_code
 
-
-    return return_data, 200
+    return response, 200
 
 
 def download_file(headers):

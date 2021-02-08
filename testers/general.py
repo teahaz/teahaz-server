@@ -12,9 +12,12 @@ def encode_binary(a):
     return base64.b64encode(a).decode('utf-8')
 
 
+global url
+#url = "http://butorhaz.hopto.org:13337"
+url = "http://localhost:5000"
 
 def get(s, username):
-    url = "http://localhost:5000/api/v0/message/"
+    url = globals()['url'] + "/api/v0/message/"
 
     headers = {
         "username": username,
@@ -32,7 +35,8 @@ def get(s, username):
 
 
 def send_file(s, username):
-    url = "http://localhost:5000/api/v0/file/"
+    url = globals()['url'] + "/api/v0/file/"
+
     # get filename from user
     filename = input(">> ")
 
@@ -68,7 +72,7 @@ def send_file(s, username):
 
 
 def send_message(s, username):
-    url = "http://localhost:5000/api/v0/message/"
+    url = globals()['url'] + "/api/v0/message/"
 
     message = input(">> ")
 
@@ -87,7 +91,7 @@ def send_message(s, username):
 
 
 def get_file(s, username):
-    url = "http://localhost:5000/api/v0/file/"
+    url = globals()['url'] + "/api/v0/file/"
 
     headers = {
             "username": username,
@@ -103,7 +107,7 @@ def get_file(s, username):
 
 
 def login(s):
-    url = "http://localhost:5000/login"
+    url = globals()['url'] + "/login"
 
     choice = input("login with email or username? [e/u]")
 
@@ -130,7 +134,7 @@ def login(s):
 
 
 def register(s):
-    url = "http://localhost:5000/register"
+    url = globals()['url'] + "/register"
 
     a = {
         "username": input("username: "),
