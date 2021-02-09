@@ -52,14 +52,22 @@ def init_user_db():
 
 #------------------------------------------------  testing --------------------------------------------------
 # tis only for testinerror
-def get_all_users():
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    db_cursor.execute(f"SELECT * FROM users")
-    a = db_cursor.fetchall()
-    db_connection.close()
-    for i in a:
-        print(i)
+def get_all_users(p=True):
+    if not os.path.isfile('storage/users.db'):
+        return False
+    try:
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM users")
+        a = db_cursor.fetchall()
+        db_connection.close()
+        if p:
+            for i in a:
+                print(i)
+
+        return True
+    except:
+        return False
 
 
 #-------------------------------------------------- access control ------------------------------------------
@@ -466,9 +474,13 @@ def get_messages(last_time=0, chatroom_id=''):
 
 
 
-# create databases, THIS IS ONLY FOR TESTING
-if __name__ == "__main__":
-    init_user_db()
+def check_databses():
+    if not get_all_users(p=False):
+        log(level='log', msg='[server/dbhandler/check_databses/0] initializing users database')
+        if not init_user_db():
+            log(level='fail', msg='[server/dbhandler/check_databses/1] users databse does not exist or corrupt, but could not be redifined\n try removing the databse and running the server again')
+            return False
+
     init_chat('conv1')
     save_new_user(username="defaultId", nickname="default", password="password")
 
