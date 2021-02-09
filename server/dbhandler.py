@@ -326,37 +326,48 @@ def get_cookies(username):
 ################################################# chat stuff ###############################################
 #------------------------------------------------  testing ---------------------------------------------------
 # tis only for testing
-def get_all_messages(chatroom_id):
+def get_all_messages(chatroom_id, p=True):
+    if not os.path.exists("storage/conv1"):
+        return False
+
     try:
         db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT * FROM messages")
     except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/get_all_users/0] database operation failed:  {e}')
+        log(level='fail', msg=f'[server/dbhandler/get_all_messages/0] database operation failed:  {e}')
         return False
 
     a = db_cursor.fetchall()
-    for b in a:
-        print(b)
+
+    if p:
+        for b in a:
+            print(b)
+
     db_connection.close()
+
+    return True
 
 
 #-------------------------------------------------  init ------------------------------------------------------
 def init_chat(chatroom_id):
     if os.path.exists(f'storage/{chatroom_id}'):
-        log(level='error', msg=f'attempting to redifine chatroom:  {chatroom_id}')
-        return False
+        log(level='warning', msg=f'will not re-define chatroom: {chatroom_id}')
+        return True
     else:
         log(level='log', msg=f'creating chatroom:  {chatroom_id}')
         os.mkdir(f'storage/{chatroom_id}')
         os.mkdir(f'storage/{chatroom_id}/uploads/')
 
-    db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
-    db_cursor = db_connection.cursor()
-    # removed list of users here, might need this later
-    db_cursor.execute(f"CREATE TABLE messages ('time', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
-    db_connection.commit()
-    db_connection.close()
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+        db_cursor = db_connection.cursor()
+        # removed list of users here, might need this later
+        db_cursor.execute(f"CREATE TABLE messages ('time', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
+        db_connection.commit()
+        db_connection.close()
+    except:
+        return False
 
     return True
 
@@ -475,13 +486,24 @@ def get_messages(last_time=0, chatroom_id=''):
 
 
 def check_databses():
+    log(level='log', msg='checking users db')
     if not get_all_users(p=False):
-        log(level='log', msg='[server/dbhandler/check_databses/0] initializing users database')
+        log(level='log', msg='[server/dbhandler/check_databses/1] initializing users database')
         if not init_user_db():
-            log(level='fail', msg='[server/dbhandler/check_databses/1] users databse does not exist or corrupt, but could not be redifined\n try removing the databse and running the server again')
-            return False
+            log(level='fail', msg='[server/dbhandler/check_databses/2] users databse does not exist or corrupt, but could not be redifined\n try removing the databse and running the server again')
+            return "users database corrupt, and could not be redifined", 500
 
-    init_chat('conv1')
-    save_new_user(username="defaultId", nickname="default", password="password")
+    log(level='success', msg='OK')
 
+    log(level='log', msg='checking default chatroom')
+    if not get_all_messages("conv1", p=False):
+        log(level='log', msg='[server/dbhandler/check_databses/4] initializing default chatroom: conv1')
+
+        if not init_chat('conv1'):
+            log(level='fail', msg='[server/dbhandler/check_databses/5] Initialization of default chatroom: conv1')
+            return "could not create default chatroom"
+
+
+    log(level='success', msg='OK')
+    return "OK", 200
 

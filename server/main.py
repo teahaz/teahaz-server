@@ -20,6 +20,8 @@ from users_th import check_cookie
 
 from dbhandler import check_databses
 
+from logging_th import logger as log
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -105,6 +107,8 @@ api.add_resource(api__messages, '/api/v0/message/')
 
 if __name__ == "__main__":
     ## start the server, in debug mode
-    check_databses()
+    response, status_code = check_databses()
+    if status_code != 200:
+        log(level='fail', msg=f"[main] fatal erorr with databasess\nTraceback: {response}")
 
     app.run(host='localhost', port=5000, debug=True)
