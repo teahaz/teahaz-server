@@ -13,16 +13,37 @@ def sanitize_filename(filename):
 
     if len(filename) != 36:
         log(level='warning', msg=f'user supplied a filename with and invalid lenght, pls make sure that te filename is 36bytes long')
-        return False
+        return "invalid filename length", 400
 
-    return filename
+    # validate uuid:
+    try:
+        uuid.UUID(filename).version
+    except ValueError:
+        return "invalid filename", 400
+
+
+    return filename, 200
 
 
 
 def sanitize_chatroomId(chatroom_id):
-    chatroom_id = chatroom_id.replace('..', '')
-    chatroom_id = chatroom_id.replace('/', '')
-    return chatroom_id
+    try:
+        chatroom_id = str(chatroom_id)
+        chatroom_id = chatroom_id.replace('..', '')
+        chatroom_id = chatroom_id.replace('/', '')
+    except Exception as e:
+        log(level='warning', msg=f'[server/security/sanitize_chatroomId/0] error while formatting and sanitizing chatroomID\n Traceback: {e}')
+        return "invalid chatroom_id", 400
+
+
+    # validate uuid:
+        # commented out because chatroom_id's are not uuids YET
+    #try:
+    #    uuid.UUID(uuid).version
+    #except ValueError:
+    #    return "invalid chatroom id", 400
+
+    return chatroom_id, 200
 
 
 # yes this is overly simple, and yes its like this bc im pretty sure it wont be this simple for long

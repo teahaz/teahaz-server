@@ -71,6 +71,7 @@ class api__messages(Resource):
         data, status_code = message_get(request.headers)
         return data, status_code
 
+
     # sends message
     def post(self):
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
@@ -88,6 +89,8 @@ class api__files(Resource):
 
         data, status_code = download_file(request.headers)
         return data, status_code
+
+
     # sends file
     def post(self):
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401

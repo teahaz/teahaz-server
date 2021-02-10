@@ -1,3 +1,22 @@
+general
+=======
+[ ] get server configs
+
+[ ] get user configs
+
+[ ] reactions
+
+[ ] proper chatrooms
+    - list of users with access
+    - some settings
+    - per user colours
+    - themes?
+
+[ ] multiple chatrooms
+
+[ ] user avatars?
+
+
 auth
 ====
 
@@ -21,7 +40,7 @@ register
 
 databases
 =========
-[ ] validating chatroom ids
+[ in progress ] validating chatroom ids
     chatroom id is just a uuid and is not encoded by default
     it makes a lot more sense not to encoded because its a folder on disk
     but this opens it up for some attacks. and for this reasont the following rules have to be true:
@@ -34,6 +53,12 @@ databases
 
     NOTE: conv1 is a terrible example of a chatroom id
 
+    * validation is commented in `security.sanitize_chatroom_id`
+
+
+files
+=====
+[ ] make sure server fails if client sends non-encoded files
 
 
 code review

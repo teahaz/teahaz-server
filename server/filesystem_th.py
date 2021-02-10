@@ -3,31 +3,29 @@ import os
 from logging_th import logger as log
 
 def save_file(data, chatroom, extension, filename):
-    # uuid is used as a filename
-    # this way we limit string escape and filesystem related vulnerabilities
+    log(level='log', msg=f'saving file: {filename}')
 
-    # this should only happen if someone modified the server, TODO: should call a function/fix to redifine the chatroom
+
+    # make sure uploads folder exists
     if not os.path.exists(f'storage/{chatroom}/uploads'):
-        log(level='error', msg=f'[server/helpers/save_file/0] uploads forlder does not exist for chatroom:  {chatroom}')
-        # if chatroom re init is called here then just move on and dont return
-        # if it attempts to fix this thent his should only return on an unsuccessful fix
-        return False
+        log(level='error', msg=f'[server/filesystem_th/save_file/0] uploads forlder does not exist for chatroom:  {chatroom}')
+        return "internal server error while saving file", 500
 
 
+    # save file
     try:
-        # write file if possible
-        # data is in text form so it doesnt need to be written in binary
         with open(f'storage/{chatroom}/uploads/{filename}', 'w')as outfile:
             outfile.write(data)
 
+
+    # failed to save file
     except Exception as e:
-        # if that failed log it, with the exeption
         log(level='error', msg=f'failed to write file: storage/{chatroom}/uploads/{filename}   exeption: {e}')
-        return False
+        return "internal server error while saving file", 500
 
 
-    # file was saved successfully
-    return True
+    # all is well
+    return "OK", 200
 
 
 
@@ -35,9 +33,24 @@ def save_file(data, chatroom, extension, filename):
 
 def read_file(chatroom, filename):
     try:
+        # as all files are base64 encoded text files, they can all be read without 'b'
         with open(f'storage/{chatroom}/uploads/{filename}', 'r')as infile:
             data = infile.read()
     except:
-        return False
-    return data
+        return "Internal server error", 500
+
+    # all is well
+    return data, 200
+
+
+
+def remove_file(chatroom, filename):
+    try: # remove file
+        os.remove(f'storage/{chatroom}/{filename}')
+    except:
+        return "internal server error while removeing file", 500
+
+
+    # all is well
+    return "OK", 200
 
