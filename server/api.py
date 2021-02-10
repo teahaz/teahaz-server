@@ -59,39 +59,48 @@ def message_send(json_data):
     return "OK", 200
 
 
+# get messages sent since <time>
 def message_get(headers):
     last_time = headers.get('time')
     username = headers.get('username')
     chatroom_id = headers.get('chatroom')
 
 
+    # make sure the client sent everything
     if not last_time or not username or not chatroom_id:
         log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
         return 'one or more of the required arguments are not supplied', 400
 
 
-    try:## pls make sure to error check this
+    # time needs to be converted to a number
+    try:
         last_time = float(last_time)
+
+
+    # please supply a valid time
     except:
         log(level='error', msg='[server/api/message_get/1] value for last get time, could not be converted to a floating point number')
         return 'value for time is not a number', 400
 
 
-    # check chatroom permission
+    # check the users permission to get messages from the chatroom
     response, status_code = dbhandler.check_access(username , chatroom_id)
     if status_code != 200:
         log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
         return response, status_code
 
 
-    return_data, status_code = dbhandler.get_messages(last_time=last_time, chatroom_id=chatroom_id)
+    # get messages since last_time
+    return_data, status_code = dbhandler.get_messages_db(last_time=last_time, chatroom_id=chatroom_id)
 
 
+    # if gettting messages failed
     if status_code != 200:
         log(level='error', msg=f'[server/api/message_get/3] server error while getting messages\n Traceback  {return_data}')
         return return_data, status_code
 
 
+    # all is well
     return return_data, 200
 
 

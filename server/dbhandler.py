@@ -383,10 +383,13 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
         return "internal server error", 500
 
 
-    # make sure the database exists
+    # connect to the database
     try:
         db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
+
+
+    # error: the database does not exists
     except:
         log(level='error', msg=f'[server/dbhandler/save_in_db/1] server could not connect to database')
         return "internal database error", 500
@@ -397,6 +400,7 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
         username = b(username)
         chatroom_id = b(chatroom_id)
         message_type = b(message_type)
+
 
     # if this fails its bc the user sent bad data
     except:
@@ -409,11 +413,14 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
     if extension: extension = b(extension)
 
 
-    # all of these values should be encoded as a sort of paranoid model
+    # save the new message
     try:
         db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, username, chatroom_id, message_type, message, filename, extension))
         db_connection.commit()
         db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
     except sqlite3.OperationalError as e:
         log(level='fail', msg=f'[server/dbhandler/save_in_db/2] database operation failed:  {e}')
         return "internal database error", 500
@@ -423,16 +430,27 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
     return "OK", 200
 
 
-def get_messages(last_time=0, chatroom_id=''):
-    try:
+def get_messages_db(last_time=0, chatroom_id=''):
+    try: # try connect to the db
         db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
+
+
+    # db doesnt exist
     except:
         log(level='error', msg=f'[server/dbhandler/get_messages/0] server could not connect to database')
         return "internal server error", 500
 
+
+
+    # time and chatroom_id should not be encoded:
+        # time shouldnt because its needed in sql queries with >=
+        # chatroom_id is just an id, and its not controllable by the client
+
+
+
+    # get all messages that had been sent since 'last_time'
     try:
-        # im not putting try here bc there could be many erorrs with the db and i need to know them
         db_cursor.execute("SELECT * FROM messages WHERE time >= ?", (last_time,))
 
         data = db_cursor.fetchall()
@@ -441,21 +459,22 @@ def get_messages(last_time=0, chatroom_id=''):
         log(level='fail', msg=f'[server/dbhandler/get_messages/1] database operation failed:  {e}')
         return "internal database error", 500
 
-    # sqlite returns a list of lists
-    # we should convert this back to json
+
+    # sqlite returns a list of lists, we should convert this back to json
     json_data = []
-    #try:
-    if 1:
+
+    # format messages for returning
+    try:
         for element in data:
             nickname = get_nickname(d(element[1]))
 
-            # get compulsary data
+            # get compulsary data, all but time need to be decoded
             send_time = element[0]
             username = d(element[1])
             chatroom = d(element[2])
             msg_type = d(element[3])
 
-            # get optional data
+            # get optional data, they may or may not be present
             message = element[4]
             if message: message = d(message)
             filename = element[5]
@@ -463,6 +482,7 @@ def get_messages(last_time=0, chatroom_id=''):
             extension = element[6]
             if extension: extension = d(extension)
 
+            # make return dict
             a = {
                 'time': send_time,
                 'username': username,
@@ -474,13 +494,18 @@ def get_messages(last_time=0, chatroom_id=''):
                 'extension': extension
                     }
 
+            # add to list
             json_data.append(a)
-    #except Exception as e:
-    else:
+
+
+    # message format error
+    except Exception as e:
+    #else:
         log(level='error', msg=f"[server/dbhandler/get_messages/2] some data in the database is corrupted and cannot be decoded\n Traceback: {e}")
         return "internal databse error", 500
 
 
+    # all is well
     return json_data, 200
 
 
