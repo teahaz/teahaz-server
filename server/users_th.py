@@ -52,6 +52,7 @@ def set_cookie(json_data, email=True):
         return cookie, 200
     else:
         # if not succesful, send the response back to the user
+        log(level="log", msg=f"user '{username}' just logged in")
         return response, status
 
 

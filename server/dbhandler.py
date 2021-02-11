@@ -208,10 +208,7 @@ def get_nickname(username):
 
 
 def store_cookie(username=None, email=None, new_cookie=None):
-    log(level="log", msg=f"user {username} just logged in")
-
-    # check if the function was called without cookies, this should only happen if the sever code is brokent
-    if new_cookie == None:
+    if new_cookie == None: # check if the function was called without cookies, this should only happen if the sever code is brokent
         log(level="error", msg=f'[server/dbhandler/store_cookie/0] function was called without a cookie supplied to it')
         return "Internal server error", 500
 
