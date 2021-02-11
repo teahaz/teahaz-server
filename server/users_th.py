@@ -49,10 +49,10 @@ def set_cookie(json_data, email=True):
 
     # check if storing was succesful
     if status == 200:
+        log(level="log", msg=f"user '{username}' just logged in")
         return cookie, 200
     else:
         # if not succesful, send the response back to the user
-        log(level="log", msg=f"user '{username}' just logged in")
         return response, status
 
 
