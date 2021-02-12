@@ -69,6 +69,6 @@ else
 
     docker build -t teahaz_server:latest .
 
-    docker run --rm -v $DIR:/server teahaz_server:latest
+    docker run --rm -v $DIR:/home/teahaz teahaz_server:latest
 
 fi
