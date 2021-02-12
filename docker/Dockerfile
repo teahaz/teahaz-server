@@ -49,8 +49,6 @@ RUN chmod -R u+wrx /home/teahaz
 USER teahaz
 WORKDIR /home/teahaz
 
-# only while the server is running in a private repo
-COPY .ssh/ /home/teahaz/.shh/
 
 
 CMD cd /home/teahaz/docker/; ./deploy.sh
