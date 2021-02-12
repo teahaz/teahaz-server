@@ -1,0 +1,72 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+ID=""
+function get_dID {
+    running=$( docker ps)
+
+    ID=$(echo $running | grep  -o ".............teahaz_server")
+
+    ID=$(echo $ID | grep  -o "^............")
+
+    echo $ID
+
+    if [ "$ID" == "" ]
+    then
+        echo "container not running"
+
+    fi
+
+}
+
+
+if [ "$1" == "kill" ]
+then
+
+    get_dID
+
+    if [ "$ID" == "" ]
+    then
+        echo "no container running"
+
+    else
+        docker kill $ID
+
+    fi
+
+
+
+elif [ "$1" == "shell" ]
+then
+
+    get_dID
+
+    if [ "$ID" == "" ]
+    then
+        echo "no container running"
+
+    else
+        docker exec -it $ID /bin/bash
+
+    fi
+
+
+
+
+elif [ "$1" == "rebuild" ]
+then
+
+    cd $DIR/docker
+
+    docker build --no-cache -t teahaz_server:latest .
+
+
+else
+    cd $DIR/docker
+
+    docker build -t teahaz_server:latest .
+
+    docker run --rm -v $DIR:/server teahaz_server:latest
+
+fi
