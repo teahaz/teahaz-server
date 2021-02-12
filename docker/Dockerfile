@@ -44,7 +44,6 @@ RUN pip3 install bcrypt
 EXPOSE 13337
 
 RUN useradd -m teahaz
-RUN mkdir /home/teahaz
 RUN chown teahaz /home/teahaz
 RUN chmod -R u+wrx /home/teahaz
 USER teahaz

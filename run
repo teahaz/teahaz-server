@@ -63,6 +63,8 @@ then
 
 
 else
+
+
     cd $DIR/docker
 
     docker build -t teahaz_server:latest .
