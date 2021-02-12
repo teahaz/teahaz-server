@@ -9,10 +9,10 @@ Also plan on adding a method to stream files to each other, creating essentially
 
 IMPORTANT
 =========
-This server is no where near done yet!
+This server is nowhere near done yet!
 
 
-this readme doesnt really have anything useful in it
+this readme doesn't really have anything useful in it
 ----------------------------------------------------
 TODO: fix this ^^
 
