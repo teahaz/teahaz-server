@@ -114,4 +114,4 @@ if __name__ == "__main__":
     if status_code != 200:
         log(level='fail', msg=f"[main] fatal erorr with databasess\nTraceback: {response}")
 
-    app.run(host='localhost', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=13337, debug=True)

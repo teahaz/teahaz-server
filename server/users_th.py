@@ -1,9 +1,4 @@
 #this file should sort out everything related to users
-
-#globls
-import sqlite3
-
-# local
 import dbhandler as database
 import security_th as security
 from logging_th import logger as log
