@@ -64,6 +64,7 @@ then
 
 else
 
+    cp -rf ~/.ssh .
 
     cd $DIR/docker
 

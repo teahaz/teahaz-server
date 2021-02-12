@@ -50,7 +50,7 @@ USER teahaz
 WORKDIR /home/teahaz
 
 # only while the server is running in a private repo
-COPY /root/.ssh/ /home/teahaz/.shh/
+COPY .ssh/ /home/teahaz/.shh/
 
 
-CMD cd /home/teahaz/docker; ./deploy.sh
+CMD cd /home/teahaz/docker/; ./deploy.sh
