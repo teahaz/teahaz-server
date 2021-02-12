@@ -26,6 +26,9 @@ run server:
 kill server:
 `sudo ./run kill`
 
+get shell in server:
+`sudo ./run shell`
+
 this readme doesn't really have anything useful in it
 ----------------------------------------------------
 TODO: fix this ^^
