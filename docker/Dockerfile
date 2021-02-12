@@ -42,14 +42,16 @@ RUN pip3 install bcrypt
 
 # setup
 EXPOSE 13337
+
 RUN useradd -m teahaz
+RUN mkdir /home/teahaz
+RUN chown teahaz /home/teahaz
+RUN chmod -R u+wrx /home/teahaz
+USER teahaz
+WORKDIR /home/teahaz
 
-RUN mkdir /server
-RUN chown teahaz /server
-RUN chmod -R u+wrx /server
+# only while the server is running in a private repo
+COPY /root/.ssh/ /home/teahaz/.shh/
 
-RUN su teahaz # dont want it to have a password so there is no chance of gettitng root back
 
-WORKDIR /server
-
-CMD cd /server/docker; ./deploy.sh
+CMD cd /home/teahaz/docker; ./deploy.sh
