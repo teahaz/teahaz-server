@@ -65,6 +65,12 @@ then
 
 else
 
+    git pull
+    if [ "$?" != 0 ]
+    then
+        echo "error while getting new updates"
+        exit
+    fi
 
     get_dID
 
