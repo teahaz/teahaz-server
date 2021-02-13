@@ -44,8 +44,6 @@ def set_cookie(json_data, email=True):
 
     # check if storing was succesful
     if status == 200:
-        log(level="log", msg=f"user '{username}' just logged in")
-        print("user logged in")
         return cookie, 200
     else:
         # if not succesful, send the response back to the user
@@ -77,9 +75,6 @@ def check_cookie(cookie, data):
 
 
 def add_user(json_data, email=True):
-    log(level="log", msg="adding new user")
-
-    # get all needed data
     email_ad = json_data.get('email')
     username = json_data.get('username')
     nickname = json_data.get('nickname')
