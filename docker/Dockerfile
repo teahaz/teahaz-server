@@ -51,5 +51,6 @@ USER teahaz
 WORKDIR /home/teahaz
 
 
+ENV PYTHONUNBUFFERED=0
 
 CMD cd /home/teahaz/docker/; ./deploy.sh
