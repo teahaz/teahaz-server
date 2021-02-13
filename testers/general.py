@@ -1,4 +1,5 @@
 import requests
+import os
 import json
 import base64
 
@@ -13,8 +14,8 @@ def encode_binary(a):
 
 
 global url
-#url = "http://butorhaz.hopto.org:13337"
-url = "http://localhost:13337"
+url = "http://butorhaz.hopto.org:13337"
+#url = "http://localhost:13337"
 
 def get(s, username):
     url = globals()['url'] + "/api/v0/message/"
@@ -88,6 +89,29 @@ def send_message(s, username):
     print("status_code: ", res.status_code)
 
     return res.text
+
+
+
+
+
+def send_message_random_binary(s, username):
+    url = globals()['url'] + "/api/v0/message/"
+
+    message = input(">> ")
+
+    a = {
+        "username": username,
+        "nickname": "bruh",
+        "type": "text",
+        "chatroom": "conv1",
+        "message": str(os.urandom(500))
+    }
+
+    res = s.post(url, json=a)
+    print("status_code: ", res.status_code)
+
+    return res.text
+
 
 
 def get_file(s, username):
@@ -171,4 +195,6 @@ while 1:
         s = register(s)
     elif choice == 'login':
         s, username = login(s)
+    elif choice == 'sendrandom':
+        print(send_message_random_binary(s, username))
 
