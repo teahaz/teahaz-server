@@ -512,15 +512,37 @@ def get_messages_db(last_time=0, chatroom_id=''):
 
 
 def check_databses():
+    log(level='log', msg='running system checks')
+
+    # make sure storage folder exists
+    log(level='log', msg='checking storage folder')
+    if not os.path.isdir("storage/"):
+        try:
+            os.mkdir("storage")
+        except Exception as e:
+            log(level='fail', msg=f'could not create storage folder\n Traceback: {e}')
+            return "could not create storage folder", 500
+
+    log(level='success', msg='OK')
+
+
+    # make sure users db exists
     log(level='log', msg='checking users db')
+
+    # chech if we can get users
     if not get_all_users(p=False):
+        # if not than db probably doesnt exist or is corrupt
         log(level='log', msg='[server/dbhandler/check_databses/1] initializing users database')
+        # make db
         if not init_user_db():
+            # crash if that failed
             log(level='fail', msg='[server/dbhandler/check_databses/2] users databse does not exist or corrupt, but could not be redifined\n try removing the databse and running the server again')
             return "users database corrupt, and could not be redifined", 500
 
     log(level='success', msg='OK')
 
+    # make sure default chatroom exists
+    # this is only while default chatroom is still a thing
     log(level='log', msg='checking default chatroom')
     if not get_all_messages("conv1", p=False):
         log(level='log', msg='[server/dbhandler/check_databses/4] initializing default chatroom: conv1')

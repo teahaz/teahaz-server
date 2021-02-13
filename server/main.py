@@ -113,5 +113,7 @@ if __name__ == "__main__":
     response, status_code = check_databses()
     if status_code != 200:
         log(level='fail', msg=f"[main] fatal erorr with databasess\nTraceback: {response}")
+        import sys
+        sys.exit(-1)
 
     app.run(host='0.0.0.0', port=13337, debug=True)
