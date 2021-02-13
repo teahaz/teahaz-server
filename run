@@ -74,7 +74,7 @@ else
 
         docker build -t teahaz_server:latest .
 
-        docker run --rm -v $DIR:/home/teahaz teahaz_server:latest
+        docker run -p 13337:13337 --rm -v $DIR:/home/teahaz teahaz_server:latest
     else
         echo "server is already running"
     fi
