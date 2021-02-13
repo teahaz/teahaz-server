@@ -41,12 +41,16 @@ def init_user_db():
     else:
         log(level='warning', msg=f"creating usersdb")
 
-    db_connection = sqlite3.connect(f'storage/users.db')
-    db_cursor = db_connection.cursor()
-    # cookies is a list of cookies, that is turned into a string with json, and base64/hex encoded
-    db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies)")
-    db_connection.commit()
-    db_connection.close()
+    try:
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+        # cookies is a list of cookies, that is turned into a string with json, and base64/hex encoded
+        db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies)")
+        db_connection.commit()
+        db_connection.close()
+    except:
+        return False
+
     return True
 
 
