@@ -12,6 +12,23 @@ IMPORTANT
 This server is nowhere near done yet!
 
 
+usage
+=====
+requirements
+------------
+* docker
+
+run
+---
+run server:
+`sudo ./run`
+
+kill server:
+`sudo ./run kill`
+
+get shell in server:
+`sudo ./run shell`
+
 this readme doesn't really have anything useful in it
 ----------------------------------------------------
 TODO: fix this ^^
