@@ -518,6 +518,7 @@ def check_databses():
     log(level='log', msg='checking storage folder')
     if not os.path.isdir("storage/"):
         try:
+            log(level='warning', msg='[server/dbhandler/check_databses/0] creating storage folder')
             os.mkdir("storage")
         except Exception as e:
             log(level='fail', msg=f'could not create storage folder\n Traceback: {e}')
