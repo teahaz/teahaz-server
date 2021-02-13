@@ -27,6 +27,7 @@ RUN apt-get update && apt-get upgrade -y
 # install stuff
 RUN apt install git -y
 RUN apt install cron -y
+RUN apt install busybox -y
 RUN apt install python3 -y
 RUN apt install python3-pip -y
 RUN apt install python3-wheel -y

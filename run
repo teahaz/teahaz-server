@@ -15,6 +15,7 @@ function get_dID {
     if [ "$ID" == "" ]
     then
         echo "container not running"
+        $ID = ""
 
     fi
 
@@ -64,12 +65,18 @@ then
 
 else
 
-    cp -rf ~/.ssh .
 
-    cd $DIR/docker
+    get_dID
 
-    docker build -t teahaz_server:latest .
+    if [ "$ID" == "" ]
+    then
+        cd $DIR/docker
 
-    docker run --rm -v $DIR:/home/teahaz teahaz_server:latest
+        docker build -t teahaz_server:latest .
+
+        docker run --rm -v $DIR:/home/teahaz teahaz_server:latest
+    else
+        echo "server is already running"
+    fi
 
 fi
