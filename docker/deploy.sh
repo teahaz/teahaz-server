@@ -9,4 +9,4 @@ cd $DIR
 
 cd $DIR/../server
 
-python3 main.py
+python3 -u main.py
