@@ -50,6 +50,7 @@ RUN chmod -R u+wrx /home/teahaz
 USER teahaz
 WORKDIR /home/teahaz
 
+HEALTHCHECK --interval=35s --timeout=4s CMD git pull || exit 1
 
 ENV PYTHONUNBUFFERED=0
 
