@@ -13,8 +13,8 @@ def encode_binary(a):
 
 
 global url
-#url = "http://butorhaz.hopto.org:13337"
-url = "http://localhost:13337"
+url = "http://butorhaz.hopto.org:13337"
+#url = "http://localhost:13337"
 
 def get(s, username):
     url = globals()['url'] + "/api/v0/message/"

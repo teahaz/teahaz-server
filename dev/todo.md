@@ -3,6 +3,8 @@ general
 [ ] get server configs
 
 [ ] get user configs
+    - nickname
+    - global user colours
 
 [ ] reactions
 
@@ -15,6 +17,7 @@ general
 [ ] multiple chatrooms
 
 [ ] user avatars?
+
 
 
 auth
@@ -79,5 +82,3 @@ bug fixes
 
 [ ] crash when json is not sent on login (probably in other places as well), this should just error
 
-[ ] something is very wrong with the alma2 user
-    - creds: `alma2 1234567890`
