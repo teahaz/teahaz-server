@@ -6,6 +6,13 @@ general
     - nickname
     - global user colours
 
+[ ] message ids -- some sort of unique id for every message
+    * will help with
+    - reactions
+    - replies
+    - deleting, editing?
+
+
 [ ] reactions
 
 [ ] proper chatrooms
