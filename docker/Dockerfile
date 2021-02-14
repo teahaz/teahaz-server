@@ -50,8 +50,7 @@ RUN chmod -R u+wrx /home/teahaz
 USER teahaz
 WORKDIR /home/teahaz
 
-HEALTHCHECK --interval=35s --timeout=4s CMD git pull || exit 1
-
+# need to test if i need this or not
 ENV PYTHONUNBUFFERED=0
 
 CMD cd /home/teahaz/docker/; ./deploy.sh

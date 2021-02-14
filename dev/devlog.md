@@ -5,7 +5,17 @@ ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
 
-# 08 feb 2021
+# 14 feb 2021
+## docker
+for the past days i have been working on making docker work nicely on the server
+some important features of this are:
+* server runs with out any dependancies, other than docker
+* server setup is one command: `sudo ./run`
+* server can auto git pull updates
+
+this is not done yet, just havent wrote in here for a while so i thought i might
+currently the main issue is that the server just errors and moves on when git pull fails. I want the server to shutdown in this case. So far the best way i have found to do this is to somehow use the healthcheck feature of docker
+
 
 
 # 01 feb 2021
