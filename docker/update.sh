@@ -5,7 +5,7 @@ do
     if [ "$?" != 0 ]
     then
        echo "\e[0;31m==========================="
-       echo "error pulling new changes\n"
+       echo "error pulling new changes"
        echo "===========================\e[0;37m"
     fi
 
