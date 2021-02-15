@@ -74,16 +74,12 @@ then
 elif [ "$1" == "rebuild" ]
 then
 
-    git_pull
-
     cd $DIR/docker
 
     docker build --no-cache -t teahaz_server:latest .
 
 
 else
-
-    git_pull
 
     get_dID
 
