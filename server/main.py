@@ -60,6 +60,9 @@ class login(Resource):
             # if the cookie fails to set then this is not actaully a cookie but an error message
             return cookie, status_code
 
+    def get(self):
+        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
+        return "OK", 200
 
 
 # handles messages

@@ -14,8 +14,8 @@ def encode_binary(a):
 
 
 global url
-url = "http://butorhaz.hopto.org:13337"
-#]url = "http://localhost:13337"
+#url = "http://butorhaz.hopto.org:13337"
+url = "http://localhost:13337"
 
 def get(s, username):
     url = globals()['url'] + "/api/v0/message/"
@@ -157,6 +157,18 @@ def login(s):
     return s, username
 
 
+def clogin(s, username):
+    url = globals()['url'] + "/login"
+
+    a = {
+        "username": username,
+    }
+    print(username)
+
+    res = s.get(url=url, headers=a)
+
+    return res.text
+
 def register(s):
     url = globals()['url'] + "/register"
 
@@ -195,6 +207,8 @@ while 1:
         s = register(s)
     elif choice == 'login':
         s, username = login(s)
+    elif choice == 'clogin':
+        print(clogin(s, username))
     elif choice == 'sendrandom':
         print(send_message_random_binary(s, username))
 
