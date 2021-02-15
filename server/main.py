@@ -64,16 +64,14 @@ class login(Resource):
 
 # handles messages
 class api__messages(Resource):
-    # gets messages since {time.time()}
-    def get(self):
+    def get(self): # gets messages since {time.time()}
         if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
         data, status_code = message_get(request.headers)
         return data, status_code
 
 
-    # sends message
-    def post(self):
+    def post(self): # sends message
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
 
         data, status_code = message_send(request.get_json())
@@ -83,16 +81,14 @@ class api__messages(Resource):
 
 # handles file
 class api__files(Resource):
-    #gets file
-    def get(self):
+    def get(self): #gets file
         if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
         data, status_code = download_file(request.headers)
         return data, status_code
 
 
-    # sends file
-    def post(self):
+    def post(self): # sends file
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
 
         data, status_code = upload_file(request.get_json())
@@ -100,6 +96,7 @@ class api__files(Resource):
 
 
 
+#legend
 api.add_resource(index, '/')
 api.add_resource(login, '/login')
 api.add_resource(register, '/register')

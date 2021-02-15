@@ -95,6 +95,17 @@ def add_user(json_data, email=True):
         email_ad = None
 
 
+    #check incase user has already registered
+    response, status_code = database.check_user_exists(username, email)
+    if status_code != 200:
+        return response, status_code
+
+
+    # response is true, then the user already exists
+    if response:
+        return "username or email already registered", 400
+
+
     # save details of new user
     response, status = database.save_new_user(username=username, email=email_ad, nickname=nickname, password=password)
 

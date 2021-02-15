@@ -95,8 +95,6 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
         # NOTE: issue in todo.md
         # default cookie should be removed soon
         cookie = b(json.dumps(['cookie time']))
-
-
     # if some of the data was corrupt and couldnt be encoded/hahsed
     except Exception as e:
         log(level='error', msg=f"[server/dbhandler/save_new_user/0] malformed data, could not be encloded\nTraceback: {e}")
@@ -121,7 +119,6 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
 
     # everything okay
     return "OK", 200
-
 
 
 def checkuser(username=None, email=None, password=None):
@@ -319,8 +316,41 @@ def get_cookies(username):
     return data
 
 
+def check_user_exists(username=None, email=None):
+    try: # try format data
+        if username: username = b(username)
+        if email: email = b(email)
+    except:
+        return "[server/dbhanler/check_user_exitst/0] username or email corrupt", 400
+
+    try:
+        # connec to the db
+        db_connection = sqlite3.connect(f'storage/users.db')
+        db_cursor = db_connection.cursor()
+
+        # run slightly different checks depending on the data supplied
+        if username and email:
+            db_cursor.execute(f"SELECT * FROM users WHERE username = ? OR email = ?", (username, email,))
+        elif username and not email:
+            db_cursor.execute(f"SELECT * FROM users WHERE username = ? ", (username,))
+        elif not username and email:
+            db_cursor.execute(f"SELECT * FROM users WHERE email = ? ", (email,))
 
 
+        # finalize everything
+        data = db_cursor.fetchall()
+        db_connection.close()
+
+
+    except Exception as e:
+        log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
+        return '[server/dbhandler/check_user_exitst/1] internal database error', 500
+
+
+    if len(data) > 0:
+        return True, 200
+    else:
+        return False, 200
 
 
 
