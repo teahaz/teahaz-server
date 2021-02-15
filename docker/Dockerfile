@@ -50,6 +50,7 @@ RUN chmod -R u+wrx /home/teahaz
 USER teahaz
 WORKDIR /home/teahaz
 
-
+# need to test if i need this or not
+ENV PYTHONUNBUFFERED=0
 
 CMD cd /home/teahaz/docker/; ./deploy.sh

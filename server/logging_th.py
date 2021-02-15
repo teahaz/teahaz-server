@@ -1,5 +1,6 @@
-import time
 import os
+import sys
+import time
 
 # the class stays here so we can easily add new templates if needed
 class colours:
@@ -37,7 +38,7 @@ def logger(level='log', msg=""):
     # level = the type of log [colours, etc]
     level = level.lower()
     msg_log = colour_templates[level] + f"[ {level} ] {time.time()}  ||  {msg}" + colours.RESET
-    print(msg_log)
+    print(msg_log, file=sys.stderr)
 
     # keep all logs in a file for later
     with open("logs/logfile", "a+")as outfile:

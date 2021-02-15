@@ -1,4 +1,5 @@
 import requests
+import os
 import json
 import base64
 
@@ -90,6 +91,29 @@ def send_message(s, username):
     return res.text
 
 
+
+
+
+def send_message_random_binary(s, username):
+    url = globals()['url'] + "/api/v0/message/"
+
+    message = input(">> ")
+
+    a = {
+        "username": username,
+        "nickname": "bruh",
+        "type": "text",
+        "chatroom": "conv1",
+        "message": str(os.urandom(500))
+    }
+
+    res = s.post(url, json=a)
+    print("status_code: ", res.status_code)
+
+    return res.text
+
+
+
 def get_file(s, username):
     url = globals()['url'] + "/api/v0/file/"
 
@@ -171,4 +195,6 @@ while 1:
         s = register(s)
     elif choice == 'login':
         s, username = login(s)
+    elif choice == 'sendrandom':
+        print(send_message_random_binary(s, username))
 

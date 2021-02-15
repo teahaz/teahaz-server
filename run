@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 ID=""
@@ -18,6 +19,21 @@ function get_dID {
         ID=""
 
     fi
+
+}
+
+
+function git_pull {
+
+    cd $DIR
+
+    git pull
+    if [ "$?" != 0 ]
+    then
+        echo "error while getting new updates"
+        exit
+    fi
+
 
 }
 
@@ -65,13 +81,6 @@ then
 
 else
 
-    git pull
-    if [ "$?" != 0 ]
-    then
-        echo "error while getting new updates"
-        exit
-    fi
-
     get_dID
 
     if [ "$ID" == "" ]
@@ -80,7 +89,7 @@ else
 
         docker build -t teahaz_server:latest .
 
-        docker run -p 13337:13337 --rm -v $DIR:/home/teahaz teahaz_server:latest
+        docker run -p 13337:13337 -e PYTHONUNBUFFERED=0 --rm -v $DIR:/home/teahaz teahaz_server:latest
     else
         echo "server is already running"
     fi

@@ -12,7 +12,6 @@ def sanitize_filename(filename):
     filename = filename.replace('/', '')
 
     if len(filename) != 36:
-        log(level='warning', msg=f'user supplied a filename with and invalid lenght, pls make sure that te filename is 36bytes long')
         return "invalid filename length", 400
 
     # validate uuid:
@@ -32,7 +31,6 @@ def sanitize_chatroomId(chatroom_id):
         chatroom_id = chatroom_id.replace('..', '')
         chatroom_id = chatroom_id.replace('/', '')
     except Exception as e:
-        log(level='warning', msg=f'[server/security/sanitize_chatroomId/0] error while formatting and sanitizing chatroomID\n Traceback: {e}')
         return "invalid chatroom_id", 400
 
 
