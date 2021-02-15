@@ -18,7 +18,6 @@ def message_get(headers):
 
     # make sure the client sent everything
     if not last_time or not username or not chatroom_id:
-        log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
         return 'one or more of the required arguments are not supplied', 400
 
 
@@ -29,14 +28,12 @@ def message_get(headers):
 
     # please supply a valid time
     except:
-        log(level='error', msg='[server/api/message_get/1] value for last get time, could not be converted to a floating point number')
         return 'value for time is not a number', 400
 
 
     # check the users permission to get messages from the chatroom
     response, status_code = dbhandler.check_access(username , chatroom_id)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/message_get/2] chatroom: {chatroom_id} doesnt exist or user doesnt have access to view it')
         return response, status_code
 
 
@@ -63,13 +60,11 @@ def message_send(json_data):
 
     # make sure all of the needed data is present and is not 'None'
     if not username or not message or not message_type or not chatroom_id:
-        log(level='warning', msg='[server/api/message_get/0] one or more of the required arguments are not supplied')
         return 'one or more of the required arguments are not supplied, needed=[chatroom_id, type, message]', 400
 
 
     # check message type
     if message_type != "text":
-        log(level='warning', msg='[server/api/message_get/0] posting non-"text" type to /message is forbidden')
         return "posting non-'text' type to /message is forbidden", 405
 
 
@@ -107,7 +102,6 @@ def download_file(headers):
 
     # make sure client sent all data
     if not username or not filename or not chatroom_id:
-        log(level='warning', msg='[server/api/download_file/0] client did not supply all the needed arguments for this function [username, chatroom, filename]')
         return 'one or more of the required arguments are not supplied', 400
 
 
@@ -120,27 +114,24 @@ def download_file(headers):
     # check chatroom permission, and existance
     response, status_code = dbhandler.check_access(username , chatroom_id)
     if status_code != 200:
-        log(level='warning', msg=f'[server/api/download_file/1] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
         return response, status_code
 
 
     # gotta sanitize shit
     filename, status_code = security.sanitize_filename(filename)
     if status_code != 200:
-        log(level='warning', msg=f'[server/api/download_file/2] user specified file is of invalid format [ must be 36 bytes long ]')
         return filename, status_code
 
 
     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
     if not os_isfile(f'storage/{chatroom_id}/uploads/{filename}'):
-        log(level='error', msg=f'[server/api/download_file/3] file storage/{chatroom_id}/uploads/{filename} does not exist')
         return "file requested by client does not exist", 404
 
 
     # read file requested by user
     data, status_code = filehander.read_file(chatroom_id, filename)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/download_file/4] error while reading file: {filename}')
+        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
         return data, status_code
 
 
@@ -158,20 +149,17 @@ def upload_file(json_data):
 
     # make sure client sent all needed data
     if not username or not chatroom_id or not message_type or not data or not extension:
-        log(level='warning', msg='[server/api/upload_file/0] one or more of the required arguments are not supplied')
         return 'one or more of the required arguments are not supplied', 400
 
 
     # message type has to be file
     if not message_type == "file":
-        log(level='error', msg='[server/api/upload_file/1] client attempted to post message with type other then "file" to /file')
         return "posting non-'file' type to /file is forbidden", 400
 
 
     # check chatroom permission, and existance
     response, status_code = dbhandler.check_access(username , chatroom_id)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/upload_file/2] chatroom: {chatroom_id} doesnt exist or user: {username} doesnt have access to view it')
         return "chatroom doesnt exist or user doesnt have access to view it", 404
 
 
@@ -182,7 +170,7 @@ def upload_file(json_data):
     # save file that user sent
     response, status_code = filehander.save_file(data, chatroom_id, extension, filename)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/upload_file/3] failed to save file: {filename}')
+        log(level='error', msg=f'[server/api/upload_file/0] failed to save file: {filename}')
         return response, status_code
 
 
@@ -199,12 +187,12 @@ def upload_file(json_data):
 
     # failed to save reference to file
     if status_code != 200:
-        log(level='warning', msg=f'[server/api/upload_file/3] failed to save file: {filename}, in database \n attempting to remove')
+        log(level='warning', msg=f'[server/api/upload_file/1] failed to save file: {filename}, in database \n attempting to remove')
 
         # delete file because it could not be indexed
         _response, status_code = filehander.remove_file(chatroom_id, filename)
         if status_code != 200:
-            log(level='error', msg=f'[server/api/upload_file/4] failed to delete corrupt file: {filename}')
+            log(level='error', msg=f'[server/api/upload_file/2] failed to delete corrupt file: {filename}')
 
         # return error
         return response, status_code

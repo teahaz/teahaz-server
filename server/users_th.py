@@ -25,7 +25,6 @@ def set_cookie(json_data, email=True):
 
     # password has to be at least 10 chars, this will also be checked during sign up
     elif len(password) < 10:
-        log(level='warning', msg=f'[server/users/set_cookie/0] failed login from user: {username}')
         return 'password must be at least 10 chars', 401
 
 
@@ -44,6 +43,7 @@ def set_cookie(json_data, email=True):
 
     # check if storing was succesful
     if status == 200:
+        log(level='log', msg=f'"{username}" just logged in')
         return cookie, 200
     else:
         # if not succesful, send the response back to the user
@@ -101,11 +101,12 @@ def add_user(json_data, email=True):
 
     # if saving failed
     if status != 200:
-        log(level='fail', msg=f'[server/users/register/2] error while saving new user. Traceback: {response}')
+        log(level='fail', msg=f'[server/users/register/0] error while saving new user. Traceback: {response}')
         return response, status
 
 
     # everything OK, registered
+    log(level='log', msg=f'new user: "{username}" just registered')
     return "succesfully registered", 200
 
 
