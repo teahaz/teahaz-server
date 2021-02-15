@@ -330,7 +330,7 @@ def check_user_exists(username=None, email=None):
 
         # run slightly different checks depending on the data supplied
         if username and email:
-            db_cursor.execute(f"SELECT * FROM users WHERE username = ? OR email = ?", (username, email,))
+            db_cursor.execute(f"SELECT * FROM users WHERE username = ? OR email = ?", (username,email,))
         elif username and not email:
             db_cursor.execute(f"SELECT * FROM users WHERE username = ? ", (username,))
         elif not username and email:

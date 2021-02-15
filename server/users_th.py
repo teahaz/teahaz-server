@@ -7,8 +7,6 @@ from logging_th import logger as log
 
 # handle logins
 def set_cookie(json_data, email=True):
-    # get the data needed for this function
-
     email_ad = json_data.get('email')
     username = json_data.get('username')
     password = json_data.get('password')
@@ -50,8 +48,6 @@ def set_cookie(json_data, email=True):
         return response, status
 
 
-
-
 def check_cookie(cookie, data):
     username = data.get('username')
 
@@ -71,7 +67,6 @@ def check_cookie(cookie, data):
         return True
     else:
         return False
-
 
 
 def add_user(json_data, email=True):
@@ -96,7 +91,7 @@ def add_user(json_data, email=True):
 
 
     #check incase user has already registered
-    response, status_code = database.check_user_exists(username, email)
+    response, status_code = database.check_user_exists(username=username, email=email_ad)
     if status_code != 200:
         return response, status_code
 
