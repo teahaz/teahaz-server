@@ -131,7 +131,6 @@ def checkuser(username=None, email=None, password=None):
     # check if password exists
     # this should not happen as there are tests before, but it doesnt hurt to check again :)
     if password == None:
-        log(level="warning", msg="no password")
         return "Login failed. no password sent", 400
 
 
@@ -169,8 +168,7 @@ def checkuser(username=None, email=None, password=None):
     if len(storedPassword) > 0:
         storedPassword = d(storedPassword[0][0])
     else:
-        log(level='warning', msg=f'[server/dbhandler/checkuser/4] un-recognised username')
-        return "Login failed. User not registered", 401
+        return "Login failed. Unrecognized username. Are you registered?", 401
 
 
     # check if the password is correct

@@ -29,7 +29,6 @@ def set_cookie(json_data, email=True):
     # check if the username and password combination exists
     response, status = database.checkuser(username=username, email=email_ad, password=password)
     if status != 200:
-        log(level='warning', msg=f'[server/users/set_cookie/1] failed login from user: {username}\nTraceback: {response} ')
         return response, status
 
 
