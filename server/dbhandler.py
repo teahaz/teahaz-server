@@ -392,10 +392,11 @@ def init_chat(chatroom_id):
         db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
         db_cursor = db_connection.cursor()
         # removed list of users here, might need this later
-        db_cursor.execute(f"CREATE TABLE messages ('time', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
+        db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
         db_connection.commit()
         db_connection.close()
-    except:
+    except Exception as e:
+        log(level='fail', msg=f"error while creating chatroom\n Traceback: {e}")
         return False
 
     return True
@@ -405,8 +406,8 @@ def init_chat(chatroom_id):
 # va=None means that the fild is not used
 # var=0 means that the field is not set AND IS NEEDED FOR THE FUNCTION
 # this destiction is for readability, the None values are not required but the 0 ones are
-def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, filename=None, extension=None ):
-    if time == 0 or username == 0 or chatroom_id == 0 or message_type == 0: #values marked with 0 are needed while ones marked with None are optional
+def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, message=None, filename=None, extension=None ):
+    if time == 0 or messageId == 0 or username == 0 or chatroom_id == 0 or message_type == 0: #values marked with 0 are needed while ones marked with None are optional
         # making sure that all values that are needed exist
         log(level='error', msg='[server/dbhandler/save_in_db/0] one or more of the required fields passed to function "save_in_db" are not present [time, username, chatroom_id, message_type]')
         return "internal server error", 500
@@ -427,6 +428,7 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
     # encode cumpolsary values
     try:
         username = b(username)
+        messageId = b(messageId)
         chatroom_id = b(chatroom_id)
         message_type = b(message_type)
 
@@ -444,7 +446,7 @@ def save_in_db(time=0, username=0, chatroom_id=0, message_type=0, message=None, 
 
     # save the new message
     try:
-        db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?)", (time, username, chatroom_id, message_type, message, filename, extension))
+        db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (time, messageId, username, chatroom_id, message_type, message, filename, extension))
         db_connection.commit()
         db_connection.close()
 
@@ -495,25 +497,27 @@ def get_messages_db(last_time=0, chatroom_id=''):
     # format messages for returning
     try:
         for element in data:
-            nickname = get_nickname(d(element[1]))
+            nickname = get_nickname(d(element[2]))
 
             # get compulsary data, all but time need to be decoded
             send_time = element[0]
-            username = d(element[1])
-            chatroom = d(element[2])
-            msg_type = d(element[3])
+            messageId = d(element[1])
+            username = d(element[2])
+            chatroom = d(element[3])
+            msg_type = d(element[4])
 
             # get optional data, they may or may not be present
-            message = element[4]
+            message = element[5]
             if message: message = d(message)
-            filename = element[5]
+            filename = element[6]
             if filename: filename = d(filename)
-            extension = element[6]
+            extension = element[7]
             if extension: extension = d(extension)
 
             # make return dict
             a = {
                 'time': send_time,
+                'messageId': messageId,
                 'username': username,
                 'nickname': nickname,
                 'chatroom': chatroom,
@@ -578,7 +582,7 @@ def check_databses():
 
         if not init_chat('conv1'):
             log(level='fail', msg='[server/dbhandler/check_databses/5] Initialization of default chatroom: conv1')
-            return "could not create default chatroom"
+            return "could not create default chatroom", 500
 
 
     log(level='success', msg='OK')

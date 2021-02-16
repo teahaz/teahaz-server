@@ -56,6 +56,7 @@ def message_send(json_data):
     username = json_data.get('username')
     message_type = json_data.get('type')
     message = json_data.get('message')
+    messageId = str(uuid.uuid1())
 
 
     # make sure all of the needed data is present and is not 'None'
@@ -78,11 +79,12 @@ def message_send(json_data):
     # store message that got sent
     #NOTE
     response , status_code = dbhandler.save_in_db(
-                                time=time.time(),
-                                username=username,
-                                chatroom_id = chatroom_id,
-                                message_type='text',
-                                message=message
+                                time         = time.time(),
+                                messageId    = messageId,
+                                username     = username,
+                                chatroom_id  = chatroom_id,
+                                message_type = 'text',
+                                message      = message
                                 )
 
 
@@ -95,9 +97,9 @@ def message_send(json_data):
 
 
 def download_file(headers):
-    username = headers.get('username')
-    filename = headers.get('filename')
-    chatroom_id = headers.get('chatroom')
+    username     = headers.get('username')
+    filename     = headers.get('filename')
+    chatroom_id  = headers.get('chatroom')
 
 
     # make sure client sent all data
@@ -145,6 +147,8 @@ def upload_file(json_data):
     message_type  = json_data.get('type')
     data          = json_data.get('data')
     extension     = json_data.get('extension')
+    messageId     = uuid.uuid1()
+
 
 
     # make sure client sent all needed data
@@ -177,6 +181,7 @@ def upload_file(json_data):
     # save a reference to the file in the chatroom database
     response, status_code = dbhandler.save_in_db(
             time          = time.time(),
+            messageId     = messageId,
             username      = username,
             chatroom_id   = chatroom_id,
             message_type  = message_type,
