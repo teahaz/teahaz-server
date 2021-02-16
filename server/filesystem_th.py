@@ -3,11 +3,7 @@ import os
 from logging_th import logger as log
 
 def save_file(data, chatroom, extension, filename):
-    log(level='log', msg=f'saving file: {filename}')
-
-
-    # make sure uploads folder exists
-    if not os.path.exists(f'storage/{chatroom}/uploads'):
+    if not os.path.exists(f'storage/{chatroom}/uploads'): # make sure uploads folder exists
         log(level='error', msg=f'[server/filesystem_th/save_file/0] uploads forlder does not exist for chatroom:  {chatroom}')
         return "internal server error while saving file", 500
 
