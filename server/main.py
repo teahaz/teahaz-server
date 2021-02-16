@@ -39,6 +39,7 @@ class index(Resource):
 
 class register(Resource):
     def post(self):
+        if not request.get_json(): return "no data sent", 401
         response, status_code = add_user(request.get_json())
         return response, status_code
 
@@ -47,6 +48,7 @@ class register(Resource):
 # checks password and returns auth cookie for use in other places
 class login(Resource):
     def post(self):
+        if not request.get_json(): return "no data sent", 401
         # authenticate and get cookie data
         cookie, status_code = set_cookie(request.get_json())
 
@@ -61,6 +63,7 @@ class login(Resource):
             return cookie, status_code
 
     def get(self):
+        if not request.headers: return "no data sent", 401
         if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
         return "OK", 200
 
@@ -68,6 +71,7 @@ class login(Resource):
 # handles messages
 class api__messages(Resource):
     def get(self): # gets messages since {time.time()}
+        if not request.headers: return "no data sent", 401
         if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
         data, status_code = message_get(request.headers)
@@ -75,6 +79,7 @@ class api__messages(Resource):
 
 
     def post(self): # sends message
+        if not request.get_json(): return "no data sent", 401
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
 
         data, status_code = message_send(request.get_json())
@@ -85,6 +90,7 @@ class api__messages(Resource):
 # handles file
 class api__files(Resource):
     def get(self): #gets file
+        if not request.headers: return "no data sent", 401
         if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
         data, status_code = download_file(request.headers)
@@ -92,6 +98,7 @@ class api__files(Resource):
 
 
     def post(self): # sends file
+        if not request.get_json(): return "no data sent", 401
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
 
         data, status_code = upload_file(request.get_json())

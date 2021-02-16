@@ -43,10 +43,6 @@ cookies
         - either this should be removed and fixed, or in worst case check if the cookie sent by user is not the default/placeholder one
 
 
-register
---------
-[ ] /register will happily register multiple users with the same username and or email
-
 
 databases
 =========
@@ -71,6 +67,7 @@ files
 [ ] make sure server fails if client sends non-encoded files
 
 
+
 code review
 ===========
 this is not really a todo but a list of things i have already done
@@ -78,14 +75,7 @@ this is not really a todo but a list of things i have already done
 [done] /login
 [done] /register
 [done] /message
-
-[ in progress] /file
+[done] /file
 
 [ ] everything else
-
-
-bug fixes
-=========
-
-[ ] crash when json is not sent on login (probably in other places as well), this should just error
 
