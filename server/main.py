@@ -68,6 +68,7 @@ class login(Resource):
         return "OK", 200
 
 
+
 # handles messages
 class api__messages(Resource):
     def get(self): # gets messages since {time.time()}

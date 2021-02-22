@@ -4,6 +4,10 @@ this is a document written mostly for myself.
 ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
+#22 feb 2021
+## multi-chatroom support
+idea is that chatrooms are saved by uuid as a folder, but this is not very user friendly. My solution to this is to rename users.db to main.db and have a chatrooms table in it. The chatrooms table would store the chatroomID the chatroom name, and maybe the occupance/admin (but the users of the chatroom should most likely be in the db inside the chatroom)
+
 
 # 14 feb 2021
 ## docker

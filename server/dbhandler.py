@@ -35,14 +35,14 @@ def de(a):
 #-------------------------------------------------  init ----------------------------------------------------
 # creates a users database
 def init_user_db():
-    if os.path.exists(f'storage/users.db'):
+    if os.path.exists(f'storage/main.db'):
         log(level='fail', msg=f'[server/dbhandler/init_user_db] cannot redifine userdb')
         return False
     else:
         log(level='warning', msg=f"creating usersdb")
 
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         # cookies is a list of cookies, that is turned into a string with json, and base64/hex encoded
         db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies)")
@@ -57,10 +57,10 @@ def init_user_db():
 #------------------------------------------------  testing --------------------------------------------------
 # tis only for testinerror
 def get_all_users(p=True):
-    if not os.path.isfile('storage/users.db'):
+    if not os.path.isfile('storage/main.db'):
         return False
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT * FROM users")
         a = db_cursor.fetchall()
@@ -103,7 +103,7 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
 
     # save all the encoded data in the database
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
         db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?, ?)", (username, email, nickname, password, cookie))
@@ -122,9 +122,9 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
 
 
 def checkuser(username=None, email=None, password=None):
-    if not os.path.isfile(f'storage/users.db'): #  check if there is a database
+    if not os.path.isfile(f'storage/main.db'): #  check if there is a database
         # i dont think database should be autoinitialized bc on some error it could delete the old database
-        log(level='fail', msg=f'could not find users.db')
+        log(level='fail', msg=f'could not find main.db')
         return "Login failed. Internal server error", 500
 
 
@@ -150,7 +150,7 @@ def checkuser(username=None, email=None, password=None):
 
     # get all passwords for the user from the db
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT password FROM users WHERE {using} = ?", (key,))
         storedPassword = db_cursor.fetchall()
@@ -187,7 +187,7 @@ def check_access(username, chatroom_id):
 def get_nickname(username):
     try:
         username = b(username)
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT nickname FROM users WHERE username = ?", (username,))
         data = db_cursor.fetchall()
@@ -226,7 +226,7 @@ def store_cookie(username=None, email=None, new_cookie=None):
 
     # get stored cookies
     try:
-        db_connection = sqlite3.connect("storage/users.db")
+        db_connection = sqlite3.connect("storage/main.db")
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT cookies FROM users WHERE {using} = ?", (key,))
         cookies = db_cursor.fetchall()
@@ -268,7 +268,7 @@ def store_cookie(username=None, email=None, new_cookie=None):
 
     # update server with new cookes list
     try:
-        db_connection = sqlite3.connect("storage/users.db")
+        db_connection = sqlite3.connect("storage/main.db")
         db_cursor = db_connection.cursor()
         db_cursor.execute(f'UPDATE users SET cookies = ? WHERE {using} = ?', (cookies, key))
         db_connection.commit()
@@ -291,7 +291,7 @@ def get_cookies(username):
 
     # get all  stored cookies of the user
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT cookies FROM users WHERE username = ?", (username,))
         data = db_cursor.fetchall()
@@ -323,7 +323,7 @@ def check_user_exists(username=None, email=None):
 
     try:
         # connec to the db
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
 
         # run slightly different checks depending on the data supplied
@@ -360,7 +360,7 @@ def get_all_messages(chatroom_id, p=True):
         return False
 
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT * FROM messages")
     except sqlite3.OperationalError as e:
@@ -389,7 +389,7 @@ def init_chat(chatroom_id):
         os.mkdir(f'storage/{chatroom_id}/uploads/')
 
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db')
         db_cursor = db_connection.cursor()
         # removed list of users here, might need this later
         db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
@@ -415,7 +415,7 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
 
     # connect to the database
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
+        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
 
 
@@ -463,7 +463,7 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
 
 def get_messages_db(last_time=0, chatroom_id=''):
     try: # try connect to the db
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
+        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
 
 
@@ -559,8 +559,8 @@ def check_databses():
     log(level='success', msg='OK')
 
 
-    # make sure users db exists
-    log(level='log', msg='checking users db')
+    # make sure main db exists
+    log(level='log', msg='checking main db')
 
     # chech if we can get users
     if not get_all_users(p=False):
