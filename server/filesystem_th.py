@@ -24,9 +24,6 @@ def save_file(data, chatroom, extension, filename):
     return "OK", 200
 
 
-
-
-
 def read_file(chatroom, filename):
     try:
         # as all files are base64 encoded text files, they can all be read without 'b'
@@ -39,7 +36,6 @@ def read_file(chatroom, filename):
     return data, 200
 
 
-
 def remove_file(chatroom, filename):
     try: # remove file
         os.remove(f'storage/{chatroom}/{filename}')
@@ -49,4 +45,19 @@ def remove_file(chatroom, filename):
 
     # all is well
     return "OK", 200
+
+
+def create_chatroom_folders(chatroomId):
+    if os.path.exists(f"storage/{chatroomId}"):
+        return "chatroomId already exists", 400
+
+    try:
+        os.mkdir(f'storage/{chatroomId}')
+        os.mkdir(f'storage/{chatroomId}/uploads')
+
+    except Exception as e:
+        return f"failed to create chatroom folders: {e}", 500
+
+    return "OK", 200
+
 

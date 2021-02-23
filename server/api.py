@@ -207,3 +207,39 @@ def upload_file(json_data):
     return response, 200
 
 
+def create_chatroom(json_data):
+    username      = json_data.get('username')
+    chatroomId    = str(uuid.uuid1())
+    chatroom_name = json_data.get('chatroom_name')
+
+
+    # make sure client sent all needed data
+    if not username or not chatroomId or not chatroom_name:
+        return 'one or more of the required arguments are not supplied', 400
+
+
+    # create folders needed for chatroom
+    response, status_code = filehander.create_chatroom_folders(chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/0] could not create chatroom\n Traceback: {response}')
+        return "internal server error", 500
+
+
+    # create chatroom.db inside chatroom the chatrom folder
+    response, status_code = dbhandler.init_chat(chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/1] could not create chatroom database\n Traceback: {response}')
+        return "internal database error", 500
+
+
+    # make entry in main.db
+    response, status_code = dbhandler.save_chatroom(chatroomId, chatroom_name)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/2] could not create chatroom entry in main.db\n Traceback: {response}')
+        return "internal database error", 500
+
+
+    return chatroomId, 200
+
+
+

@@ -13,6 +13,7 @@ from api import upload_file
 from api import message_get
 from api import message_send
 from api import download_file
+from api import create_chatroom
 
 from users_th import add_user
 from users_th import set_cookie
@@ -106,13 +107,22 @@ class api__files(Resource):
         return data, status_code
 
 
+class api__chatroom(Resource):
+    def post(self): # create chatroom
+        if not request.get_json(): return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
+
+        response, status_code = create_chatroom(request.get_json())
+        return response, status_code
+
 
 #legend
 api.add_resource(index, '/')
-api.add_resource(login, '/login')
-api.add_resource(register, '/register')
+api.add_resource(login, '/login/')
+api.add_resource(register, '/register/')
 api.add_resource(api__files, '/api/v0/file/')
 api.add_resource(api__messages, '/api/v0/message/')
+api.add_resource(api__chatroom, '/api/v0/chatrooms/')
 
 
 
@@ -120,7 +130,7 @@ if __name__ == "__main__":
     ## start the server in debug mode
     response, status_code = check_databses()
     if status_code != 200:
-        log(level='fail', msg=f"[main] fatal erorr with databasess\nTraceback: {response}")
+        log(level='fail', msg=f"[health check] fatal erorr with databasess\nTraceback: {response}")
         import sys
         sys.exit(-1)
 

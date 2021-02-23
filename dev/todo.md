@@ -68,6 +68,9 @@ files
 
 
 
+
+
+
 code review
 ===========
 this is not really a todo but a list of things i have already done
@@ -79,3 +82,19 @@ this is not really a todo but a list of things i have already done
 
 [ ] everything else
 
+
+chats
+=====
+[ ] make sure the chats work
+
+[ ] add conv1 back temporarily so bazsis client doesnt instantly break
+
+[ ] save chats the user inside the users table in main.db
+
+[ ] make error for chatroom does not exists (currently its internal server error)
+
+[ ] make client not crash when getting arbitrary chat (something is wrong with the type of the returned data)
+
+[ ] add get method for user to see chats that (s)he is in
+
+[ ] error check the shit out of everything

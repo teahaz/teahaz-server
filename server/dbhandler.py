@@ -34,24 +34,21 @@ def de(a):
 ################################################# user stuff ###############################################
 #-------------------------------------------------  init ----------------------------------------------------
 # creates a users database
-def init_user_db():
-    if os.path.exists(f'storage/main.db'):
-        log(level='fail', msg=f'[server/dbhandler/init_user_db] cannot redifine userdb')
-        return False
-    else:
-        log(level='warning', msg=f"creating usersdb")
-
+def init_main_db():
     try:
         db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
-        # cookies is a list of cookies, that is turned into a string with json, and base64/hex encoded
+        db_cursor.execute(f"CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')")
         db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies)")
         db_connection.commit()
         db_connection.close()
-    except:
-        return False
 
-    return True
+
+    except Exception as e:
+        return f"error occured during the creation of main.db: {e}", 500
+
+
+    return "OK", 200
 
 
 #------------------------------------------------  testing --------------------------------------------------
@@ -378,28 +375,46 @@ def get_all_messages(chatroom_id, p=True):
     return True
 
 
-#-------------------------------------------------  init ------------------------------------------------------
+#-------------------------------------------------  creating chatrooms ------------------------------------------------------
 def init_chat(chatroom_id):
-    if os.path.exists(f'storage/{chatroom_id}'):
-        log(level='warning', msg=f'will not re-define chatroom: {chatroom_id}')
-        return True
-    else:
-        log(level='log', msg=f'creating chatroom:  {chatroom_id}')
-        os.mkdir(f'storage/{chatroom_id}')
-        os.mkdir(f'storage/{chatroom_id}/uploads/')
-
     try:
         db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db')
         db_cursor = db_connection.cursor()
-        # removed list of users here, might need this later
+        db_cursor.execute(f"CREATE TABLE users ('username', 'admin', 'colour')")
         db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
         db_connection.commit()
         db_connection.close()
-    except Exception as e:
-        log(level='fail', msg=f"error while creating chatroom\n Traceback: {e}")
-        return False
 
-    return True
+
+    except Exception as e:
+        return f"could not connect to database: {e}", 500
+
+    return "OK", 200
+
+
+def save_chatroom(chatroomId, chatroom_name):
+    try:
+        chatroomId = b(chatroomId)
+        chatroom_name = b(chatroom_name)
+
+
+    except Exception as e:
+        return f"could not encode data: {e}"
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"INSERT INTO chatrooms VALUES (?, ?)", (chatroomId, chatroom_name))
+        db_connection.commit()
+        db_connection.close()
+
+
+    except Exception as e:
+        return f"could not connect to main database: {e}", 500
+
+
+    return "OK", 200
 
 
 #---------------------------------------------------- messages ------------------------------------------------
@@ -546,45 +561,50 @@ def get_messages_db(last_time=0, chatroom_id=''):
 def check_databses():
     log(level='log', msg='running system checks')
 
-    # make sure storage folder exists
+
+    # check if storage folder exists
     log(level='log', msg='checking storage folder')
+
+    # check if folder exists, and try to create it if not
     if not os.path.isdir("storage/"):
         try:
-            log(level='warning', msg='[server/dbhandler/check_databses/0] creating storage folder')
+            log(level='warning', msg='[health check] creating storage folder')
             os.mkdir("storage")
+
         except Exception as e:
-            log(level='fail', msg=f'could not create storage folder\n Traceback: {e}')
-            return "could not create storage folder", 500
-
-    log(level='success', msg='OK')
+            return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500
 
 
-    # make sure main db exists
+
+
+    # check main.db
     log(level='log', msg='checking main db')
 
-    # chech if we can get users
-    if not get_all_users(p=False):
-        # if not than db probably doesnt exist or is corrupt
-        log(level='log', msg='[server/dbhandler/check_databses/1] initializing users database')
-        # make db
-        if not init_user_db():
-            # crash if that failed
-            log(level='fail', msg='[server/dbhandler/check_databses/2] users databse does not exist or corrupt, but could not be redifined\n try removing the databse and running the server again')
-            return "users database corrupt, and could not be redifined", 500
+    # does the main db exist?
+    if not os.path.isfile('storage/main.db'):
+        log(level='warning', msg=f'[health check] creating main.db')
 
-    log(level='success', msg='OK')
-
-    # make sure default chatroom exists
-    # this is only while default chatroom is still a thing
-    log(level='log', msg='checking default chatroom')
-    if not get_all_messages("conv1", p=False):
-        log(level='log', msg='[server/dbhandler/check_databses/4] initializing default chatroom: conv1')
-
-        if not init_chat('conv1'):
-            log(level='fail', msg='[server/dbhandler/check_databses/5] Initialization of default chatroom: conv1')
-            return "could not create default chatroom", 500
+        response, status_code = init_main_db()
+        if status_code != 200:
+            return f"failed to create main.db\n Traceback: {response}\n\n Suggest that you delete the 'storage' folder"
 
 
-    log(level='success', msg='OK')
+    # make sure the database is good by testing all tables
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM users")
+        db_cursor.execute(f"SELECT * FROM chatrooms")
+        a = db_cursor.fetchall()
+        db_connection.close()
+
+
+    # something is wrong with the database
+    except Exception as e:
+        return f"main database is missing tables or otherwise corrupted\n Traceback: {e}", 500
+
+
+
+    log(level='success', msg='[health check] System is healthy :)')
     return "OK", 200
 
