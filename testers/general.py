@@ -178,6 +178,18 @@ def create_chatroom():
 
 
 
+def get_chatroms():
+    url = globals()['url'] + "/api/v0/chatrooms/"
+
+    a = {
+            "username": globals()['username'],
+            }
+
+    res = globals()['s'].get(url=url, headers=a)
+
+    return res.text
+
+
 
 s = requests.Session()
 cookies = ''
@@ -205,6 +217,8 @@ while 1:
         print(clogin())
     elif choice == 'newchat':
         print(create_chatroom())
+    elif choice == 'getchats':
+        print(get_chatroms())
     elif choice == 'chat':
         globals()['chatroom_id'] = input('chatroom: ')
 

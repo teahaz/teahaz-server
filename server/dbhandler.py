@@ -92,7 +92,7 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
         # NOTE: issue in todo.md
         # default cookie and default chatroom should be removed
         cookie = b(json.dumps(['cookie time']))
-        chatrooms = b(json.dumps(['cookie time']))
+        chatrooms = b(json.dumps(['conv1']))
 
 
     # if some of the data was corrupt and couldnt be encoded/hahsed
@@ -185,9 +185,8 @@ def user_save_chatroom(username, new_chatroom):
 
     try:
         username = b(username)
-        new_chatroom = b(new_chatroom)
     except:
-        return "usernme or chatroomId could not be encoded", 500
+        return "usernme could not be encoded", 500
 
 
     # get stored cookies
@@ -252,7 +251,51 @@ def user_save_chatroom(username, new_chatroom):
     return "OK", 200
 
 
-# this function should not be in dbhandler
+#NOTE this could probably be merged with get_cookes
+def user_get_chatrooms(username):
+    try:
+        username = b(username)
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/user_get_chatroms/0] username could not be encoded: {e}")
+        return "internal server error", 500
+
+
+    # get all  stored cookies of the user
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatrooms FROM users WHERE username = ?", (username,))
+        data = db_cursor.fetchall()
+        db_connection.close()
+
+
+
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/user_get_chatroms/1] database operation failed:  {e}')
+        return "internal database error", 500
+
+
+    # chatrooms are stored in a base64 encoded str(list)
+    if len(data) == 0:
+        log(level='error', msg=f'[server/dbhandler/user_get_chatroms/2] user not initialized properly')
+        return "internal database error", 500
+
+
+    # decode and load the data as json
+    try:
+        data = d(data)
+        data = json.loads(data)
+    except:
+        log(level='error', msg=f'[server/dbhandler/user_get_chatroms/3] failed to process chatrooms data of user {username}\n Data is probably corrupted')
+
+
+    return data, 200
+
+
+
+
+
 def check_access(username, chatroom_id):
     #return "chatroom doesnt exist or user doesnt have access to view it", 404
     return "OK", 200
@@ -386,6 +429,7 @@ def get_cookies(username):
         log(level='error', msg=f'[server/dbhandler/get_cookies/0] failed to process cookie data of user {username}\n Data is probably corrupted')
 
     return data
+
 
 
 def check_user_exists(username=None, email=None):
@@ -680,7 +724,7 @@ def check_databses():
     except Exception as e:
         return f"main database is missing tables or otherwise corrupted\n Traceback: {e}", 500
 
-
+    init_chat('conv1')
 
     log(level='success', msg='[health check] System is healthy :)')
     return "OK", 200

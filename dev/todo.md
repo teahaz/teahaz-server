@@ -77,21 +77,15 @@ files
 
 code review
 ===========
-this is not really a todo but a list of things i have already done
+[ ] dbhandler
 
-[done] /login
-[done] /register
-[done] /message
-[done] /file
-
-[ ] everything else
 
 
 chats
 =====
 [ ] make sure the chats work
 
-[ ] add conv1 back temporarily so bazsis client doesnt instantly break
+[ ] fix conv1, its probably not registered in main.db
 
 [ ] save chats the user inside the users table in main.db
 
@@ -102,3 +96,7 @@ chats
 [ ] error check the shit out of everything
 
 [ ] make dbhandler.checkaccess finally do something
+
+[ ] make person who created the chatroom admin by default
+
+[ ] make getchats display both the chatroom name and the id

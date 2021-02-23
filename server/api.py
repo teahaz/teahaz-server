@@ -257,7 +257,14 @@ def get_chatrooms(headers):
         return "username not supplied", 400
 
 
-    # NOTE need to add servers to user
+    response, status_code = dbhandler.user_get_chatrooms(username)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/get_chatrooms/3] could not get chatroom data from main.db')
+        return response
+
+
+    return response, status_code
+
 
 
 
