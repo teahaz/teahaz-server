@@ -13,6 +13,7 @@ from api import upload_file
 from api import message_get
 from api import message_send
 from api import download_file
+#from api import get_chatrooms
 from api import create_chatroom
 
 from users_th import add_user
@@ -108,6 +109,14 @@ class api__files(Resource):
 
 
 class api__chatroom(Resource):
+#    def get(self): # create chatroom
+#        if not request.headers: return "no data sent", 401
+#        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
+#
+#        response, status_code = get_chatrooms(request.headers)
+#        return response, status_code
+#
+
     def post(self): # create chatroom
         if not request.get_json(): return "no data sent", 401
         if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401

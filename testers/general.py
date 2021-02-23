@@ -172,8 +172,7 @@ def create_chatroom():
 
     res = globals()['s'].post(url=url, json=a)
     if res.status_code == 200:
-        globals()['chatroom_id'] = str(res.text)
-        print(res.text)
+        globals()['chatroom_id'] = str(res.text).strip('\n').strip('"')
 
     return res.text
 

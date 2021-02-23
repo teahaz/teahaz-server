@@ -242,4 +242,16 @@ def create_chatroom(json_data):
     return chatroomId, 200
 
 
-
+#def get_chatrooms(headers):
+#    username = headers.get('username')
+#
+#
+#    # make sure we got all needed data
+#    if not username:
+#        return "username not supplied", 400
+#
+#
+#    # NOTE need to add servers to user
+#
+#
+#    

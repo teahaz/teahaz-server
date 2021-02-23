@@ -93,8 +93,6 @@ chats
 
 [ ] make error for chatroom does not exists (currently its internal server error)
 
-[ ] make client not crash when getting arbitrary chat (something is wrong with the type of the returned data)
-
 [ ] add get method for user to see chats that (s)he is in
 
 [ ] error check the shit out of everything
