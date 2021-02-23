@@ -25,6 +25,10 @@ general
 
 [ ] user avatars?
 
+[ ] add meaning or id number ot error messges sent back to client
+
+[ ] remove [cookie time] from `init_main_db`
+
 
 
 auth
@@ -96,3 +100,5 @@ chats
 [ ] add get method for user to see chats that (s)he is in
 
 [ ] error check the shit out of everything
+
+[ ] make dbhandler.checkaccess finally do something

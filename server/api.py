@@ -239,19 +239,25 @@ def create_chatroom(json_data):
         return "internal database error", 500
 
 
+    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/3] could not save chatroom for user in main.db\n Traceback: {response}')
+        return "internal database errror", 500
+
+
     return chatroomId, 200
 
 
-#def get_chatrooms(headers):
-#    username = headers.get('username')
-#
-#
-#    # make sure we got all needed data
-#    if not username:
-#        return "username not supplied", 400
-#
-#
-#    # NOTE need to add servers to user
-#
-#
-#    
+def get_chatrooms(headers):
+    username = headers.get('username')
+
+
+    # make sure we got all needed data
+    if not username:
+        return "username not supplied", 400
+
+
+    # NOTE need to add servers to user
+
+
+

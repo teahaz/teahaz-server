@@ -39,7 +39,7 @@ def init_main_db():
         db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')")
-        db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies)")
+        db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies, chatrooms)")
         db_connection.commit()
         db_connection.close()
 
@@ -90,8 +90,11 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
 
 
         # NOTE: issue in todo.md
-        # default cookie should be removed soon
+        # default cookie and default chatroom should be removed
         cookie = b(json.dumps(['cookie time']))
+        chatrooms = b(json.dumps(['cookie time']))
+
+
     # if some of the data was corrupt and couldnt be encoded/hahsed
     except Exception as e:
         log(level='error', msg=f"[server/dbhandler/save_new_user/0] malformed data, could not be encloded\nTraceback: {e}")
@@ -103,7 +106,7 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
         db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
-        db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?, ?)", (username, email, nickname, password, cookie))
+        db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)", (username, email, nickname, password, cookie, chatrooms))
         db_connection.commit()
         db_connection.close()
 
@@ -173,6 +176,80 @@ def checkuser(username=None, email=None, password=None):
         return "OK", 200
     else:
         return "Login failed. Username/email or password is incorrect!", 401
+
+
+def user_save_chatroom(username, new_chatroom):
+    if not username or not new_chatroom:
+        log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/0] user_save_chatroom did not get the required arguments')
+        return "internal server error", 500
+
+    try:
+        username = b(username)
+        new_chatroom = b(new_chatroom)
+    except:
+        return "usernme or chatroomId could not be encoded", 500
+
+
+    # get stored cookies
+    try:
+        db_connection = sqlite3.connect("storage/main.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatrooms FROM users WHERE username = ?", (username,))
+        chatrooms = db_cursor.fetchall()
+        db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/1] database operation getting chatrooms failed:  {e}')
+        return "Internal database error", 500
+
+
+    # al users should have at least '[]' stored their chatrooms, if they dont then the database is corrupted somehow
+    print(chatrooms)
+    if len(chatrooms) == 0:
+        log(level='error', msg=f'[server/dbhandler/user_save_chatroom/2] user does not exists or did not get initialized properly')
+        return "Internal database error", 500
+
+
+    # add new chatroomId to chatrooms list
+    ## cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
+    try:
+        #decode
+        chatrooms = d(chatrooms[0][0])
+
+        #append
+        chatrooms = json.loads(chatrooms)
+        chatrooms.append(new_chatroom)
+        chatrooms = json.dumps(chatrooms)
+
+        # encode
+        chatrooms = b(chatrooms)
+
+
+    # if the cookies cannot be decoded/encoded than the data is malformed, which is a server issue
+    except:
+        log(level='error', msg=f'[server/dbhandler/user_save_chatroom/3] malformed chatroom data in databse')
+        return "Internal database error", 500
+
+
+    # update server with new cookes list
+    try:
+        db_connection = sqlite3.connect("storage/main.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f'UPDATE users SET chatrooms = ? WHERE username = ?', (chatrooms, username))
+        db_connection.commit()
+        db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/4] database operation, saving chatroom: failed:  {e}')
+        return "Internal database error", 5000
+
+
+    # everything worked out fine
+    return "OK", 200
 
 
 # this function should not be in dbhandler
