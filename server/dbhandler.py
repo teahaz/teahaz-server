@@ -323,7 +323,7 @@ def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
 
 
     except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/add_user_to_chatroom/1] database operation failed:  {e}')
+        log(level='error', msg=f'[server/dbhandler/add_user_to_chatroom/1] database operation failed:  {e}')
         return "internal database error: could not conenct to database", 500
 
 
