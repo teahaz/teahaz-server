@@ -101,11 +101,11 @@ chats
     - if its missing from either then delete it from user disk and main.db
 
 [] create invites
+    - details in discord pinned `trying to decide how to do invites`
 
 [] make dbhandler.checkaccess finally do something
 
 [] error check the shit out of everything
-
 
 [] make sure the chats work
 
