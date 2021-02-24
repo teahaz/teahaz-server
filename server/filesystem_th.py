@@ -1,5 +1,6 @@
 # this file handles all things connected to local files
 import os
+import shutil
 from logging_th import logger as log
 
 def save_file(data, chatroom, extension, filename):
@@ -61,3 +62,14 @@ def create_chatroom_folders(chatroomId):
     return "OK", 200
 
 
+def remove_chatroom(chatroom):
+    try:
+        shutil.rmtree(f'storage/{chatroom}', ignore_errors=True)
+
+
+    except Exception as e:
+        log(level='error', msg=f"[server/filehanler/remove_chatroom/0] could not remove chatroom\n Traceback: {e}")
+        return "could not remove the chatroom", 500
+
+
+    return "OK", 200

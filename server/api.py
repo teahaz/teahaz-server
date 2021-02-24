@@ -229,20 +229,32 @@ def create_chatroom(json_data):
     response, status_code = dbhandler.init_chat(chatroomId)
     if status_code != 200:
         log(level='error', msg=f'[server/api/create_chatroom/1] could not create chatroom database\n Traceback: {response}')
-        return "internal database error", 500
+        filehander.remove_chatroom(chatroomId)
+        return response, status_code
 
 
     # make entry in main.db
     response, status_code = dbhandler.save_chatroom(chatroomId, chatroom_name)
     if status_code != 200:
         log(level='error', msg=f'[server/api/create_chatroom/2] could not create chatroom entry in main.db\n Traceback: {response}')
-        return "internal database error", 500
+        filehander.remove_chatroom(chatroomId)
+        return response, status_code
 
 
+    # save chatroom id to main.db users table under the users name
     response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
     if status_code != 200:
         log(level='error', msg=f'[server/api/create_chatroom/3] could not save chatroom for user in main.db\n Traceback: {response}')
-        return "internal database errror", 500
+        filehander.remove_chatroom(chatroomId)
+        return response, status_code
+
+
+    # add the user that created the chatroom as chatroom admin
+    response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=True)
+    if status_code != 200:
+        log(level='error', msg=f"[server/api/create_chatroom/4] failed to add chatroom admin")
+        filehander.remove_chatroom(chatroomId)
+        return response, status_code
 
 
     return chatroomId, 200
@@ -260,8 +272,6 @@ def get_chatrooms(headers):
     # get a list of chatroom IDs that the user has access to
     response, status_code = dbhandler.user_get_chatrooms(username)
 
-    print('response: ',response , type(response))
-    print('status_code: ',status_code , type(status_code))
     # if error
     if status_code != 200:
         log(level='error', msg=f'[server/api/get_chatrooms/3] could not get chatroom data from main.db')
@@ -275,11 +285,8 @@ def get_chatrooms(headers):
             return "", 204
 
         # create json with chatname and chat ID in it
-        print('response: ',response , type(response))
         resp_list = []
         for chatroomId in response:
-            print('chatroomId: ',chatroomId , type(chatroomId))
-
 
             # get name corresponding to  chatroomId
             chatname, status_code = dbhandler.get_chatname(chatroomId)

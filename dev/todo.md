@@ -68,7 +68,7 @@ databases
 
 files
 =====
-[ ] make sure server fails if client sends non-encoded files
+[] make sure server fails if client sends non-encoded files
 
 
 
@@ -77,26 +77,36 @@ files
 
 code review
 ===========
-[ ] dbhandler
+[] dbhandler
 
 
 
 chats
 =====
-[ ] make sure the chats work
+[✓] save chats the user inside the users table in main.db
 
-[ ] fix conv1, its probably not registered in main.db
-
-[ ] save chats the user inside the users table in main.db
-
-[ ] make error for chatroom does not exists (currently its internal server error)
-
-[ ] add get method for user to see chats that (s)he is in
-
-[ ] error check the shit out of everything
-
-[ ] make dbhandler.checkaccess finally do something
-
-[ ] make person who created the chatroom admin by default
+[✓] add get method for user to see chats that (s)he is in
 
 [✓] make getchats display both the chatroom name and the id
+
+[✓] make error for chatroom does not exists (currently its internal server error)
+
+[✓] make person who created the chatroom admin by default (and member)
+
+[] create method to remove a user from a chatroom 
+
+[] create method to remove chatroom from main.db
+
+[] create a check-chatrooms method that loops though all chatrooms of a user, and makes sure that they exist both in main.db and on disk
+    - if its missing from either then delete it from user disk and main.db
+
+[] create invites
+
+[] make dbhandler.checkaccess finally do something
+
+[] error check the shit out of everything
+
+
+[] make sure the chats work
+
+[] fix conv1, its probably not registered in main.db
