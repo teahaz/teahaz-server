@@ -92,7 +92,7 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
         # NOTE: issue in todo.md
         # default cookie and default chatroom should be removed
         cookie = b(json.dumps(['cookie time']))
-        chatrooms = b(json.dumps(['conv1']))
+        chatrooms = b(json.dumps([]))
 
 
     # if some of the data was corrupt and couldnt be encoded/hahsed
@@ -244,7 +244,7 @@ def user_save_chatroom(username, new_chatroom):
     # fail on sqlite errors. This usually happens when the server is run without properly set up databases
     except sqlite3.OperationalError as e:
         log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/4] database operation, saving chatroom: failed:  {e}')
-        return "Internal database error", 5000
+        return "Internal database error", 500
 
 
     # everything worked out fine
@@ -301,6 +301,8 @@ def check_access(username, chatroom_id):
     return "OK", 200
 
 
+
+# NOTE get nickname and get chatname could probably be combined into one function
 def get_nickname(username):
     try:
         username = b(username)
@@ -319,8 +321,38 @@ def get_nickname(username):
         nickname = d(data[0][0])
     except:
         nickname = "could not get nickname"
+
+
     return nickname
 
+
+def get_chatname(chatroomId):
+    try:
+        chatroomId = b(chatroomId)
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatroom_name FROM chatrooms WHERE chatroomId = ?", (chatroomId,))
+        data = db_cursor.fetchall()
+        db_connection.close()
+
+
+
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
+        return "internal database error: database operation failed", 500
+
+
+
+    try:
+        chatroom_name = d(data[0][0])
+
+
+    except:
+        log(level='fail', msg=f'[server/dbhandler/get_chatname/1] corrupted data in database:  {e}')
+        return "internal database error: some values may be corrupted", 500
+
+
+    return chatroom_name, 200
 
 
 def store_cookie(username=None, email=None, new_cookie=None):
@@ -724,7 +756,6 @@ def check_databses():
     except Exception as e:
         return f"main database is missing tables or otherwise corrupted\n Traceback: {e}", 500
 
-    init_chat('conv1')
 
     log(level='success', msg='[health check] System is healthy :)')
     return "OK", 200

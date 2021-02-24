@@ -99,4 +99,4 @@ chats
 
 [ ] make person who created the chatroom admin by default
 
-[ ] make getchats display both the chatroom name and the id
+[✓] make getchats display both the chatroom name and the id

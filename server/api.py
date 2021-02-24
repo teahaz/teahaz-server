@@ -257,12 +257,46 @@ def get_chatrooms(headers):
         return "username not supplied", 400
 
 
+    # get a list of chatroom IDs that the user has access to
     response, status_code = dbhandler.user_get_chatrooms(username)
+
+    print('response: ',response , type(response))
+    print('status_code: ',status_code , type(status_code))
+    # if error
     if status_code != 200:
         log(level='error', msg=f'[server/api/get_chatrooms/3] could not get chatroom data from main.db')
-        return response
+        return response, status_code
 
 
+    # if not error
+    else:
+        # if there are non then respond with 204
+        if len(response) == 0:
+            return "", 204
+
+        # create json with chatname and chat ID in it
+        print('response: ',response , type(response))
+        resp_list = []
+        for chatroomId in response:
+            print('chatroomId: ',chatroomId , type(chatroomId))
+
+
+            # get name corresponding to  chatroomId
+            chatname, status_code = dbhandler.get_chatname(chatroomId)
+            if status_code != 200:
+                return chatname, status_code
+
+
+            chat_obj = {
+                    'name': chatname,
+                    'chatroomId': chatroomId
+                    }
+
+
+            resp_list.append(chat_obj)
+        response = resp_list
+
+    # all is well
     return response, status_code
 
 
