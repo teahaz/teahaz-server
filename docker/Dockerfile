@@ -47,7 +47,9 @@ EXPOSE 13337
 
 RUN useradd -m teahaz
 RUN chown teahaz /home/teahaz
+RUN chgrp teahaz /home/teahaz
 RUN chmod -R u+wrx /home/teahaz
+RUN chmod -R g+wrx /home/teahaz
 USER teahaz
 WORKDIR /home/teahaz
 
