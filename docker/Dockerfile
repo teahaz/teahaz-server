@@ -45,6 +45,11 @@ RUN pip3 install bcrypt
 # setup
 EXPOSE 13337
 
+RUN echo -e "#!/bin/sh;\n chown teahaz /home/teahaz;chmod -R u+wrx /home/teahaz" > /usr/bin/set_perms
+RUN chown root /usr/bin/set_perms
+RUN chmod o+x /usr/bin/set_perms
+RUN chmod u+x /usr/bin/set_perms
+
 RUN useradd -m teahaz
 RUN chown teahaz /home/teahaz
 RUN chgrp teahaz /home/teahaz
