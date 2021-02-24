@@ -50,6 +50,11 @@ RUN chown teahaz /home/teahaz
 RUN chgrp teahaz /home/teahaz
 RUN chmod -R u+wrx /home/teahaz
 RUN chmod -R g+wrx /home/teahaz
+
+# for some reason the .git files dont get set properly
+RUN chmod -R u+wrx /home/teahaz/.git
+RUN chmod -R g+wrx /home/teahaz/.git
+
 USER teahaz
 WORKDIR /home/teahaz
 
