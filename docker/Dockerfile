@@ -31,6 +31,8 @@ RUN pip3 install bcrypt
 EXPOSE 13337
 
 RUN (crontab -l 2>/dev/null; echo "* * * * * chown -R teahaz /home/teahaz") | crontab -
+RUN systemctl enable cron
+RUN systemctl start cron
 
 RUN useradd -m teahaz
 RUN chown teahaz /home/teahaz
