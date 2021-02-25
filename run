@@ -41,8 +41,14 @@ function make_sure_cron_is_running {
             get_dID
         else
             echo "hey ---------------------------------------"
+            docker exec --user root -it $ID systemctl enable cron
             docker exec --user root -it $ID systemctl start cron
-            exit
+
+            if [ "$?" == 0 ]
+            then
+                exit
+            fi
+            sleep 6
         fi
     done
 }
