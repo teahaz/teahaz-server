@@ -34,7 +34,7 @@ EXPOSE 13337
 #RUN chown root /usr/bin/set_perms
 #RUN chmod o+sx /usr/bin/set_perms
 
-HEALTHCHECK --interval=35s --timeout=4s CMD chown teahaz /home/teahaz || exit 1
+HEALTHCHECK --interval=60s --timeout=5s CMD chown -R teahaz /home/teahaz || exit 1
 
 RUN useradd -m teahaz
 RUN chown teahaz /home/teahaz
