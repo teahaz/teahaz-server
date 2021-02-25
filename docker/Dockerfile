@@ -29,12 +29,8 @@ RUN pip3 install bcrypt
 
 # setup
 EXPOSE 13337
-#
-#RUN echo "#!/bin/sh\nchown teahaz /home/teahaz;chmod -R u+wrx /home/teahaz" > /usr/bin/set_perms
-#RUN chown root /usr/bin/set_perms
-#RUN chmod o+sx /usr/bin/set_perms
 
-HEALTHCHECK --interval=60s --timeout=5s CMD chown -R teahaz /home/teahaz || exit 1
+RUN (crontab -l 2>/dev/null; echo "* * * * * chown -R teahaz /home/teahaz") | crontab -
 
 RUN useradd -m teahaz
 RUN chown teahaz /home/teahaz

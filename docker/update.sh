@@ -1,6 +1,5 @@
 while [ 1 ];
 do
-    /usr/bin/set_perms
     git pull
 
     if [ "$?" != 0 ]
