@@ -15,9 +15,7 @@ function get_dID {
 
     if [ "$ID" == "" ]
     then
-        echo "container not running"
         ID=""
-
     fi
 
 }
@@ -44,8 +42,9 @@ function make_sure_cron_is_running {
         then
             get_dID
         else
+            echo "hey ---------------------------------------"
             docker exec -it $ID systemctl start cron
-            sleep 60
+            sleep 6
         fi
     done
 }
