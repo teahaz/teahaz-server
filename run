@@ -40,7 +40,7 @@ function git_pull {
 function make_sure_cron_is_running {
     while [ 1 ]
     do
-        if [ $ID == "" ]
+        if [ "$ID" == "" ]
         then
             get_dID
         else
