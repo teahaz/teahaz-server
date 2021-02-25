@@ -37,6 +37,19 @@ function git_pull {
 
 }
 
+function make_sure_cron_is_running {
+    while [ 1 ]
+    do
+        if [ $ID == "" ]
+        then
+            get_dID
+        else
+            docker exec -it $ID systemctl start cron
+            sleep 60
+        fi
+    done
+}
+
 
 if [ "$1" == "kill" ]
 then
@@ -89,7 +102,10 @@ else
 
         docker build -t teahaz_server:latest .
 
+        make_sure_cron_is_running &
+
         docker run -p 13337:13337 -e PYTHONUNBUFFERED=0 --rm -v $DIR:/home/teahaz teahaz_server:latest
+
     else
         echo "server is already running"
     fi
