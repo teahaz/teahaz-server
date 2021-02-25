@@ -1,6 +1,6 @@
 while [ 1 ];
 do
-    git pull
+    git pull --force
 
     if [ "$?" != 0 ]
     then
