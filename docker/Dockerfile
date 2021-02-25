@@ -2,6 +2,7 @@
 FROM ubuntu:20.04
 RUN apt-get update && apt-get upgrade -y
 RUN apt install apt-utils -y
+RUN apt install systemctl -y
 
 
 # evn
@@ -14,7 +15,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt install git -y
 RUN apt install cron -y
 RUN apt install busybox -y
-RUN apt install systemctl -y
 
 RUN apt install python3 -y
 RUN apt install python3-pip -y
