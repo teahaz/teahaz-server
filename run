@@ -40,9 +40,8 @@ function make_sure_cron_is_running {
         then
             get_dID
         else
-            echo "hey ---------------------------------------"
-            docker exec --user root -it $ID systemctl enable cron
-            docker exec --user root -it $ID systemctl start cron
+            docker exec --user root $ID systemctl enable cron
+            docker exec --user root $ID systemctl start cron
 
             if [ "$?" == 0 ]
             then
