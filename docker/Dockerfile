@@ -1,27 +1,12 @@
-# WARNING: this dockerfile is not complete and cannot be used to run the server yet
-################################################################################################
-#Dockerfile for running the server easier
-# build with:
-#   sudo docker build -t teahaz_server:latest .
-#
-# run server:
-#   sudo docker run --rm -v $pwd/server/:/server teahaz_server:latest
-#
-#stop server:
-#   sudo docker kill <container id>
-#
-# get shell with: [NOTE the server has to be running for this]
-#   sudo docker exec -it <container id> /bin/bash
-################################################################################################
-
-#docker run -it -v /Users/bdbot/Documents/mount_demo/:/mount_demo nycdsa/linux-toolkits bash
-#sudo docker run -v $pwd:/server teahaz_server:latest
-
+# install and update
 FROM ubuntu:20.04
 RUN apt-get update && apt-get upgrade -y
 RUN apt install apt-utils -y
 
 
+# evn
+ENV PYTHONUNBUFFERED=0
+ENV DEBIAN_FRONTEND=noninteractive 
 
 
 
@@ -58,7 +43,6 @@ RUN chmod -R g+wrx /home/teahaz
 USER teahaz
 WORKDIR /home/teahaz
 
-# need to test if i need this or not
-ENV PYTHONUNBUFFERED=0
 
+# run
 CMD cd /home/teahaz/docker/; ./deploy.sh
