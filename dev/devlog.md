@@ -4,6 +4,14 @@ this is a document written mostly for myself.
 ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
+
+# 26 feb 2021
+## e2ee
+just wanted to write down an idea i had, to make e2ee work by each message having a kID (key ID) with it. the client stores keys with the corresoponding key ID and that way it will know what messages it should decrypt and which ones it shouldnt
+
+
+
+
 #22 feb 2021
 ## multi-chatroom support
 idea is that chatrooms are saved by uuid as a folder, but this is not very user friendly. My solution to this is to rename users.db to main.db and have a chatrooms table in it. The chatrooms table would store the chatroomID the chatroom name, and maybe the occupance/admin (but the users of the chatroom should most likely be in the db inside the chatroom)
