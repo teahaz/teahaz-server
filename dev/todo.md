@@ -93,12 +93,9 @@ chats
 
 [✓] make person who created the chatroom admin by default (and member)
 
-[] create method to remove a user from a chatroom 
+[✓] create method to remove a user from a chatroom 
 
-[] create method to remove chatroom from main.db
-
-[] create a check-chatrooms method that loops though all chatrooms of a user, and makes sure that they exist both in main.db and on disk
-    - if its missing from either then delete it from user disk and main.db
+[✓] create method to remove chatroom from main.db
 
 [] create invites
     - details in discord pinned `trying to decide how to do invites`
@@ -110,3 +107,11 @@ chats
 [] make sure the chats work
 
 [] fix conv1, its probably not registered in main.db
+
+
+
+might not happen
+----------------
+[] create a check-chatrooms method that loops though all chatrooms of a user, and makes sure that they exist both in main.db and on disk
+    - if its missing from either then delete it from user disk and main.db
+
