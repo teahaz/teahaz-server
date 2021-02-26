@@ -221,15 +221,18 @@ def create_chatroom(json_data):
     # create folders needed for chatroom
     response, status_code = filehander.create_chatroom_folders(chatroomId)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/create_chatroom/0] could not create chatroom\n Traceback: {response}')
-        return "internal server error", 500
+        log(level='error', msg=f'[server/api/create_chatroom/0] could not create chatroom')
+        return response, 500
 
 
     # create chatroom.db inside chatroom the chatrom folder
     response, status_code = dbhandler.init_chat(chatroomId)
     if status_code != 200:
         log(level='error', msg=f'[server/api/create_chatroom/1] could not create chatroom database\n Traceback: {response}')
+
+        # remove chatroom
         filehander.remove_chatroom(chatroomId)
+
         return response, status_code
 
 
@@ -237,15 +240,10 @@ def create_chatroom(json_data):
     response, status_code = dbhandler.save_chatroom(chatroomId, chatroom_name)
     if status_code != 200:
         log(level='error', msg=f'[server/api/create_chatroom/2] could not create chatroom entry in main.db\n Traceback: {response}')
-        filehander.remove_chatroom(chatroomId)
-        return response, status_code
 
-
-    # save chatroom id to main.db users table under the users name
-    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
-    if status_code != 200:
-        log(level='error', msg=f'[server/api/create_chatroom/3] could not save chatroom for user in main.db\n Traceback: {response}')
+        # remove chatroom
         filehander.remove_chatroom(chatroomId)
+
         return response, status_code
 
 
@@ -253,7 +251,23 @@ def create_chatroom(json_data):
     response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=True)
     if status_code != 200:
         log(level='error', msg=f"[server/api/create_chatroom/4] failed to add chatroom admin")
+
+        # remove chatroom
         filehander.remove_chatroom(chatroomId)
+        dbhandler.delete_chatroom_main(chatroomId)
+
+        return response, status_code
+
+
+    # save chatroom id to main.db users table under the users name
+    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/3] could not save chatroom for user in main.db\n Traceback: {response}')
+
+        # remove chatroom
+        filehander.remove_chatroom(chatroomId)
+        dbhandler.delete_chatroom_main(chatroomId)
+
         return response, status_code
 
 

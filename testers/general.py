@@ -14,8 +14,8 @@ global s
 global url
 global username
 global chatroom_id
-url = "http://butorhaz.hopto.org:13337"
-#url = "http://localhost:13337"
+#url = "http://butorhaz.hopto.org:13337"
+url = "http://localhost:13337"
 
 def get():
     url = globals()['url'] + "/api/v0/message/"

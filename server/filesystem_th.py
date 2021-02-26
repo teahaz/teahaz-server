@@ -50,14 +50,15 @@ def remove_file(chatroom, filename):
 
 def create_chatroom_folders(chatroomId):
     if os.path.exists(f"storage/{chatroomId}"):
-        return "chatroomId already exists", 400
+        return "Internal server error: tried to assing existing chatroom ID", 400
 
     try:
         os.mkdir(f'storage/{chatroomId}')
         os.mkdir(f'storage/{chatroomId}/uploads')
 
     except Exception as e:
-        return f"failed to create chatroom folders: {e}", 500
+        log(level='error', msg=f'[server/filehanler/create_chatroom_folders/0] could not create chatroom folders\n Traceback: {e}')
+        return f"Internal server error: failed while setting up the chatroom", 500
 
     return "OK", 200
 
