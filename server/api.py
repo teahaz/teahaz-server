@@ -310,7 +310,7 @@ def get_chatrooms(headers):
 
             chat_obj = {
                     'name': chatname,
-                    'chatroomId': chatroomId
+                    'chatroom': chatroomId
                     }
 
 
@@ -321,5 +321,53 @@ def get_chatrooms(headers):
     return response, status_code
 
 
+def create_invite(json_data):
+    username   = json_data.get('username')
+    chatroomId = json_data.get('chatroom')
+    expr_time  = json_data.get('expr_time')
+    uses       = json_data.get('uses')
+    inviteId   = str(uuid.uuid1())
+
+
+    # make sure we got all the data
+    if not username or not chatroomId or not uses or not expr_time:
+        return "one or more of the required arguments were not supplied. Required=[username, chatroom, expr_time, uses]", 400
+
+
+    # make sure the format is good on time and uses
+    try:
+        expr_time = float(expr_time)
+        uses = int(uses)
+
+
+    # no
+    except:
+        return "Invalid format: expr_time has to be type: FLOAT AND uses has to by type: INT", 400
+
+
+    # make sure the user has access to the chatroom
+    response, status_code = dbhandler.check_access(username, chatroomId)
+    if status_code != 200:
+        return response, status_code
+
+
+    # invites can only be created if you are admin
+    response, status_code = dbhandler.check_perms(username, chatroomId, permission="admin")
+    if status_code != 200:
+        return response, status_code
+
+
+    # save this invite in the database
+    response, status_code = dbhandler.save_invite(chatroomId, inviteId, expr_time, uses)
+    if status_code != 200:
+        return response, status_code
+
+
+    # ok
+    return inviteId, 200
+
+
+def process_invite(json_data):
+    pass
 
 

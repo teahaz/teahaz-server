@@ -413,10 +413,16 @@ def get_nickname(username):
 
 # create and setup chatroom.db
 def init_chat(chatroom_id):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db')
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"CREATE TABLE users ('username', 'admin', 'colour')")
+        db_cursor.execute(f"CREATE TABLE invites ('inviteId', 'expr_time', 'uses')")
         db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
         db_connection.commit()
         db_connection.close()
@@ -429,9 +435,14 @@ def init_chat(chatroom_id):
     return "OK", 200
 
 
+
 # add a user to a chatroom
 def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
-    chatroomId_d = chatroomId # need to keep this un-encoded for the path
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
 
 
     try:
@@ -446,7 +457,6 @@ def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
 
 
     try:
-        username = b(username)
         db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?)", (username, admin, colour))
@@ -463,13 +473,65 @@ def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
 
 
 
-
 # check if chatroom exists && user has access to it
 def check_access(username, chatroom_id):
-    if not os.path.isdir(f'storage/{chatroom_id}'): # NOTE check same thing in database
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    if not os.path.isdir(f'storage/{chatroomId_d}'): # NOTE check same thing in database
         return "chatroom does not exist", 400
 
     return "OK", 200
+
+
+
+def check_perms(username, chatroomId, permission="admin"):
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    try:
+        username   = b(username)
+        chatroomId = b(chatroomId)
+
+
+    except Exception as e:
+        log(level="warning", msg=f"[server/dbhandler.py/check_perms/0] could not encode data sent from user\n Traceback: {e}")
+
+
+    # the option needs to be in this list to pass, this should avoid arbitrary things bing injected into the sql statement
+    userPerms = [ "admin" ] # NOTE this cold be global, idk yet
+    if permission not in userPerms:
+        log(level='error', msg="[server/dbhandler.py/check_perms/1] attemted to check invalid permission. Make sure you are only checking things in userPerms list")
+        return "Internal server error: attemted to check invalid permiison", 500
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM users WHERE username = ? and {permission} = true", (username,))
+        a = db_cursor.fetchall()
+        db_connection.close()
+
+
+    except sqlite3.OperationalError as e:
+        log(level='error', msg=f'[server/dbhandler/check_perms/2] database operation failed:  {e}')
+        return "internal database error: could not conenct to database", 500
+
+
+    if len(a) == 0 or not a:
+        return "Permission denied: your user does not have permission to perform this action", 403
+
+
+    return "OK", 200
+
+
+
+
 
 
 
@@ -773,7 +835,56 @@ def delete_chatroom_from_user(username, chatroomId):
 
 
 
-# ----------------------------------------------------------------------- users ------------------------------------------------------------
+# ----------------------------------------------------------------------- !users ------------------------------------------------------------
+# ----------------------------------------------------------------------- invites ------------------------------------------------------------
+
+
+
+def save_invite(chatroomId, inviteId, expr_time, uses):
+    if not chatroomId or not inviteId or not expr_time or not uses:
+        log(level='error', msg="[server/dbhandler.py/save_invite/0] missing arguments to save_invite function")
+        return "internal server error: missing arguments", 500
+
+
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+
+    # encode data: no sqli pls
+    try:
+        inviteId = b(inviteId)
+        # expr_time and uses are not encoded so we can do cool sql statements
+
+
+    # could not encode the data for some reason
+    except:
+        return "Internal server error: [dbhanler/save_invite/1] failed to encode data", 500
+
+
+
+    # save invite in database
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"INSERT INTO invites VALUES (?, ?, ?)", (inviteId, expr_time, uses))
+        db_connection.commit()
+        db_connection.close()
+
+
+    # database operation failed
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler.py/save_invite/2] database operation failed: saving invite\n Traceback: {e}')
+        return "Internal database error: could not connect to database"
+
+
+    # ok
+    return "OK", 200
+
+
+
 # ======================================================================= !chatrooms =======================================================
 
 
@@ -798,8 +909,14 @@ def get_all_messages(chatroom_id, p=True):
     if not os.path.exists("storage/conv1"):
         return False
 
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_Id) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db')
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT * FROM messages")
     except sqlite3.OperationalError as e:
@@ -831,9 +948,15 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
         return "internal server error", 500
 
 
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     # connect to the database
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
 
 
@@ -881,8 +1004,13 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
 
 # get messages from db
 def get_messages_db(last_time=0, chatroom_id=''):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     try: # try connect to the db
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
 
 

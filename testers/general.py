@@ -1,4 +1,5 @@
 import requests
+import time
 import os
 import json
 import base64
@@ -43,8 +44,6 @@ def send_file():
     if len(filename) == 0:
         filename = '../notes.md'
     print(filename)
-
-
     with open(filename, 'rb')as infile:
         contents = infile.read()
 
@@ -53,7 +52,6 @@ def send_file():
     # get file extension bc mimetype sucks sometimes
     extension = filename.split(".")[-1]
     print('extension: ',extension , type(extension))
-
 
     a = {
         "username": globals()['username'],
@@ -190,6 +188,22 @@ def get_chatroms():
     return res.text
 
 
+def get_invite():
+    url = globals()['url'] + "/api/v0/invite/"
+
+    a = {
+
+            "username": globals()['username'],
+            "chatroom": globals()['chatroom_id'],
+            "expr_time": str(time.time() + 60 * 60 * 24),
+            "uses": str(10)
+            }
+
+    res = globals()['s'].get(url=url, headers=a)
+    if res.status_code == 200:
+        print("invite: ", str(res.text).strip('\n').strip('"'))
+
+    return res.text
 
 s = requests.Session()
 cookies = ''
@@ -221,6 +235,8 @@ while 1:
         print(get_chatroms())
     elif choice == 'chat':
         globals()['chatroom_id'] = input('chatroom: ')
+    elif choice == 'ginvite':
+        print(get_invite())
 
     print("username: ", globals()['username'])
     print("chatroom_id: ", globals()['chatroom_id'])
