@@ -7,21 +7,21 @@ from hashlib import sha256
 
 from logging_th import logger as log
 
-def sanitize_filename(filename):
-    filename = filename.replace('..', '')
-    filename = filename.replace('/', '')
+def sanitize_uuid(ID):
+    ID = ID.replace('..', '')
+    ID = ID.replace('/', '')
 
-    if len(filename) != 36:
-        return "invalid filename length", 400
+    if len(ID) != 36:
+        return False
 
     # validate uuid:
     try:
-        uuid.UUID(filename).version
+        uuid.UUID(ID).version
     except ValueError:
-        return "invalid filename", 400
+        return False
 
 
-    return filename, 200
+    return ID
 
 
 

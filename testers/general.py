@@ -205,6 +205,21 @@ def get_invite():
 
     return res.text
 
+
+def use_invite():
+    url = globals()['url'] + "/api/v0/invite/"
+
+    a = {
+
+            "username": globals()['username'],
+            "chatroom": input("chatroom: "),
+            "inviteId": input("invite: ")
+            }
+
+    res = globals()['s'].post(url=url, json=a)
+    return res.text
+
+
 s = requests.Session()
 cookies = ''
 username = ''
@@ -237,6 +252,8 @@ while 1:
         globals()['chatroom_id'] = input('chatroom: ')
     elif choice == 'ginvite':
         print(get_invite())
+    elif choice == 'uinvite':
+        print(use_invite())
 
     print("username: ", globals()['username'])
     print("chatroom_id: ", globals()['chatroom_id'])

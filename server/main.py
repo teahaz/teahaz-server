@@ -14,6 +14,7 @@ from api import message_get
 from api import message_send
 from api import download_file
 from api import create_invite
+from api import process_invite
 from api import get_chatrooms
 from api import create_chatroom
 
@@ -135,6 +136,14 @@ class api__invites(Resource):
 
         response, status_code = create_invite(request.headers)
         return response, status_code
+
+    def post(self):
+        if not request.get_json(): return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
+
+        response, status_code = process_invite(request.get_json())
+        return response, status_code
+
 
 
 #legend

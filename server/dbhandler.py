@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import uuid
 import base64
 import sqlite3
@@ -532,9 +533,6 @@ def check_perms(username, chatroomId, permission="admin"):
 
 
 
-
-
-
 # ----------------------------------------------------------------------- !chatroom db ------------------------------------------------------
 # ----------------------------------------------------------------------- maindb ------------------------------------------------------------
 
@@ -634,7 +632,6 @@ def delete_chatroom_main(chatroomId):
 
 
 
-# ----------------------------------------------------------------------- !maindb ------------------------------------------------------------
 # ----------------------------------------------------------------------- users ------------------------------------------------------------
 
 
@@ -836,6 +833,7 @@ def delete_chatroom_from_user(username, chatroomId):
 
 
 # ----------------------------------------------------------------------- !users ------------------------------------------------------------
+# ----------------------------------------------------------------------- !maindb ------------------------------------------------------------
 # ----------------------------------------------------------------------- invites ------------------------------------------------------------
 
 
@@ -884,6 +882,73 @@ def save_invite(chatroomId, inviteId, expr_time, uses):
     return "OK", 200
 
 
+
+def use_invite(inviteId, chatroomId):
+    if not inviteId or not chatroomId:
+        log(level='error', msg="[server/dbhandler.py/use_invite/0] missing arguments to function")
+        return "internal server error: missing arguments", 500
+
+
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    try:
+        inviteId = b(inviteId)
+
+    except Exception as e:
+        log(level='warning', msg="[server/dbhandler.py/use_invite/1] inviteId could not be encoded\n Traceback: {e}")
+        return "inviteID format incorrect", 400
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT uses FROM invites WHERE inviteId = ? AND (expr_time > ? OR expr_time = 0)", (inviteId, str(int(time.time()))))
+        uses = db_cursor.fetchall()
+        db_connection.close()
+
+
+    # database operation failed
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler.py/use_invite/2] database operation failed: saving invite\n Traceback: {e}')
+        return "Internal database error: could not connect to database", 500
+
+
+    print('uses: ',uses , type(uses))
+    if len(uses) == 0:
+        return "no such invite in databse", 400
+
+
+    try:
+        uses = int(uses[0][0])
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite uses: database possibly corrupted\nTraceback: {e}")
+        return "Internal databse error: could not process data from databse", 500
+
+
+    if uses > 0:
+        uses = uses - 1
+    else:
+        return "invite cannot be used as it has exeeded its maximum capacity", 403
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"UPDATE invites SET uses = ? WHERE inviteId = ?", (str(uses), inviteId))
+        uses = db_connection.fetchall()
+        db_connection.close()
+
+
+    # database operation failed
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler.py/save_invite/2] database operation failed: saving invite\n Traceback: {e}')
+        return "Internal database error: could not connect to database"
+
+
+    return "OK", 200
 
 # ======================================================================= !chatrooms =======================================================
 
@@ -1004,7 +1069,7 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
 
 # get messages from db
 def get_messages_db(last_time=0, chatroom_id=''):
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id) # sanitize chatroom id used for path
     if status_code != 200:
         return chatroomId_d, status_code
 

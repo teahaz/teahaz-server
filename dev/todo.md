@@ -30,6 +30,13 @@ general
 [ ] remove [cookie time] from `init_main_db`
 
 
+[] create a db_execute method that connects to a db and runs commands
+    why?
+    - reduce unecessary code duplication
+    - allow for db cacheing so we dont reopen the same one each time
+    - have errors handled inside the function
+
+
 
 auth
 ====
@@ -97,8 +104,12 @@ chats
 
 [✓] create method to remove chatroom from main.db
 
-[] create invites
+[✓] create invites
     - details in discord pinned `trying to decide how to do invites`
+
+[] make invites work
+
+[] move invites from chatroom.db to main.db
 
 [] make dbhandler.checkaccess finally do something
 

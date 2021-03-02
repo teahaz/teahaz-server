@@ -120,9 +120,9 @@ def download_file(headers):
 
 
     # gotta sanitize shit
-    filename, status_code = security.sanitize_filename(filename)
-    if status_code != 200:
-        return filename, status_code
+    filename = security.sanitize_uuid(filename)
+    if not filename:
+        return "invalid format from filename", 400
 
 
     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
@@ -368,6 +368,41 @@ def create_invite(json_data):
 
 
 def process_invite(json_data):
-    pass
+    username   = json_data.get('username')
+    inviteId   = json_data.get('inviteId')
+    chatroomId = json_data.get('chatroom')
 
+
+    # make sure we got all the data
+    if not username or not inviteId:
+        return "one or more of the required arguments were not supplied. Required=[username, inviteId]", 400
+
+
+    # we need to sanitize
+    inviteId = security.sanitize_uuid(inviteId)
+    if not inviteId:
+        return "invalid format for invite ID", 400
+
+
+    response, status_code = dbhandler.use_invite(inviteId, chatroomId)
+    if status_code != 200:
+        return response, status_code
+
+
+    response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=False)
+    if status_code != 200:
+        return response, status_code
+
+
+    chatname, status_code = dbhandler.get_chatname(chatroomId)
+    if status_code != 200:
+        return chatname, status_code
+
+
+    chat_obj = {
+            "name": chatname,
+            "chatroom": chatroomId
+            }
+
+    return chat_obj, 200
 
