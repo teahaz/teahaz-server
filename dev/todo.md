@@ -38,6 +38,10 @@ general
 
 
 
+[] make sure dumb ass users dont send unencoded data to /message/
+
+
+
 auth
 ====
 

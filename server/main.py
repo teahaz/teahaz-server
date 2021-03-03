@@ -153,7 +153,7 @@ api.add_resource(register, '/register/')
 api.add_resource(api__files, '/api/v0/file/')
 api.add_resource(api__invites, '/api/v0/invite/')
 api.add_resource(api__messages, '/api/v0/message/')
-api.add_resource(api__chatroom, '/api/v0/chatrooms/')
+api.add_resource(api__chatroom, '/api/v0/chatroom/')
 
 
 

@@ -161,7 +161,7 @@ def register():
 
 
 def create_chatroom():
-    url = globals()['url'] + "/api/v0/chatrooms/"
+    url = globals()['url'] + "/api/v0/chatroom/"
 
     a = {
             "username": globals()['username'],
@@ -177,7 +177,7 @@ def create_chatroom():
 
 
 def get_chatroms():
-    url = globals()['url'] + "/api/v0/chatrooms/"
+    url = globals()['url'] + "/api/v0/chatroom/"
 
     a = {
             "username": globals()['username'],
