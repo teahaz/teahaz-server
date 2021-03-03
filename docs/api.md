@@ -40,7 +40,7 @@ data = {
         "username": username,
         }
 
-#**NOTE:** In GET requests data has to be sent in the http header
+#NOTE: In GET requests data has to be sent in the http header
 res = requests.get(url=url, headers=data)
 
 print(res.text)
@@ -78,13 +78,13 @@ Sending a POST request to /chatroom/ should create a new chatroom. The creator o
 ```py
 url = http:/<server url>/api/v0/chatroom/"
 
-// format required data in json format
+# format required data in json format
 data = {
         "username": username,
         "chatroom_name": input("chatroom name: ")
         }
 
-// make post request. NOTE: data is sent in the json field 
+# make post request. NOTE: data is sent in the json field 
 res = requests.post(url=url, json=data)
 
 print(res.text)
