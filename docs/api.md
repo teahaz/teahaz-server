@@ -52,7 +52,7 @@ print(res.text)
 
 #### example return data:
 Server returns both the name and the ID of every chatroom the user is in
-```
+```json
 [
     {
         "name": "chatroom_name1",
@@ -130,6 +130,7 @@ Sending a GET request to /invite/ should create an invite.
 
 #### code example:
 ```py
+import time
 url = http://<teahouse server>/api/v0/invite/"
 
 data = {
@@ -152,3 +153,37 @@ Returns the ID of the invite
 ```
 
 
+Using an invite
+---------------
+Sending a POST request to /invite/ with an invite ID should add your use to the chatroom the invite corresponds to.
+
+#### required fields:
+* username
+* inviteID
+ - the same invite ID that appeared in section [Creating an invite](#creating-an-invite)
+
+
+
+#### code example:
+```py
+url = http://<teahouse server>/api/v0/invite/"
+
+data = {
+        "username": username,
+        "inviteId": input("invite: ")
+        }
+
+# make post request with data in the json field
+res = session_obj.post(url=url, json=data)
+return res.text
+```
+
+
+#### example output
+returns a json object with the chatroom name and ID
+```json
+{
+    "name": "best chat ever",
+    "chatroom": "47aec55e-7c27-11eb-87af-b5145ad18bcb"
+}
+```
