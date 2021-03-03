@@ -13,6 +13,10 @@ from api import upload_file
 from api import message_get
 from api import message_send
 from api import download_file
+from api import create_invite
+from api import process_invite
+from api import get_chatrooms
+from api import create_chatroom
 
 from users_th import add_user
 from users_th import set_cookie
@@ -68,6 +72,7 @@ class login(Resource):
         return "OK", 200
 
 
+
 # handles messages
 class api__messages(Resource):
     def get(self): # gets messages since {time.time()}
@@ -106,12 +111,49 @@ class api__files(Resource):
 
 
 
+class api__chatroom(Resource):
+    def get(self): # create chatroom
+        if not request.headers: return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
+
+        response, status_code = get_chatrooms(request.headers)
+        return response, status_code
+
+
+    def post(self): # create chatroom
+        if not request.get_json(): return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
+
+        response, status_code = create_chatroom(request.get_json())
+        return response, status_code
+
+
+
+class api__invites(Resource):
+    def get(self):
+        if not request.headers: return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
+
+        response, status_code = create_invite(request.headers)
+        return response, status_code
+
+    def post(self):
+        if not request.get_json(): return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
+
+        response, status_code = process_invite(request.get_json())
+        return response, status_code
+
+
+
 #legend
 api.add_resource(index, '/')
-api.add_resource(login, '/login')
-api.add_resource(register, '/register')
+api.add_resource(login, '/login/')
+api.add_resource(register, '/register/')
 api.add_resource(api__files, '/api/v0/file/')
+api.add_resource(api__invites, '/api/v0/invite/')
 api.add_resource(api__messages, '/api/v0/message/')
+api.add_resource(api__chatroom, '/api/v0/chatroom/')
 
 
 
@@ -119,8 +161,11 @@ if __name__ == "__main__":
     ## start the server in debug mode
     response, status_code = check_databses()
     if status_code != 200:
-        log(level='fail', msg=f"[main] fatal erorr with databasess\nTraceback: {response}")
+        log(level='fail', msg=f"[health check] fatal erorr with databasess\nTraceback: {response}")
         import sys
         sys.exit(-1)
 
+
+
     app.run(host='0.0.0.0', port=13337, debug=True)
+

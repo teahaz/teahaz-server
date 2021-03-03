@@ -5,6 +5,33 @@ ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
 
+# 02 mar 2021
+## invites
+there are 2 main ideas for the invites:
+1.) have all invites in their own chatroom
+    - this kinda makes sense and is what i would assume to be the case anyway (and what i already implemented)
+    - downside is that you will have to send the chatID witht the invite when processing
+
+2.) have invites in main.db
+    - this feels odd at first but makes a lot more sense when you think about it
+    - would not need to send chatroom ids, and some other smaller benefits
+
+
+I have already implemented option 1, but I intend on switching to option 2 in the future
+
+
+
+# 26 feb 2021
+## e2ee
+just wanted to write down an idea i had, to make e2ee work by each message having a kID (key ID) with it. the client stores keys with the corresoponding key ID and that way it will know what messages it should decrypt and which ones it shouldnt
+
+
+
+#22 feb 2021
+## multi-chatroom support
+idea is that chatrooms are saved by uuid as a folder, but this is not very user friendly. My solution to this is to rename users.db to main.db and have a chatrooms table in it. The chatrooms table would store the chatroomID the chatroom name, and maybe the occupance/admin (but the users of the chatroom should most likely be in the db inside the chatroom)
+
+
 # 14 feb 2021
 ## docker
 for the past days i have been working on making docker work nicely on the server

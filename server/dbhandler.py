@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import uuid
 import base64
 import sqlite3
@@ -11,16 +12,11 @@ from logging_th import logger as log
 
 
 
-#--------------------------------------------- encoding ---------------------------------------------
-# encode/decode shit to stop any sort of injection
-def b(a):
-    return base64.b64encode(str(a).encode('utf-8')).decode('utf-8')
+# ======================================================================= encodeing and encryption ========================================================
+# ----------------------------------------------------------------------- unsafe -------------------------------------------------------------------------
 
-def d(a):
-    return base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
 
-# decode, but omit errors
-# this is strictly for optional arguments and should not be used anywhere else
+
 def de(a):
     try:
         a = base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
@@ -30,37 +26,65 @@ def de(a):
 
 
 
+# ----------------------------------------------------------------------- !unsafe -------------------------------------------------------------------------
+# ----------------------------------------------------------------------- encodins -------------------------------------------------------------------------
 
-################################################# user stuff ###############################################
-#-------------------------------------------------  init ----------------------------------------------------
-# creates a users database
-def init_user_db():
-    if os.path.exists(f'storage/users.db'):
-        log(level='fail', msg=f'[server/dbhandler/init_user_db] cannot redifine userdb')
-        return False
-    else:
-        log(level='warning', msg=f"creating usersdb")
 
+
+# base64 encode messages
+def b(a):
+    return base64.b64encode(str(a).encode('utf-8')).decode('utf-8')
+
+
+# base64 decode messages
+def d(a):
+    return base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
+
+
+
+# ----------------------------------------------------------------------- !encodins -------------------------------------------------------------------------
+# ======================================================================= !encodeing and encryption ========================================================
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================= users ========================================================
+# ----------------------------------------------------------------------- setup & testing ----------------------------------------------
+
+
+
+# create and setup the main db
+def init_main_db():
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
-        # cookies is a list of cookies, that is turned into a string with json, and base64/hex encoded
-        db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies)")
+        db_cursor.execute(f"CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')")
+        db_cursor.execute(f"CREATE TABLE invites ('inviteId', 'chatroomId', 'expr_time', 'uses')")
+        db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies, chatrooms)")
         db_connection.commit()
         db_connection.close()
-    except:
-        return False
-
-    return True
 
 
-#------------------------------------------------  testing --------------------------------------------------
-# tis only for testinerror
+    except Exception as e:
+        return f"error occured during the creation of main.db: {e}", 500
+
+
+    return "OK", 200
+
+
+# get all registered users
 def get_all_users(p=True):
-    if not os.path.isfile('storage/users.db'):
+    if not os.path.isfile('storage/main.db'):
         return False
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT * FROM users")
         a = db_cursor.fetchall()
@@ -74,7 +98,14 @@ def get_all_users(p=True):
         return False
 
 
-#-------------------------------------------------- access control ------------------------------------------
+
+
+# ----------------------------------------------------------------------- !setup & testing ----------------------------------------------
+# ----------------------------------------------------------------------- access ----------------------------------------------
+
+
+
+# save details of a new user
 def save_new_user(username=None, email=None, nickname=None, password=None):
     try:
 
@@ -93,8 +124,11 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
 
 
         # NOTE: issue in todo.md
-        # default cookie should be removed soon
+        # default cookie and default chatroom should be removed
         cookie = b(json.dumps(['cookie time']))
+        chatrooms = b(json.dumps([]))
+
+
     # if some of the data was corrupt and couldnt be encoded/hahsed
     except Exception as e:
         log(level='error', msg=f"[server/dbhandler/save_new_user/0] malformed data, could not be encloded\nTraceback: {e}")
@@ -103,10 +137,10 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
 
     # save all the encoded data in the database
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         # cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
-        db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?, ?)", (username, email, nickname, password, cookie))
+        db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)", (username, email, nickname, password, cookie, chatrooms))
         db_connection.commit()
         db_connection.close()
 
@@ -121,10 +155,49 @@ def save_new_user(username=None, email=None, nickname=None, password=None):
     return "OK", 200
 
 
+# check if a user already exists (mostly for registering)
+def check_user_exists(username=None, email=None):
+    try: # try format data
+        if username: username = b(username)
+        if email: email = b(email)
+    except:
+        return "[server/dbhanler/check_user_exitst/0] username or email corrupt", 400
+
+    try:
+        # connec to the db
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+
+        # run slightly different checks depending on the data supplied
+        if username and email:
+            db_cursor.execute(f"SELECT * FROM users WHERE username = ? OR email = ?", (username,email,))
+        elif username and not email:
+            db_cursor.execute(f"SELECT * FROM users WHERE username = ? ", (username,))
+        elif not username and email:
+            db_cursor.execute(f"SELECT * FROM users WHERE email = ? ", (email,))
+
+
+        # finalize everything
+        data = db_cursor.fetchall()
+        db_connection.close()
+
+
+    except Exception as e:
+        log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
+        return '[server/dbhandler/check_user_exitst/1] internal database error', 500
+
+
+    if len(data) > 0:
+        return True, 200
+    else:
+        return False, 200
+
+
+# check username and password of user
 def checkuser(username=None, email=None, password=None):
-    if not os.path.isfile(f'storage/users.db'): #  check if there is a database
+    if not os.path.isfile(f'storage/main.db'): #  check if there is a database
         # i dont think database should be autoinitialized bc on some error it could delete the old database
-        log(level='fail', msg=f'could not find users.db')
+        log(level='fail', msg=f'could not find main.db')
         return "Login failed. Internal server error", 500
 
 
@@ -150,7 +223,7 @@ def checkuser(username=None, email=None, password=None):
 
     # get all passwords for the user from the db
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT password FROM users WHERE {using} = ?", (key,))
         storedPassword = db_cursor.fetchall()
@@ -178,34 +251,7 @@ def checkuser(username=None, email=None, password=None):
         return "Login failed. Username/email or password is incorrect!", 401
 
 
-# this function should not be in dbhandler
-def check_access(username, chatroom_id):
-    #return "chatroom doesnt exist or user doesnt have access to view it", 404
-    return "OK", 200
-
-
-def get_nickname(username):
-    try:
-        username = b(username)
-        db_connection = sqlite3.connect(f'storage/users.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT nickname FROM users WHERE username = ?", (username,))
-        data = db_cursor.fetchall()
-        db_connection.close()
-    except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
-        return False
-
-    # sqlite3 wraps the username in a tuple inside of a list
-    #print(data)
-    try:
-        nickname = d(data[0][0])
-    except:
-        nickname = "could not get nickname"
-    return nickname
-
-
-
+# store a new cookie in user entry of main.db
 def store_cookie(username=None, email=None, new_cookie=None):
     if new_cookie == None: # check if the function was called without cookies, this should only happen if the sever code is brokent
         log(level="error", msg=f'[server/dbhandler/store_cookie/0] function was called without a cookie supplied to it')
@@ -226,7 +272,7 @@ def store_cookie(username=None, email=None, new_cookie=None):
 
     # get stored cookies
     try:
-        db_connection = sqlite3.connect("storage/users.db")
+        db_connection = sqlite3.connect("storage/main.db")
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT cookies FROM users WHERE {using} = ?", (key,))
         cookies = db_cursor.fetchall()
@@ -268,7 +314,7 @@ def store_cookie(username=None, email=None, new_cookie=None):
 
     # update server with new cookes list
     try:
-        db_connection = sqlite3.connect("storage/users.db")
+        db_connection = sqlite3.connect("storage/main.db")
         db_cursor = db_connection.cursor()
         db_cursor.execute(f'UPDATE users SET cookies = ? WHERE {using} = ?', (cookies, key))
         db_connection.commit()
@@ -285,13 +331,13 @@ def store_cookie(username=None, email=None, new_cookie=None):
     return "OK", 200
 
 
-
+# return all active cookies of a user
 def get_cookies(username):
     username = b(username)
 
     # get all  stored cookies of the user
     try:
-        db_connection = sqlite3.connect(f'storage/users.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT cookies FROM users WHERE username = ?", (username,))
         data = db_cursor.fetchall()
@@ -314,53 +360,692 @@ def get_cookies(username):
     return data
 
 
-def check_user_exists(username=None, email=None):
-    try: # try format data
-        if username: username = b(username)
-        if email: email = b(email)
-    except:
-        return "[server/dbhanler/check_user_exitst/0] username or email corrupt", 400
 
+# ----------------------------------------------------------------------- !access ----------------------------------------------
+# ----------------------------------------------------------------------- other ----------------------------------------------
+
+
+
+# get the nickname of a user
+def get_nickname(username):
     try:
-        # connec to the db
-        db_connection = sqlite3.connect(f'storage/users.db')
+        username = b(username)
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
-
-        # run slightly different checks depending on the data supplied
-        if username and email:
-            db_cursor.execute(f"SELECT * FROM users WHERE username = ? OR email = ?", (username,email,))
-        elif username and not email:
-            db_cursor.execute(f"SELECT * FROM users WHERE username = ? ", (username,))
-        elif not username and email:
-            db_cursor.execute(f"SELECT * FROM users WHERE email = ? ", (email,))
-
-
-        # finalize everything
+        db_cursor.execute(f"SELECT nickname FROM users WHERE username = ?", (username,))
         data = db_cursor.fetchall()
         db_connection.close()
 
 
-    except Exception as e:
+    except sqlite3.OperationalError as e:
         log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
-        return '[server/dbhandler/check_user_exitst/1] internal database error', 500
+        return False
+
+    # sqlite3 wraps the username in a tuple inside of a list
+    #print(data)
+    try:
+        nickname = d(data[0][0])
+    except:
+        nickname = "could not get nickname"
 
 
-    if len(data) > 0:
-        return True, 200
+    return nickname
+
+
+
+# ----------------------------------------------------------------------- !other ----------------------------------------------
+# ======================================================================= !users ========================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================= chatrooms ========================================================
+# ----------------------------------------------------------------------- chatroom db ------------------------------------------------------
+# ----------------------------------------------------------------------- setup and esting -------------------------------------------------
+
+
+
+# create and setup chatroom.db
+def init_chat(chatroom_id):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"CREATE TABLE users ('username', 'admin', 'colour')")
+        db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
+        db_connection.commit()
+        db_connection.close()
+
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/init_chat/0] database operation failed\n Traceback: {e}")
+        return f"internal database error: could not connect to database", 500
+
+    return "OK", 200
+
+
+# get all registered users
+def get_all_invites(p=True):
+    if not os.path.isfile('storage/main.db'):
+        return False
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM invites")
+        a = db_cursor.fetchall()
+        db_connection.close()
+
+        if p:
+            for i in a:
+                print(i)
+
+        return True
+    except:
+        return False
+
+
+
+# ----------------------------------------------------------------------- setup and esting -------------------------------------------------
+
+
+
+# add a user to a chatroom
+def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+
+    try:
+        username   = b(username)
+        chatroomId = b(chatroomId)
+        if colour != None:
+            colour = b(colour)
+
+
+    except Exception as e:
+        log(level="warning", msg=f"[server/dbhandler.py/add_user_to_chatroom/0] could not encode data sent from user\n Traceback: {e}")
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"INSERT INTO users VALUES (?, ?, ?)", (username, admin, colour))
+        db_connection.commit()
+        db_connection.close()
+
+
+    except sqlite3.OperationalError as e:
+        log(level='error', msg=f'[server/dbhandler/add_user_to_chatroom/1] database operation failed:  {e}')
+        return "internal database error: could not conenct to database", 500
+
+
+    return "OK", 200
+
+# merge up
+def remove_user_from_chatroom(username, chatroomId):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+
+    try:
+        username   = b(username)
+        chatroomId = b(chatroomId)
+
+
+    except Exception as e:
+        log(level="warning", msg=f"[server/dbhandler.py/add_user_to_chatroom/0] could not encode data sent from user\n Traceback: {e}")
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"DELETE FROM users WHERE username = ?", (username,))
+        db_connection.commit()
+        db_connection.close()
+
+
+    except sqlite3.OperationalError as e:
+        log(level='error', msg=f'[server/dbhandler/add_user_to_chatroom/1] database operation failed:  {e}')
+        return "internal database error: could not conenct to database", 500
+
+
+    return "OK", 200
+
+
+# check if chatroom exists && user has access to it
+def check_access(username, chatroom_id):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    if not os.path.isdir(f'storage/{chatroomId_d}'): # NOTE check same thing in database
+        return "chatroom does not exist", 400
+
+    return "OK", 200
+
+
+
+def check_perms(username, chatroomId, permission="admin"):
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    try:
+        username   = b(username)
+        chatroomId = b(chatroomId)
+
+
+    except Exception as e:
+        log(level="warning", msg=f"[server/dbhandler.py/check_perms/0] could not encode data sent from user\n Traceback: {e}")
+
+
+    # the option needs to be in this list to pass, this should avoid arbitrary things bing injected into the sql statement
+    userPerms = [ "admin" ] # NOTE this cold be global, idk yet
+    if permission not in userPerms:
+        log(level='error', msg="[server/dbhandler.py/check_perms/1] attemted to check invalid permission. Make sure you are only checking things in userPerms list")
+        return "Internal server error: attemted to check invalid permiison", 500
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM users WHERE username = ? and {permission} = true", (username,))
+        a = db_cursor.fetchall()
+        db_connection.close()
+
+
+    except sqlite3.OperationalError as e:
+        log(level='error', msg=f'[server/dbhandler/check_perms/2] database operation failed:  {e}')
+        return "internal database error: could not conenct to database", 500
+
+
+    if len(a) == 0 or not a:
+        return "Permission denied: your user does not have permission to perform this action", 403
+
+
+    return "OK", 200
+
+
+
+
+# ----------------------------------------------------------------------- !chatroom db ------------------------------------------------------
+# ----------------------------------------------------------------------- maindb ------------------------------------------------------------
+
+
+
+# save chatroom id and name in main.db
+def save_chatroom(chatroomId, chatroom_name):
+    if not chatroom_name or not chatroomId:
+        return "Internal database error: could not get chatname or ID"
+
+    try:
+        chatroomId = b(chatroomId)
+        chatroom_name = b(chatroom_name)
+
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler.py/save_chatroom/0] could not encode chatroomId or chatroom_name\n Traceback: {e}")
+        return f"could not encode chatroom_name", 400
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"INSERT INTO chatrooms VALUES (?, ?)", (chatroomId, chatroom_name))
+        db_connection.commit()
+        db_connection.close()
+
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler.py/save_chatroom/1] database operation failed\n Traceback: {e}")
+        return f"internal database error", 500
+
+
+    return "OK", 200
+
+
+# get the name of a chatroom from main.db
+def get_chatname(chatroomId):
+    try:
+        chatroomId = b(chatroomId)
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatroom_name FROM chatrooms WHERE chatroomId = ?", (chatroomId,))
+        data = db_cursor.fetchall()
+        db_connection.close()
+
+
+
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_nickname/0] database operation failed:  {e}')
+        return "internal database error: database operation failed", 500
+
+
+
+    try:
+        print('chatroom_name: ',data )
+        if len(data) > 0:
+            chatroom_name = d(data[0][0])
+        else:
+            chatroom_name = None
+
+
+    except Exception as e:
+        log(level='fail', msg=f'[server/dbhandler/get_chatname/1] corrupted data in database:  {e}')
+        return "internal database error: some values may be corrupted", 500
+
+
+    return chatroom_name, 200
+
+
+# delete a chatroom from the main.db
+def delete_chatroom_main(chatroomId):
+    try:
+        chatroomId = b(chatroomId)
+
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler.py/delete_chatroom_main/0] failed to encode chatroomId while deleting chatroom \n Traceback: {e}")
+        return f"could not encode chatroom_name", 500
+
+
+    try:
+        log(level='warning', msg=f"[server/dbhandler/delete_chatroom_main/1] deleting chatroom {d(chatroomId)}")
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"DELETE FROM chatrooms WHERE chatroomId = ?", (chatroomId,))
+        db_connection.commit()
+        db_connection.close()
+
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler.py/save_chatroom/1] database operation failed\n Traceback: {e}")
+        return f"internal database error", 500
+
+
+    return "OK", 200
+
+
+
+# ----------------------------------------------------------------------- users ------------------------------------------------------------
+
+
+
+# save chatroom ID to user entry in main.db
+def user_save_chatroom(username, new_chatroom):
+    if not username or not new_chatroom:
+        log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/0] user_save_chatroom did not get the required arguments')
+        return "internal server error", 500
+
+    try:
+        username = b(username)
+        # chatrooms arent encoded individually bc they are encoded as the whole list
+
+
+    except:
+        return "Internal server error: usernme could not be encoded", 500
+
+
+    # get stored cookies
+    try:
+        db_connection = sqlite3.connect("storage/main.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatrooms FROM users WHERE username = ?", (username,))
+        chatrooms = db_cursor.fetchall()
+        db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/1] database operation getting chatrooms failed:  {e}')
+        return "Internal database error: could not connect to database", 500
+
+
+    # al users should have at least '[]' stored their chatrooms, if they dont then the database is corrupted somehow
+    if len(chatrooms) == 0:
+        log(level='error', msg=f'[server/dbhandler/user_save_chatroom/2] user does not exists or did not get initialized properly')
+        return "Internal database error", 500
+
+
+    # add new chatroomId to chatrooms list
+    ## cookies are being stored as a list that has been converted to string, this makes it easy to add new cookies
+    try:
+        #decode
+        chatrooms = d(chatrooms[0][0])
+
+        #append
+        chatrooms = json.loads(chatrooms)
+        chatrooms.append(new_chatroom)
+        chatrooms = json.dumps(chatrooms)
+
+        # encode
+        chatrooms = b(chatrooms)
+
+
+    # if the cookies cannot be decoded/encoded than the data is malformed, which is a server issue
+    except:
+        log(level='error', msg=f'[server/dbhandler/user_save_chatroom/3] malformed chatroom data in databse')
+        return "Internal database error", 500
+
+
+    # update server with new cookes list
+    try:
+        db_connection = sqlite3.connect("storage/main.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f'UPDATE users SET chatrooms = ? WHERE username = ?', (chatrooms, username))
+        db_connection.commit()
+        db_connection.close()
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/user_save_chatroom/4] database operation, saving chatroom: failed:  {e}')
+        return "Internal database error", 500
+
+
+    # everything worked out fine
+    return "OK", 200
+
+
+# get all chatrooms a user is in
+def user_get_chatrooms(username):
+    try:
+        username = b(username)
+
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/user_get_chatroms/0] username could not be encoded: {e}")
+        return "internal server error", 500
+
+
+    # get all  stored cookies of the user
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatrooms FROM users WHERE username = ?", (username,))
+        data = db_cursor.fetchall()
+        db_connection.close()
+
+
+
+    except Exception as e:
+        log(level='fail', msg=f'[server/dbhandler/user_get_chatroms/1] database operation failed:  {e}')
+        return "internal database error", 500
+
+
+    # chatrooms are stored in a base64 encoded str(list)
+    if len(data) == 0:
+        log(level='error', msg=f'[server/dbhandler/user_get_chatroms/2] user not initialized properly')
+        return "internal database error", 500
+
+
+    # decode and load the data as json
+    try:
+        data = d(data)
+        data = json.loads(data)
+    except:
+        log(level='error', msg=f'[server/dbhandler/user_get_chatroms/3] failed to process chatrooms data of user {username}\n Data is probably corrupted')
+
+
+    return data, 200
+
+
+def delete_chatroom_from_user(username, chatroomId):
+    try:
+        username = b(username)
+        # chatrooms arent encoded individually bc they are encoded as the whole list
+
+    except Exception as e:
+        log(level='fail', msg=f'[server/dbhandler/delete_chatroom_from_user/0] could not encode username for deleting chatroom\n Traceback: {e}')
+        return "usernme could not be encoded", 500
+
+
+
+    # get stored cookies
+    try:
+        db_connection = sqlite3.connect("storage/main.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT chatrooms FROM users WHERE username = ?", (username,))
+        chatrooms = db_cursor.fetchall()
+        db_connection.close()
+
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/delete_chatroom_from_user/1] database operation getting chatrooms failed:  {e}')
+        return "Internal database error", 500
+
+
+
+    # al users should have at least '[]' stored their chatrooms, if they dont then the database is corrupted somehow
+    if len(chatrooms) == 0:
+        log(level='error', msg=f'[server/dbhandler/user_save_chatroom/2] user does not exists or did not get initialized properly')
+        return "Internal database error", 500
+
+
+
+    # chatrooms are stored as a serialized list
+    try:
+        #decode
+        chatrooms = d(chatrooms[0][0])
+
+        #remove element
+        chatrooms = json.loads(chatrooms)
+        chatrooms.remove(chatroomId)
+        chatrooms = json.dumps(chatrooms)
+
+        # encode
+        chatrooms = b(chatrooms)
+
+
+
+    # if the cookies cannot be decoded/encoded than the data is malformed, which is a server issue
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler/delete_chatroom_from_user/3] malformed chatroom data in databse\n Traceback: {e}')
+        return "Internal database error: could not remove chatrom", 500
+
+
+
+    # update server with new cookes list
+    try:
+        db_connection = sqlite3.connect("storage/main.db")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f'UPDATE users SET chatrooms = ? WHERE username = ?', (chatrooms, username))
+        db_connection.commit()
+        db_connection.close()
+
+
+
+    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/delete_chatroom_from_user/4] database operation failed while deleting chatroom from user\n Traceback: {e}')
+        return "Internal database error", 500
+
+
+    # everything worked out fine
+    return "OK", 200
+
+
+
+# ----------------------------------------------------------------------- !users ------------------------------------------------------------
+# ----------------------------------------------------------------------- invites ------------------------------------------------------------
+
+
+
+def save_invite(chatroomId, inviteId, expr_time, uses):
+    if not chatroomId or not inviteId or not expr_time or not uses:
+        log(level='error', msg="[server/dbhandler.py/save_invite/0] missing arguments to save_invite function")
+        return "internal server error: missing arguments", 500
+
+
+    # encode data: no sqli pls
+    try:
+        inviteId   = b(inviteId)
+        chatroomId = b(chatroomId)
+        # expr_time and uses are not encoded so we can do cool sql statements
+
+
+    # could not encode the data for some reason
+    except:
+        return "Internal server error: [dbhanler/save_invite/1] failed to encode data", 500
+
+
+
+    # save invite in database
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"INSERT INTO invites VALUES (?, ?, ?, ?)", (inviteId, chatroomId, expr_time, uses))
+        db_connection.commit()
+        db_connection.close()
+
+
+    # database operation failed
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler.py/save_invite/2] database operation failed: saving invite\n Traceback: {e}')
+        return "Internal database error: could not connect to database"
+
+
+    # ok
+    return "OK", 200
+
+
+
+def use_invite(inviteId):
+    if not inviteId:
+        log(level='error', msg="[server/dbhandler.py/use_invite/0] missing arguments to function")
+        return "internal server error: missing arguments", 500
+
+
+    # encode inviteId
+    try:
+        inviteId = b(inviteId)
+
+    except Exception as e:
+        log(level='warning', msg="[server/dbhandler.py/use_invite/1] inviteId could not be encoded\n Traceback: {e}")
+        return "inviteID format incorrect", 400
+
+
+    # get all invites that match the inviteID and are not expired or overused
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        print(inviteId)
+        db_cursor.execute(f"SELECT * FROM invites WHERE inviteId = ? ", (inviteId,))
+        #db_cursor.execute(f"SELECT * FROM invites WHERE inviteId = ? AND (expr_time > ? OR expr_time = 0)", (inviteId, str(int(time.time()))))
+        invite = db_cursor.fetchall()
+        print('invite: ',invite , type(invite))
+        db_connection.close()
+
+
+    # database operation failed
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler.py/use_invite/2] database operation failed: saving invite\n Traceback: {e}')
+        return "Internal database error: could not connect to database", 500
+
+
+    # check if there were any valid invites
+    if len(invite) == 0:
+        return "Invite ID incorrect or expired", 400
+
+
+    # get data from the invite
+    try:
+        print('invite: ',invite , type(invite))
+        invite = invite[0]
+        print('invite: ',invite , type(invite))
+        uses = int(invite[3])
+        print('uses: ',uses , type(uses))
+        chatroomId = d(invite[1])
+
+
+    # somethings wrong with the database format
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite database possibly corrupted\nTraceback: {e}")
+        return "Internal databse error: could not process data from databse", 500
+
+
+    # cehck if the invite is overused
+    if uses > 0:
+        uses = uses - 1
     else:
-        return False, 200
+        return "invite cannot be used as it has exeeded its maximum capacity", 403
+
+
+    # update the databse with the new value of 'uses'
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"UPDATE invites SET uses = ? WHERE inviteId = ?", (str(uses), inviteId))
+        db_connection.commit()
+        db_connection.close()
+
+
+    # database operation failed
+    except Exception as e:
+        log(level='error', msg=f'[server/dbhandler.py/save_invite/2] database operation failed: saving invite\n Traceback: {e}')
+        return "Internal database error: could not connect to database"
 
 
 
-################################################# chat stuff ###############################################
-#------------------------------------------------  testing ---------------------------------------------------
-# tis only for testing
+    # all is well
+    return chatroomId, 200
+
+
+
+# ----------------------------------------------------------------------- !maindb ------------------------------------------------------------
+# ======================================================================= !chatrooms =======================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================= messages =======================================================
+# ----------------------------------------------------------------------- testing --------------------------------------------------------
+
+
+
+# get all messages in a chatroom
 def get_all_messages(chatroom_id, p=True):
     if not os.path.exists("storage/conv1"):
         return False
 
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_Id) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"SELECT * FROM messages")
     except sqlite3.OperationalError as e:
@@ -378,34 +1063,13 @@ def get_all_messages(chatroom_id, p=True):
     return True
 
 
-#-------------------------------------------------  init ------------------------------------------------------
-def init_chat(chatroom_id):
-    if os.path.exists(f'storage/{chatroom_id}'):
-        log(level='warning', msg=f'will not re-define chatroom: {chatroom_id}')
-        return True
-    else:
-        log(level='log', msg=f'creating chatroom:  {chatroom_id}')
-        os.mkdir(f'storage/{chatroom_id}')
-        os.mkdir(f'storage/{chatroom_id}/uploads/')
 
-    try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db')
-        db_cursor = db_connection.cursor()
-        # removed list of users here, might need this later
-        db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
-        db_connection.commit()
-        db_connection.close()
-    except Exception as e:
-        log(level='fail', msg=f"error while creating chatroom\n Traceback: {e}")
-        return False
-
-    return True
+# ----------------------------------------------------------------------- !testing --------------------------------------------------------
+# ----------------------------------------------------------------------- general --------------------------------------------------------
 
 
-#---------------------------------------------------- messages ------------------------------------------------
-# va=None means that the fild is not used
-# var=0 means that the field is not set AND IS NEEDED FOR THE FUNCTION
-# this destiction is for readability, the None values are not required but the 0 ones are
+
+# save a message in the database (both texts and files)
 def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, message=None, filename=None, extension=None ):
     if time == 0 or messageId == 0 or username == 0 or chatroom_id == 0 or message_type == 0: #values marked with 0 are needed while ones marked with None are optional
         # making sure that all values that are needed exist
@@ -413,9 +1077,15 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
         return "internal server error", 500
 
 
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     # connect to the database
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
 
 
@@ -461,9 +1131,15 @@ def save_in_db(time=0, messageId=0, username=0, chatroom_id=0, message_type=0, m
     return "OK", 200
 
 
+# get messages from db
 def get_messages_db(last_time=0, chatroom_id=''):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_id) # sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
     try: # try connect to the db
-        db_connection = sqlite3.connect(f'storage/{chatroom_id}/messages.db') # chatroom_id is the folder name that data to do with chatroom resides in
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db') # chatroom_id is the folder name that data to do with chatroom resides in
         db_cursor = db_connection.cursor()
 
 
@@ -543,48 +1219,67 @@ def get_messages_db(last_time=0, chatroom_id=''):
 
 
 
+# ----------------------------------------------------------------------- !general --------------------------------------------------------
+# ======================================================================= messages =======================================================
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================= health check =======================================================
 def check_databses():
     log(level='log', msg='running system checks')
 
-    # make sure storage folder exists
+
+    # check if storage folder exists
     log(level='log', msg='checking storage folder')
+
+    # check if folder exists, and try to create it if not
     if not os.path.isdir("storage/"):
         try:
-            log(level='warning', msg='[server/dbhandler/check_databses/0] creating storage folder')
+            log(level='warning', msg='[health check] creating storage folder')
             os.mkdir("storage")
+
         except Exception as e:
-            log(level='fail', msg=f'could not create storage folder\n Traceback: {e}')
-            return "could not create storage folder", 500
-
-    log(level='success', msg='OK')
+            return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500
 
 
-    # make sure users db exists
-    log(level='log', msg='checking users db')
-
-    # chech if we can get users
-    if not get_all_users(p=False):
-        # if not than db probably doesnt exist or is corrupt
-        log(level='log', msg='[server/dbhandler/check_databses/1] initializing users database')
-        # make db
-        if not init_user_db():
-            # crash if that failed
-            log(level='fail', msg='[server/dbhandler/check_databses/2] users databse does not exist or corrupt, but could not be redifined\n try removing the databse and running the server again')
-            return "users database corrupt, and could not be redifined", 500
-
-    log(level='success', msg='OK')
-
-    # make sure default chatroom exists
-    # this is only while default chatroom is still a thing
-    log(level='log', msg='checking default chatroom')
-    if not get_all_messages("conv1", p=False):
-        log(level='log', msg='[server/dbhandler/check_databses/4] initializing default chatroom: conv1')
-
-        if not init_chat('conv1'):
-            log(level='fail', msg='[server/dbhandler/check_databses/5] Initialization of default chatroom: conv1')
-            return "could not create default chatroom", 500
 
 
-    log(level='success', msg='OK')
+    # check main.db
+    log(level='log', msg='checking main db')
+
+    # does the main db exist?
+    if not os.path.isfile('storage/main.db'):
+        log(level='warning', msg=f'[health check] creating main.db')
+
+        response, status_code = init_main_db()
+        if status_code != 200:
+            return f"failed to create main.db\n Traceback: {response}\n\n Suggest that you delete the 'storage' folder"
+
+
+    # make sure the database is good by testing all tables
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM users")
+        db_cursor.execute(f"SELECT * FROM chatrooms")
+        db_cursor.fetchall()
+        db_connection.close()
+
+
+    # something is wrong with the database
+    except Exception as e:
+        return f"main database is missing tables or otherwise corrupted\n Traceback: {e}", 500
+
+
+    log(level='success', msg='[health check] System is healthy :)')
     return "OK", 200
 

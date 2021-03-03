@@ -120,9 +120,9 @@ def download_file(headers):
 
 
     # gotta sanitize shit
-    filename, status_code = security.sanitize_filename(filename)
-    if status_code != 200:
-        return filename, status_code
+    filename = security.sanitize_uuid(filename)
+    if not filename:
+        return "invalid format from filename", 400
 
 
     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
@@ -206,4 +206,208 @@ def upload_file(json_data):
     # all is well
     return response, 200
 
+
+def create_chatroom(json_data):
+    username      = json_data.get('username')
+    chatroomId    = str(uuid.uuid1())
+    chatroom_name = json_data.get('chatroom_name')
+
+
+    # make sure client sent all needed data
+    if not username or not chatroomId or not chatroom_name:
+        return 'one or more of the required arguments are not supplied', 400
+
+
+    # create folders needed for chatroom
+    response, status_code = filehander.create_chatroom_folders(chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/0] could not create chatroom')
+        return response, 500
+
+
+    # create chatroom.db inside chatroom the chatrom folder
+    response, status_code = dbhandler.init_chat(chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/1] could not create chatroom database\n Traceback: {response}')
+
+        # remove chatroom
+        filehander.remove_chatroom(chatroomId)
+
+        return response, status_code
+
+
+    # make entry in main.db
+    response, status_code = dbhandler.save_chatroom(chatroomId, chatroom_name)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/2] could not create chatroom entry in main.db\n Traceback: {response}')
+
+        # remove chatroom
+        filehander.remove_chatroom(chatroomId)
+
+        return response, status_code
+
+
+    # add the user that created the chatroom as chatroom admin
+    response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=True)
+    if status_code != 200:
+        log(level='error', msg=f"[server/api/create_chatroom/4] failed to add chatroom admin")
+
+        # remove chatroom
+        filehander.remove_chatroom(chatroomId)
+        dbhandler.delete_chatroom_main(chatroomId)
+
+        return response, status_code
+
+
+    # save chatroom id to main.db users table under the users name
+    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/create_chatroom/3] could not save chatroom for user in main.db\n Traceback: {response}')
+
+        # remove chatroom
+        filehander.remove_chatroom(chatroomId)
+        dbhandler.delete_chatroom_main(chatroomId)
+
+        return response, status_code
+
+
+    return chatroomId, 200
+
+
+def get_chatrooms(headers):
+    username = headers.get('username')
+
+
+    # make sure we got all needed data
+    if not username:
+        return "username not supplied", 400
+
+
+    # get a list of chatroom IDs that the user has access to
+    response, status_code = dbhandler.user_get_chatrooms(username)
+
+    # if error
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/get_chatrooms/3] could not get chatroom data from main.db')
+        return response, status_code
+
+
+    # if not error
+    else:
+        # if there are non then respond with 204
+        if len(response) == 0:
+            return "", 204
+
+        # create json with chatname and chat ID in it
+        resp_list = []
+        for chatroomId in response:
+
+            # get name corresponding to  chatroomId
+            chatname, status_code = dbhandler.get_chatname(chatroomId)
+            if status_code != 200:
+                return chatname, status_code
+
+
+            chat_obj = {
+                    'name': chatname,
+                    'chatroom': chatroomId
+                    }
+
+
+            resp_list.append(chat_obj)
+        response = resp_list
+
+    # all is well
+    return response, status_code
+
+
+def create_invite(json_data):
+    username   = json_data.get('username')
+    chatroomId = json_data.get('chatroom')
+    expr_time  = json_data.get('expr_time')
+    uses       = json_data.get('uses')
+    inviteId   = str(uuid.uuid1())
+
+
+    # make sure we got all the data
+    if not username or not chatroomId or not uses or not expr_time:
+        return "one or more of the required arguments were not supplied. Required=[username, chatroom, expr_time, uses]", 400
+
+
+    # make sure the format is good on time and uses
+    try:
+        expr_time = float(expr_time)
+        uses = int(uses)
+
+
+    # no
+    except:
+        return "Invalid format: expr_time has to be type: FLOAT AND uses has to by type: INT", 400
+
+
+    # make sure the user has access to the chatroom
+    response, status_code = dbhandler.check_access(username, chatroomId)
+    if status_code != 200:
+        return response, status_code
+
+
+    # invites can only be created if you are admin
+    response, status_code = dbhandler.check_perms(username, chatroomId, permission="admin")
+    if status_code != 200:
+        return response, status_code
+
+
+    # save this invite in the database
+    response, status_code = dbhandler.save_invite(chatroomId, inviteId, expr_time, uses)
+    if status_code != 200:
+        return response, status_code
+
+
+    # ok
+    return inviteId, 200
+
+
+def process_invite(json_data):
+    username   = json_data.get('username')
+    inviteId   = json_data.get('inviteId')
+
+
+    # make sure we got all the data
+    if not username or not inviteId:
+        return "one or more of the required arguments were not supplied. Required=[username, inviteId]", 400
+
+
+    # we need to sanitize
+    inviteId = security.sanitize_uuid(inviteId)
+    if not inviteId:
+        return "invalid format for invite ID", 400
+
+
+    chatroomId, status_code = dbhandler.use_invite(inviteId)
+    if status_code != 200:
+        return chatroomId, status_code
+
+
+    response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=False)
+    if status_code != 200:
+        return response, status_code
+
+
+    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
+    if status_code != 200:
+        dbhandler.remove_user_from_chatroom(username, chatroomId)
+        return response, status_code
+
+
+    chatname, status_code = dbhandler.get_chatname(chatroomId)
+    if status_code != 200:
+        return chatname, status_code
+
+
+    chat_obj = {
+            "name": chatname,
+            "chatroom": chatroomId
+            }
+
+    return chat_obj, 200
 

@@ -25,6 +25,25 @@ general
 
 [ ] user avatars?
 
+[ ] add meaning or id number ot error messges sent back to client
+
+[ ] remove [cookie time] from `init_main_db`
+
+
+[] create a db_execute method that connects to a db and runs commands
+    why?
+    - reduce unecessary code duplication
+    - allow for db cacheing so we dont reopen the same one each time
+    - have errors handled inside the function
+
+
+
+[] make sure dumb ass users dont send unencoded data to /message/
+
+
+[] add permissions to invites
+     eg you could create an invite with only read access
+
 
 
 auth
@@ -64,18 +83,55 @@ databases
 
 files
 =====
-[ ] make sure server fails if client sends non-encoded files
+[] make sure server fails if client sends non-encoded files
+
+
+
 
 
 
 code review
 ===========
-this is not really a todo but a list of things i have already done
+[] dbhandler
 
-[done] /login
-[done] /register
-[done] /message
-[done] /file
 
-[ ] everything else
+
+chats
+=====
+[✓] save chats the user inside the users table in main.db
+
+[✓] add get method for user to see chats that (s)he is in
+
+[✓] make getchats display both the chatroom name and the id
+
+[✓] make error for chatroom does not exists (currently its internal server error)
+
+[✓] make person who created the chatroom admin by default (and member)
+
+[✓] create method to remove a user from a chatroom 
+
+[✓] create method to remove chatroom from main.db
+
+[✓] create invites
+    - details in discord pinned `trying to decide how to do invites`
+
+[✓] make invites work
+
+[✓] move invites from chatroom.db to main.db
+
+[] make dbhandler.checkaccess finally do something
+    i havent done this yet bc things like conv1 will die
+
+[] error check the shit out of everything
+
+[] make sure the chats work
+
+[] fix conv1, its probably not registered in main.db
+
+
+
+might not happen
+----------------
+[] create a check-chatrooms method that loops though all chatrooms of a user, and makes sure that they exist both in main.db and on disk
+    - if its missing from either then delete it from user disk and main.db
 
