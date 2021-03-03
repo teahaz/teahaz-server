@@ -71,7 +71,7 @@ Sending a POST request to /chatroom/ should create a new chatroom. The creator o
 #### required fields
 * username
 * chatroom_name
-    chatroom name is the nickname of the chatroom and **not** the ID
+   - chatroom name is the nickname of the chatroom and **not** the ID
 
 
 #### code example:
