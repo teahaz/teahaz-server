@@ -43,7 +43,7 @@ data = {
         }
 
 #NOTE: In GET requests data has to be sent in the http header
-res = requests.get(url=url, headers=data)
+res = session_obj.get(url=url, headers=data)
 
 print(res.text)
 ```
@@ -87,7 +87,7 @@ data = {
         }
 
 # make post request. NOTE: data is sent in the json field 
-res = requests.post(url=url, json=data)
+res = session_obj.post(url=url, json=data)
 
 print(res.text)
 ```
@@ -108,8 +108,47 @@ chatroom_name: best chat ever
 
 invites
 =======
+Creating an invite
+------------------
+Sending a GET request to /invite/ should create an invite.
+**NOTE:** The creator of the invite has to be admin of the chatroom they are creating an invite for!
+
+#### required fields
+* username
+* chatroom
+    - The chatrooms ID
+
+* expr_time
+    - Expiration time of the invite.
+    - This has to be a date in Epoch time format.
+    - if you dont want the invite to expire then set this to 0.
+
+* uses
+    - The number of users that can join with this link.
+    - There is no option for unlimited, however there is no upper limit.
 
 
+#### code example:
+```py
+url = http://<teahouse server>/api/v0/invite/"
 
-A chatroom admin can get this endpoint to create an Invite. A user 
+data = {
+        "username": username,
+        "chatroom": chatroomId
+        "expr_time": str(time.time() + 60 * 60 * 24),
+        "uses": str(10)
+        }
+
+#NOTE: In GET requests data has to be sent in the http header
+res = session_obj.get(url=url, headers=data)
+
+print(res.text)
+```
+
+#### example output:
+Returns the ID of the invite
+```
+"1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
+```
+
 
