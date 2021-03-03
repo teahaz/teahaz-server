@@ -7,6 +7,7 @@ docs of /api/v0
 1. [/message/](#messages)
 2. [/file/](#files)
 3. [/chatroom/](#chatrooms)
+    - [creating-a-new-chatrom](#Checking-chatrooms-you-have-access-to)
 5. [/invites/](#invites)
 
 
