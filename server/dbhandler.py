@@ -66,6 +66,7 @@ def init_main_db():
         db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')")
+        db_cursor.execute(f"CREATE TABLE invites ('inviteId', 'chatroomId', 'expr_time', 'uses')")
         db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies, chatrooms)")
         db_connection.commit()
         db_connection.close()
@@ -409,6 +410,7 @@ def get_nickname(username):
 
 # ======================================================================= chatrooms ========================================================
 # ----------------------------------------------------------------------- chatroom db ------------------------------------------------------
+# ----------------------------------------------------------------------- setup and esting -------------------------------------------------
 
 
 
@@ -423,7 +425,6 @@ def init_chat(chatroom_id):
         db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"CREATE TABLE users ('username', 'admin', 'colour')")
-        db_cursor.execute(f"CREATE TABLE invites ('inviteId', 'expr_time', 'uses')")
         db_cursor.execute(f"CREATE TABLE messages ('time', 'messageId', 'username', 'chatroom_id', 'type', 'message', 'filename', 'extension')")
         db_connection.commit()
         db_connection.close()
@@ -436,11 +437,34 @@ def init_chat(chatroom_id):
     return "OK", 200
 
 
+# get all registered users
+def get_all_invites(p=True):
+    if not os.path.isfile('storage/main.db'):
+        return False
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM invites")
+        a = db_cursor.fetchall()
+        db_connection.close()
+
+        if p:
+            for i in a:
+                print(i)
+
+        return True
+    except:
+        return False
+
+
+
+# ----------------------------------------------------------------------- setup and esting -------------------------------------------------
+
+
 
 # add a user to a chatroom
 def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
-    # sanitize chatroom id used for path
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # save non-encoded version for file path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)# sanitize chatroom id used for path
     if status_code != 200:
         return chatroomId_d, status_code
 
@@ -472,6 +496,37 @@ def add_user_to_chatroom(username, chatroomId, admin=False, colour=None):
 
     return "OK", 200
 
+# merge up
+def remove_user_from_chatroom(username, chatroomId):
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)# sanitize chatroom id used for path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+
+    try:
+        username   = b(username)
+        chatroomId = b(chatroomId)
+
+
+    except Exception as e:
+        log(level="warning", msg=f"[server/dbhandler.py/add_user_to_chatroom/0] could not encode data sent from user\n Traceback: {e}")
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"DELETE FROM users WHERE username = ?", (username,))
+        db_connection.commit()
+        db_connection.close()
+
+
+    except sqlite3.OperationalError as e:
+        log(level='error', msg=f'[server/dbhandler/add_user_to_chatroom/1] database operation failed:  {e}')
+        return "internal database error: could not conenct to database", 500
+
+
+    return "OK", 200
 
 
 # check if chatroom exists && user has access to it
@@ -833,7 +888,6 @@ def delete_chatroom_from_user(username, chatroomId):
 
 
 # ----------------------------------------------------------------------- !users ------------------------------------------------------------
-# ----------------------------------------------------------------------- !maindb ------------------------------------------------------------
 # ----------------------------------------------------------------------- invites ------------------------------------------------------------
 
 
@@ -844,16 +898,10 @@ def save_invite(chatroomId, inviteId, expr_time, uses):
         return "internal server error: missing arguments", 500
 
 
-    # sanitize chatroom id used for path
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)
-    if status_code != 200:
-        return chatroomId_d, status_code
-
-
-
     # encode data: no sqli pls
     try:
-        inviteId = b(inviteId)
+        inviteId   = b(inviteId)
+        chatroomId = b(chatroomId)
         # expr_time and uses are not encoded so we can do cool sql statements
 
 
@@ -865,9 +913,9 @@ def save_invite(chatroomId, inviteId, expr_time, uses):
 
     # save invite in database
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
-        db_cursor.execute(f"INSERT INTO invites VALUES (?, ?, ?)", (inviteId, expr_time, uses))
+        db_cursor.execute(f"INSERT INTO invites VALUES (?, ?, ?, ?)", (inviteId, chatroomId, expr_time, uses))
         db_connection.commit()
         db_connection.close()
 
@@ -883,17 +931,13 @@ def save_invite(chatroomId, inviteId, expr_time, uses):
 
 
 
-def use_invite(inviteId, chatroomId):
-    if not inviteId or not chatroomId:
+def use_invite(inviteId):
+    if not inviteId:
         log(level='error', msg="[server/dbhandler.py/use_invite/0] missing arguments to function")
         return "internal server error: missing arguments", 500
 
 
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId)
-    if status_code != 200:
-        return chatroomId_d, status_code
-
-
+    # encode inviteId
     try:
         inviteId = b(inviteId)
 
@@ -902,11 +946,15 @@ def use_invite(inviteId, chatroomId):
         return "inviteID format incorrect", 400
 
 
+    # get all invites that match the inviteID and are not expired or overused
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT uses FROM invites WHERE inviteId = ? AND (expr_time > ? OR expr_time = 0)", (inviteId, str(int(time.time()))))
-        uses = db_cursor.fetchall()
+        print(inviteId)
+        db_cursor.execute(f"SELECT * FROM invites WHERE inviteId = ? ", (inviteId,))
+        #db_cursor.execute(f"SELECT * FROM invites WHERE inviteId = ? AND (expr_time > ? OR expr_time = 0)", (inviteId, str(int(time.time()))))
+        invite = db_cursor.fetchall()
+        print('invite: ',invite , type(invite))
         db_connection.close()
 
 
@@ -916,29 +964,40 @@ def use_invite(inviteId, chatroomId):
         return "Internal database error: could not connect to database", 500
 
 
-    print('uses: ',uses , type(uses))
-    if len(uses) == 0:
-        return "no such invite in databse", 400
+    # check if there were any valid invites
+    if len(invite) == 0:
+        return "Invite ID incorrect or expired", 400
 
 
+    # get data from the invite
     try:
-        uses = int(uses[0][0])
+        print('invite: ',invite , type(invite))
+        invite = invite[0]
+        print('invite: ',invite , type(invite))
+        uses = int(invite[3])
+        print('uses: ',uses , type(uses))
+        chatroomId = d(invite[1])
+
+
+    # somethings wrong with the database format
     except Exception as e:
-        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite uses: database possibly corrupted\nTraceback: {e}")
+        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite database possibly corrupted\nTraceback: {e}")
         return "Internal databse error: could not process data from databse", 500
 
 
+    # cehck if the invite is overused
     if uses > 0:
         uses = uses - 1
     else:
         return "invite cannot be used as it has exeeded its maximum capacity", 403
 
 
+    # update the databse with the new value of 'uses'
     try:
-        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_connection = sqlite3.connect(f'storage/main.db')
         db_cursor = db_connection.cursor()
         db_cursor.execute(f"UPDATE invites SET uses = ? WHERE inviteId = ?", (str(uses), inviteId))
-        uses = db_connection.fetchall()
+        db_connection.commit()
         db_connection.close()
 
 
@@ -948,8 +1007,13 @@ def use_invite(inviteId, chatroomId):
         return "Internal database error: could not connect to database"
 
 
-    return "OK", 200
 
+    # all is well
+    return chatroomId, 200
+
+
+
+# ----------------------------------------------------------------------- !maindb ------------------------------------------------------------
 # ======================================================================= !chatrooms =======================================================
 
 

@@ -370,7 +370,6 @@ def create_invite(json_data):
 def process_invite(json_data):
     username   = json_data.get('username')
     inviteId   = json_data.get('inviteId')
-    chatroomId = json_data.get('chatroom')
 
 
     # make sure we got all the data
@@ -384,13 +383,19 @@ def process_invite(json_data):
         return "invalid format for invite ID", 400
 
 
-    response, status_code = dbhandler.use_invite(inviteId, chatroomId)
+    chatroomId, status_code = dbhandler.use_invite(inviteId)
     if status_code != 200:
-        return response, status_code
+        return chatroomId, status_code
 
 
     response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=False)
     if status_code != 200:
+        return response, status_code
+
+
+    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
+    if status_code != 200:
+        dbhandler.remove_user_from_chatroom(username, chatroomId)
         return response, status_code
 
 

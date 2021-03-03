@@ -107,11 +107,12 @@ chats
 [✓] create invites
     - details in discord pinned `trying to decide how to do invites`
 
-[] make invites work
+[✓] make invites work
 
-[] move invites from chatroom.db to main.db
+[✓] move invites from chatroom.db to main.db
 
 [] make dbhandler.checkaccess finally do something
+    i havent done this yet bc things like conv1 will die
 
 [] error check the shit out of everything
 

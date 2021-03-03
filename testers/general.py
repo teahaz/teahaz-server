@@ -212,7 +212,6 @@ def use_invite():
     a = {
 
             "username": globals()['username'],
-            "chatroom": input("chatroom: "),
             "inviteId": input("invite: ")
             }
 
