@@ -11,13 +11,9 @@ function get_dID {
 
     ID=$(echo $ID | grep  -o "^............")
 
-    echo $ID
-
     if [ "$ID" == "" ]
     then
-        echo "container not running"
         ID=""
-
     fi
 
 }
@@ -35,6 +31,25 @@ function git_pull {
     fi
 
 
+}
+
+function make_sure_cron_is_running {
+    while [ 1 ]
+    do
+        if [ "$ID" == "" ]
+        then
+            get_dID
+        else
+            docker exec --user root $ID systemctl enable cron
+            docker exec --user root $ID systemctl start cron
+
+            if [ "$?" == 0 ]
+            then
+                exit
+            fi
+            sleep 6
+        fi
+    done
 }
 
 
@@ -89,7 +104,10 @@ else
 
         docker build -t teahaz_server:latest .
 
+        make_sure_cron_is_running &
+
         docker run -p 13337:13337 -e PYTHONUNBUFFERED=0 --rm -v $DIR:/home/teahaz teahaz_server:latest
+
     else
         echo "server is already running"
     fi
