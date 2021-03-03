@@ -7,7 +7,8 @@ docs of /api/v0
 1. [/message/](#messages)
 2. [/file/](#files)
 3. [/chatroom/](#chatrooms)
-3. [/invites/](#invites)
+        * [creating a chatroom](##Creating a new chatroom)
+5. [/invites/](#invites)
 
 
 
