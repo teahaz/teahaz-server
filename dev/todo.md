@@ -41,6 +41,10 @@ general
 [] make sure dumb ass users dont send unencoded data to /message/
 
 
+[] add permissions to invites
+     eg you could create an invite with only read access
+
+
 
 auth
 ====
