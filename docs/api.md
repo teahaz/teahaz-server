@@ -28,7 +28,7 @@ chatrooms
 =========
 Checking chatrooms you have access to
 -------------------------------------
-A GET request to /chatroom/ should return all chatrooms that your user has access to
+A GET request to `/chatroom/` should return all chatrooms that your user has access to
 
 #### required fields:
 * username
@@ -68,7 +68,7 @@ Server returns both the name and the ID of every chatroom the user is in
 
 Creating a new chatroom
 -----------------------
-Sending a POST request to /chatroom/ should create a new chatroom. The creator of the chatroom will automatically be added as an admin.
+Sending a POST request to `/chatroom/` should create a new chatroom. The creator of the chatroom will automatically be added as an admin.
 
 #### required fields:
 * username
@@ -110,7 +110,7 @@ invites
 =======
 Creating an invite
 ------------------
-Sending a GET request to /invite/ should create an invite.
+Sending a GET request to `/invite/` should create an invite.
 **NOTE:** The creator of the invite has to be admin of the chatroom they are creating an invite for!
 
 #### required fields:
@@ -155,7 +155,7 @@ Returns the ID of the invite
 
 Using an invite
 ---------------
-Sending a POST request to /invite/ with an invite ID should add your use to the chatroom the invite corresponds to.
+Sending a POST request to `/invite/` with an invite ID should add your use to the chatroom the invite corresponds to.
 
 #### required fields:
 * username
