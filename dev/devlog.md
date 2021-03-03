@@ -6,6 +6,21 @@ usually something about what im working on, what i recently finished, or random 
 
 
 # 02 mar 2021
+## setup
+should we change to every chatroom seperate or stay a tree system of server/chatroom
+#### pros
+* legit would be a lot cooler
+#### cons
+ * missing some of the centralized amangement
+    - some data, eg what chatrooms the user has access to would have to be stored on the users device. If the user looses that save than they can never log back into their account.
+    - would also mean no syncronizing between devices
+
+    - one way to solve this would be to have a seperate storage server, that stores encrypted, perhaps pickled data about you
+
+
+
+
+# 02 mar 2021
 ## invites
 there are 2 main ideas for the invites:
 1.) have all invites in their own chatroom
