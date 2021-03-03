@@ -30,7 +30,7 @@ Checking chatrooms you have access to
 -------------------------------------
 A GET request to /chatroom/ should return all chatrooms that your user has access to
 
-#### required fields
+#### required fields:
 * username
 
 
@@ -70,7 +70,7 @@ Creating a new chatroom
 -----------------------
 Sending a POST request to /chatroom/ should create a new chatroom. The creator of the chatroom will automatically be added as an admin.
 
-#### required fields
+#### required fields:
 * username
 * chatroom_name
    - chatroom name is the nickname of the chatroom and **not** the ID
@@ -113,7 +113,7 @@ Creating an invite
 Sending a GET request to /invite/ should create an invite.
 **NOTE:** The creator of the invite has to be admin of the chatroom they are creating an invite for!
 
-#### required fields
+#### required fields:
 * username
 * chatroom
     - The chatrooms ID
@@ -134,7 +134,7 @@ url = http://<teahouse server>/api/v0/invite/"
 
 data = {
         "username": username,
-        "chatroom": chatroomId
+        "chatroom": chatroomId,
         "expr_time": str(time.time() + 60 * 60 * 24),
         "uses": str(10)
         }
