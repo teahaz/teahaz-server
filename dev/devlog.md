@@ -1,14 +1,45 @@
 devlog
 ======
 this is a document written mostly for myself.
-ill write here whenever the fuck it pleases me
+ill write here whenever the fuck pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
 
 # 04 mar 2021
 ## refactoring everything
 from the note 2 days ago we decided to make the switch
-im removing /register
+
+#### changes
+* not sending chatroom id
+
+chatroom id is now important for every single function, thus i dont think there is any point in including it in every bit of json.  Instead i think it should be part of the url like `/api/vx/<endpoint>/<chatroom_id>`
+
+
+* remove `/register/`
+this endpoint is now mostly redundant as there is no place to register
+
+instead you can do one of 2 things:
+    - create a chatroom. This will add you as the admin by default
+    - Join a chatroom. Use an invite to join a chatroom
+
+
+* changes to `/login/`
+Im not yet exactly sure how I will change `/login/`, but similarly to `/register/` it doesnt really serve any purpose rn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 02 mar 2021
