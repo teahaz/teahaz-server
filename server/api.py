@@ -352,9 +352,12 @@ def create_invite(json_data):
 
 
     # invites can only be created if you are admin
-    response, status_code = dbhandler.check_perms(username, chatroomId, permission="admin")
+    has_permission, status_code = dbhandler.check_perms(username, chatroomId, permission="admin")
     if status_code != 200:
-        return response, status_code
+        return has_permission, status_code
+
+    if has_permission != True:
+        return "Permission denied: your user does not have permission to perform this action", 403
 
 
     # save this invite in the database
