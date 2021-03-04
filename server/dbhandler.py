@@ -51,6 +51,23 @@ def d(a):
 
 
 
+def database_execute(db='', statement='', variables=()):
+    try:
+        db_connection = sqlite3.connect(f'storage/main.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')")
+        data = db_cursor.fetchall()
+        db_connection.commit()
+        db_connection.close()
+
+    except Exception as e:
+        return f"Database operation failed: {e}", 500
+
+    return data, 200
+
+
+
+
 
 
 
@@ -62,42 +79,66 @@ def d(a):
 
 # create and setup the main db
 def init_main_db():
-    try:
-        db_connection = sqlite3.connect(f'storage/main.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')")
-        db_cursor.execute(f"CREATE TABLE invites ('inviteId', 'chatroomId', 'expr_time', 'uses')")
-        db_cursor.execute(f"CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies, chatrooms)")
-        db_connection.commit()
-        db_connection.close()
+    database = 'storage/main.db'
 
 
-    except Exception as e:
-        return f"error occured during the creation of main.db: {e}", 500
+    # create chatrooms table
+    sql = "CREATE TABLE chatrooms ('chatroomId', 'chatroom_name')"
+    data, status_code = database_execute(database, sql, ())
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/init_main_db/0] || {data}")
+        return "Internal database error", status_code
+
+
+    # create invites table
+    sql = "CREATE TABLE invites ('inviteId', 'chatroomId', 'expr_time', 'uses')"
+    data, status_code = database_execute(database, sql, ())
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/init_main_db/0] || {data}")
+        return "Internal database error", status_code
+
+
+    # create users table
+    sql = "CREATE TABLE users ('username', 'email', 'nickname', 'password', cookies, chatrooms)"
+    data, status_code = database_execute(database, sql, ())
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/init_main_db/0] || {data}")
+        return "Internal database error", status_code
 
 
     return "OK", 200
 
 
+
 # get all registered users
 def get_all_users(p=True):
-    if not os.path.isfile('storage/main.db'):
+    database = 'storage/main.db'
+
+    # does database exist
+    if not os.path.isfile(database):
         return False
+
+
+    # fetch all users
+    sql = "SELECT * FROM users"
+    data, status_code = database_execute(database, sql, ())
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/get_all_users/0] || {data}")
+        return False
+
+
+    # print them if p=True
     try:
-        db_connection = sqlite3.connect(f'storage/main.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT * FROM users")
-        a = db_cursor.fetchall()
-        db_connection.close()
         if p:
-            for i in a:
+            for i in data:
                 print(i)
 
-        return True
-    except:
+    except Exception as e:
+        log(level='error', msg=f"[dbhandler/get_all_users/1] || {e}")
         return False
 
 
+    return True
 
 
 # ----------------------------------------------------------------------- !setup & testing ----------------------------------------------
