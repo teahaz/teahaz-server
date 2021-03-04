@@ -5,6 +5,12 @@ ill write here whenever the fuck it pleases me
 usually something about what im working on, what i recently finished, or random thoughts that are important (maybe)
 
 
+# 04 mar 2021
+## refactoring everything
+from the note 2 days ago we decided to make the switch
+im removing /register
+
+
 # 02 mar 2021
 ## setup
 should we change to every chatroom seperate or stay a tree system of server/chatroom

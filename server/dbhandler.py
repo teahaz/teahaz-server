@@ -126,7 +126,7 @@ def init_chat(chatroomId, chatroom_name):
 
 # save details of a new user
 #'username', 'email', 'nickname', 'password', 'cookies', 'colour', 'admin'
-def save_new_user(username,nickname, password, chatroomId, email=None, admin=False):
+def save_new_user(username, nickname, password, chatroomId, email=None, admin=False):
     if not username or not nickname or not password or not chatroomId:
         log(level='error', msg=f"[dbhandler/save_new_user/0] || some required data was not passed to the function")
         return "[server/dbhandler/save_new_user/0] || Failed to register user: Internal server error", 500

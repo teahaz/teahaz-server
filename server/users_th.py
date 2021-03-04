@@ -7,9 +7,10 @@ from logging_th import logger as log
 
 # handle logins
 def set_cookie(json_data, email=True):
-    email_ad = json_data.get('email')
-    username = json_data.get('username')
-    password = json_data.get('password')
+    email_ad   = json_data.get('email')
+    username   = json_data.get('username')
+    password   = json_data.get('password')
+    chatroomId = json_data.get('chatroom')
 
     # if the email verification setting is turned off then make email NULL even if the users serts one
     if not email:
@@ -27,7 +28,7 @@ def set_cookie(json_data, email=True):
 
 
     # check if the username and password combination exists
-    response, status = database.checkuser(username=username, email=email_ad, password=password)
+    response, status = database.checkuser(chatroomId, username=username, email=email_ad, password=password)
     if status != 200:
         return response, status
 
@@ -36,7 +37,7 @@ def set_cookie(json_data, email=True):
     cookie = security.generate_cookie()
 
     # store the cookies in teh database
-    response, status = database.store_cookie(username=username, email=email_ad, new_cookie=cookie)
+    response, status = database.store_cookie(chatroomId, username=username, email=email_ad, new_cookie=cookie)
 
     # check if storing was succesful
     if status == 200:
@@ -48,14 +49,15 @@ def set_cookie(json_data, email=True):
 
 
 def check_cookie(cookie, data):
-    username = data.get('username')
+    username   = data.get('username')
+    chatroomId = data.get('chatroom')
 
     # check if username exists
     if not username:
         return False
 
     # get cookies of user
-    stored_cookies = database.get_cookies(username)
+    stored_cookies = database.get_cookies(chatroomId, username)
 
     # if the user has no stored cookies
     if not stored_cookies:
@@ -69,10 +71,11 @@ def check_cookie(cookie, data):
 
 
 def add_user(json_data, email=True):
-    email_ad = json_data.get('email')
-    username = json_data.get('username')
-    nickname = json_data.get('nickname')
-    password = json_data.get('password')
+    email_ad   = json_data.get('email')
+    username   = json_data.get('username')
+    nickname   = json_data.get('nickname')
+    password   = json_data.get('password')
+    chatroomId = json_data.get('chatroom')
 
 
     # username, nickname, and password are required. Thus server will error if not supplied
@@ -90,7 +93,7 @@ def add_user(json_data, email=True):
 
 
     #check incase user has already registered
-    response, status_code = database.check_user_exists(username=username, email=email_ad)
+    response, status_code = database.check_user_exists(chatroomId, username=username, email=email_ad)
     if status_code != 200:
         return response, status_code
 
@@ -101,7 +104,8 @@ def add_user(json_data, email=True):
 
 
     # save details of new user
-    response, status = database.save_new_user(username=username, email=email_ad, nickname=nickname, password=password)
+    #'username', 'email', 'nickname', 'password', 'cookies', 'colour', 'admin'
+    response, status = database.save_new_user(username, nickname, password, chatroomId, email=email_ad, admin=True)
 
 
     # if saving failed
