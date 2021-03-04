@@ -154,126 +154,6 @@ def database_execute(chatroom='', statement='', variables=()):
 
 
 
-def save_invite(chatroomId, inviteId, expr_time, uses):
-    if not chatroomId or not inviteId or not expr_time or not uses:
-        log(level='error', msg="[server/dbhandler.py/save_invite/0] missing arguments to save_invite function")
-        return "internal server error: missing arguments", 500
-
-
-    # encode data: no sqli pls
-    try:
-        inviteId   = b(inviteId)
-        chatroomId = b(chatroomId)
-        # expr_time and uses are not encoded so we can do cool sql statements
-
-
-    # could not encode the data for some reason
-    except:
-        return "Internal server error: [dbhanler/save_invite/1] failed to encode data", 500
-
-
-
-    # save invite in database
-    try:
-        db_connection = sqlite3.connect(f'storage/main.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"INSERT INTO invites VALUES (?, ?, ?, ?)", (inviteId, chatroomId, expr_time, uses))
-        db_connection.commit()
-        db_connection.close()
-
-
-    # database operation failed
-    except Exception as e:
-        log(level='error', msg=f'[server/dbhandler.py/save_invite/2] database operation failed: saving invite\n Traceback: {e}')
-        return "Internal database error: could not connect to database"
-
-
-    # ok
-    return "OK", 200
-
-
-
-def use_invite(inviteId):
-    if not inviteId:
-        log(level='error', msg="[server/dbhandler.py/use_invite/0] missing arguments to function")
-        return "internal server error: missing arguments", 500
-
-
-    # encode inviteId
-    try:
-        inviteId = b(inviteId)
-
-    except Exception as e:
-        log(level='warning', msg="[server/dbhandler.py/use_invite/1] inviteId could not be encoded\n Traceback: {e}")
-        return "inviteID format incorrect", 400
-
-
-    # get all invites that match the inviteID and are not expired or overused
-    try:
-        db_connection = sqlite3.connect(f'storage/main.db')
-        db_cursor = db_connection.cursor()
-        print(inviteId)
-        db_cursor.execute(f"SELECT * FROM invites WHERE inviteId = ? ", (inviteId,))
-        #db_cursor.execute(f"SELECT * FROM invites WHERE inviteId = ? AND (expr_time > ? OR expr_time = 0)", (inviteId, str(int(time.time()))))
-        invite = db_cursor.fetchall()
-        print('invite: ',invite , type(invite))
-        db_connection.close()
-
-
-    # database operation failed
-    except Exception as e:
-        log(level='error', msg=f'[server/dbhandler.py/use_invite/2] database operation failed: saving invite\n Traceback: {e}')
-        return "Internal database error: could not connect to database", 500
-
-
-    # check if there were any valid invites
-    if len(invite) == 0:
-        return "Invite ID incorrect or expired", 400
-
-
-    # get data from the invite
-    try:
-        print('invite: ',invite , type(invite))
-        invite = invite[0]
-        print('invite: ',invite , type(invite))
-        uses = int(invite[3])
-        print('uses: ',uses , type(uses))
-        chatroomId = d(invite[1])
-
-
-    # somethings wrong with the database format
-    except Exception as e:
-        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite database possibly corrupted\nTraceback: {e}")
-        return "Internal databse error: could not process data from databse", 500
-
-
-    # cehck if the invite is overused
-    if uses > 0:
-        uses = uses - 1
-    else:
-        return "invite cannot be used as it has exeeded its maximum capacity", 403
-
-
-    # update the databse with the new value of 'uses'
-    try:
-        db_connection = sqlite3.connect(f'storage/main.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"UPDATE invites SET uses = ? WHERE inviteId = ?", (str(uses), inviteId))
-        db_connection.commit()
-        db_connection.close()
-
-
-    # database operation failed
-    except Exception as e:
-        log(level='error', msg=f'[server/dbhandler.py/save_invite/2] database operation failed: saving invite\n Traceback: {e}')
-        return "Internal database error: could not connect to database"
-
-
-
-    # all is well
-    return chatroomId, 200
-
-
 
 # ----------------------------------------------------------------------- !maindb ------------------------------------------------------------
 # ======================================================================= !chatrooms =======================================================
@@ -295,34 +175,6 @@ def use_invite(inviteId):
 
 
 
-# get all messages in a chatroom
-def get_all_messages(chatroomId, p=True):
-    if not os.path.exists("storage/conv1"):
-        return False
-
-    # sanitize chatroom id used for path
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_Id) # save non-encoded version for file path
-    if status_code != 200:
-        return chatroomId_d, status_code
-
-
-    try:
-        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT * FROM messages")
-    except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/get_all_messages/0] database operation failed:  {e}')
-        return False
-
-    a = db_cursor.fetchall()
-
-    if p:
-        for b in a:
-            print(b)
-
-    db_connection.close()
-
-    return True
 
 
 
@@ -331,153 +183,6 @@ def get_all_messages(chatroomId, p=True):
 
 
 
-# save a message in the database (both texts and files)
-def save_in_db(time=0, messageId=0, username=0, chatroomId=0, message_type=0, message=None, filename=None, extension=None ):
-    if time == 0 or messageId == 0 or username == 0 or chatroomId == 0 or message_type == 0: #values marked with 0 are needed while ones marked with None are optional
-        # making sure that all values that are needed exist
-        log(level='error', msg='[server/dbhandler/save_in_db/0] one or more of the required fields passed to function "save_in_db" are not present [time, username, chatroomId, message_type]')
-        return "internal server error", 500
-
-
-    # sanitize chatroom id used for path
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # save non-encoded version for file path
-    if status_code != 200:
-        return chatroomId_d, status_code
-
-
-    # connect to the database
-    try:
-        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db') # chatroomId is the folder name that data to do with chatroom resides in
-        db_cursor = db_connection.cursor()
-
-
-    # error: the database does not exists
-    except:
-        log(level='error', msg=f'[server/dbhandler/save_in_db/1] server could not connect to database')
-        return "internal database error", 500
-
-
-    # encode cumpolsary values
-    try:
-        username = b(username)
-        messageId = b(messageId)
-        chatroomId = b(chatroomId)
-        message_type = b(message_type)
-
-
-    # if this fails its bc the user sent bad data
-    except:
-        return "corrupted data sent to server", 400
-
-
-    # encode non compulsary values
-    if message: message = b(message)
-    if filename: filename = b(filename)
-    if extension: extension = b(extension)
-
-
-    # save the new message
-    try:
-        db_cursor.execute(f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (time, messageId, username, chatroomId, message_type, message, filename, extension))
-        db_connection.commit()
-        db_connection.close()
-
-
-    # fail on sqlite errors. This usually happens when the server is run without properly set up databases
-    except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/save_in_db/2] database operation failed:  {e}')
-        return "internal database error", 500
-
-
-    # all is well
-    return "OK", 200
-
-
-# get messages from db
-def get_messages_db(last_time=0, chatroomId=''):
-    chatroomId_d, status_code = security.sanitize_chatroomId(chatroomId) # sanitize chatroom id used for path
-    if status_code != 200:
-        return chatroomId_d, status_code
-
-
-    try: # try connect to the db
-        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db') # chatroomId is the folder name that data to do with chatroom resides in
-        db_cursor = db_connection.cursor()
-
-
-    # db doesnt exist
-    except:
-        log(level='error', msg=f'[server/dbhandler/get_messages/0] server could not connect to database')
-        return "internal server error", 500
-
-
-
-    # time and chatroomId should not be encoded:
-        # time shouldnt because its needed in sql queries with >=
-        # chatroomId is just an id, and its not controllable by the client
-
-
-
-    # get all messages that had been sent since 'last_time'
-    try:
-        db_cursor.execute("SELECT * FROM messages WHERE time >= ?", (last_time,))
-
-        data = db_cursor.fetchall()
-        db_connection.close()
-    except sqlite3.OperationalError as e:
-        log(level='fail', msg=f'[server/dbhandler/get_messages/1] database operation failed:  {e}')
-        return "internal database error", 500
-
-
-    # sqlite returns a list of lists, we should convert this back to json
-    json_data = []
-
-    # format messages for returning
-    try:
-        for element in data:
-            nickname = get_nickname(d(element[2]))
-
-            # get compulsary data, all but time need to be decoded
-            send_time = element[0]
-            messageId = d(element[1])
-            username = d(element[2])
-            chatroom = d(element[3])
-            msg_type = d(element[4])
-
-            # get optional data, they may or may not be present
-            message = element[5]
-            if message: message = d(message)
-            filename = element[6]
-            if filename: filename = d(filename)
-            extension = element[7]
-            if extension: extension = d(extension)
-
-            # make return dict
-            a = {
-                'time': send_time,
-                'messageId': messageId,
-                'username': username,
-                'nickname': nickname,
-                'chatroom': chatroom,
-                'type': msg_type,
-                'message': message,
-                'filename': filename,
-                'extension': extension
-                    }
-
-            # add to list
-            json_data.append(a)
-
-
-    # message format error
-    except Exception as e:
-    #else:
-        log(level='error', msg=f"[server/dbhandler/get_messages/2] some data in the database is corrupted and cannot be decoded\n Traceback: {e}")
-        return "internal databse error", 500
-
-
-    # all is well
-    return json_data, 200
 
 
 
@@ -495,55 +200,6 @@ def get_messages_db(last_time=0, chatroomId=''):
 
 
 
-# ======================================================================= health check =======================================================
-def check_databses():
-    log(level='log', msg='running system checks')
-
-
-    # check if storage folder exists
-    log(level='log', msg='checking storage folder')
-
-    # check if folder exists, and try to create it if not
-    if not os.path.isdir("storage/"):
-        try:
-            log(level='warning', msg='[health check] creating storage folder')
-            os.mkdir("storage")
-
-        except Exception as e:
-            return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500
-
-
-
-
-    # check main.db
-    log(level='log', msg='checking main db')
-
-    # does the main db exist?
-    if not os.path.isfile('storage/main.db'):
-        log(level='warning', msg=f'[health check] creating main.db')
-
-        response, status_code = init_main_db()
-        if status_code != 200:
-            return f"failed to create main.db\n Traceback: {response}\n\n Suggest that you delete the 'storage' folder"
-
-
-    # make sure the database is good by testing all tables
-    try:
-        db_connection = sqlite3.connect(f'storage/main.db')
-        db_cursor = db_connection.cursor()
-        db_cursor.execute(f"SELECT * FROM users")
-        db_cursor.execute(f"SELECT * FROM chatrooms")
-        db_cursor.fetchall()
-        db_connection.close()
-
-
-    # something is wrong with the database
-    except Exception as e:
-        return f"main database is missing tables or otherwise corrupted\n Traceback: {e}", 500
-
-
-    log(level='success', msg='[health check] System is healthy :)')
-    return "OK", 200
 
 
 
@@ -953,6 +609,285 @@ def get_chatname(chatroomId):
     return chatroom_name, 200
 
 
+
+#================================================== !chatroom ==============================================
+#=================================================== invites ===============================================
+
+
+
+
+def save_invite(chatroomId, inviteId, expr_time, uses):
+    if not chatroomId or not inviteId or not expr_time or not uses:
+        log(level='error', msg="[dbhandler.py/save_invite/0] || missing arguments to save_invite function")
+        return "internal server error: missing arguments", 500
+
+
+    # encode data: no sqli pls
+    try:
+        inviteId   = b(inviteId)
+        # expr_time and uses are not encoded so we can do cool sql statements
+
+
+    # could not encode the data for some reason
+    except Exception as e:
+        log(level='error', msg="[dbhandler.py/save_invite/1] || Error occured while encoding data: {e}")
+        return "[dbhanler/save_invite/1] || failed to encode data: Internal server error", 500
+
+
+
+    # save inivte
+    sql = f"INSERT INTO invites VALUES (?, ?, ?)"
+    data, status_code = database_execute(chatroomId, sql, (inviteId, expr_time, uses))
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/save_invite/2] || Failed to save invite in datbase: {data}")
+        return "[dbhandler/save_invite/3] || Failed to save invite in database: Internal database error", 500
+
+
+    # ok
+    return "OK", 200
+
+
+
+# verify and use invite
+def use_invite(chatroomId, inviteId):
+    if not inviteId:
+        log(level='error', msg="[dbhandler.py/use_invite/0] || missing arguments to function")
+        return "internal server error: missing arguments", 500
+
+
+
+    # encode inviteId
+    try:
+        inviteId = b(inviteId)
+
+    except Exception as e:
+        log(level='warning', msg="[dbhandler.py/use_invite/1] inviteId could not be encoded\n Traceback: {e}")
+        return "inviteID format incorrect", 400
+
+
+
+    # get all invite data from database
+    # NOTE  TODO IMPORTANT: inivte time is not checked rn
+    #sql = f"SELECT * FROM invites WHERE inviteId = ? AND (expr_time > ? OR expr_time = 0)", (inviteId, str(int(time.time())))
+    sql = f"SELECT * FROM invites WHERE inviteId = ? "
+    data, status_code = database_execute(chatroomId, sql, (inviteId,))
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/use_invite/2] || Database operation, gettting invite data failed: {data}")
+        return "[dbhandler/use_invite/2] || Could not check invite: Internal database error", 500
+
+    invite = data
+    print('invite: ',invite , type(invite))
+
+
+
+    # check if there weren't any valid invites
+    if len(invite) == 0:
+        return "Invite ID incorrect or expired", 400
+
+
+
+    # get data from the invite
+    try:
+        print('invite: ',invite , type(invite))
+        invite = invite[0]
+        print('invite: ',invite , type(invite))
+        uses = int(invite[3])
+
+
+
+    # somethings wrong with the database format
+    except Exception as e:
+        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite database possibly corrupted\nTraceback: {e}")
+        return "Internal databse error: could not process data from databse", 500
+
+
+
+    # cehck if the invite is overused
+    if uses > 0:
+        uses = uses - 1
+    else:
+        return "invite cannot be used as it has exeeded its maximum capacity", 403
+
+
+
+    sql = f"UPDATE invites SET uses = ? WHERE inviteId = ?"
+    data, status_code = database_execute(chatroomId, sql, (str(uses), inviteId))
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/use_invite/3] || Could not return decremented uses value to database: {data}")
+        return "[dbhandler/use_invite/3] || Could not check invite: Internal database error", 500
+
+
+
+    # all is well
+    return "OK", 200
+
+
+
+
+#=================================================== !invites ==============================================
+#=================================================== messages ==============================================
+
+
+
+# save a message in the database (both texts and files)
+def save_in_db(time, messageId, username, chatroomId, message_type, message=None, filename=None, extension=None ):
+    if not time  or not messageId  or not username  or not chatroomId  or not message_type :
+        # making sure that all values that are needed exist
+        log(level='error', msg='[dbhandler/save_in_db/0] || one or more of the required fields passed to function "save_in_db" are not present [time, username, chatroomId, message_type]')
+        return "[dbhandler/save_in_db/0] || internal server error: missing arguments", 500
+
+
+    # encode cumpolsary values
+    try:
+        username = b(username)
+        messageId = b(messageId)
+        chatroomId = b(chatroomId)
+        message_type = b(message_type)
+
+
+    # if this fails its bc the user sent bad data
+    except Exception as e:
+        log(level='error', msg='[dbhandler/save_in_db/1] || could not encode some data: {e}')
+        return "[dbhandler/save_in_db/1] || corrupted data sent to server", 400
+
+
+    # encode non compulsary values
+    if message: message = b(message)
+    if filename: filename = b(filename)
+    if extension: extension = b(extension)
+
+
+
+    sql = f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    variables = (time, messageId, username, chatroomId, message_type, message, filename, extension)
+    data, status_code = database_execute(chatroomId, sql, variables)
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/save_in_db/2] || Failed to save message: {data}")
+        return "[dbhandler/save_in_db/2] || Failed to send message: Internal datase error", 500
+
+
+
+    # all is well
+    return "OK", 200
+
+
+
+# get all messages from database since `last_time`
+def get_messages_db(chatroomId, last_time=0):
+    sql = "SELECT * FROM messages WHERE time >= ?"
+    data, status_code = database_execute(chatroomId, sql, (last_time,))
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/get_messages_db/0] || Could not get messages from db: {data}")
+        return "[dbhandler/get_messages_db/0] || Failed to get messages: Internal database error", 500
+
+
+
+    # sqlite returns a list of lists, we should convert this back to json
+    json_data = []
+
+    # format messages for returning
+    try:
+        for element in data:
+            nickname = get_nickname(chatroomId, d(element[2]))
+
+            # get compulsary data, all but time need to be decoded
+            send_time = element[0]
+            messageId = d(element[1])
+            username = d(element[2])
+            chatroom = d(element[3])
+            msg_type = d(element[4])
+
+            # get optional data, they may or may not be present
+            message = element[5]
+            if message: message = d(message)
+            filename = element[6]
+            if filename: filename = d(filename)
+            extension = element[7]
+            if extension: extension = d(extension)
+
+            # make return dict
+            a = {
+                'time': send_time,
+                'messageId': messageId,
+                'username': username,
+                'nickname': nickname,
+                'chatroom': chatroom,
+                'type': msg_type,
+                'message': message,
+                'filename': filename,
+                'extension': extension
+                    }
+
+            # add to list
+            json_data.append(a)
+
+
+    # message format error
+    except Exception as e:
+    #else:
+        log(level='error', msg=f"[dbhandler/get_messages/1] || Error while formatting message data: {e}")
+        return "[dbhandler/get_messages/1] || Could not format data: Internal databse error", 500
+
+
+    # all is well
+    return json_data, 200
+
+
+
+
+#================================================== !messages ==============================================
+#=================================================== testing ================-==============================
+
+
+
+def check_databses():
+    log(level='log', msg='running system checks')
+
+
+    # check if storage folder exists
+    log(level='log', msg='checking storage folder')
+
+    # check if folder exists, and try to create it if not
+    if not os.path.isdir("storage/"):
+        try:
+            log(level='warning', msg='[health check] creating storage folder')
+            os.mkdir("storage")
+
+        except Exception as e:
+            return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500
+
+
+    for chatroom in os.listdir('storage/chatrooms/'):
+        log(level='log', msg=f'checking chatroom: {chatroom}')
+
+        if not os.path.exists(f"storage/chatrooms/{chatroom}/main.db"):
+            return f"{chatroom} does not have a database file", 500
+
+        sql = "SELECT * FROM users"
+        data, status_code = database_execute(chatroom, sql, ())
+        if status_code != 200:
+            return f"{chatroom} database is corrupted: {data}", 500
+
+        sql = "SELECT * FROM invites"
+        data, status_code = database_execute(chatroom, sql, ())
+        if status_code != 200:
+            return f"{chatroom} database is corrupted: {data}", 500
+
+        sql = "SELECT * FROM messages"
+        data, status_code = database_execute(chatroom, sql, ())
+        if status_code != 200:
+            return f"{chatroom} database is corrupted: {data}", 500
+
+        sql = "SELECT * FROM settings"
+        data, status_code = database_execute(chatroom, sql, ())
+        if status_code != 200:
+            return f"{chatroom} database is corrupted: {data}", 500
+
+
+
+
+    log(level='success', msg='[health check] System is healthy :)')
+    return "OK", 200
 
 
 
@@ -1380,6 +1315,35 @@ def delete_chatroom_from_user(username, chatroomId):
     # everything worked out fine
     return "OK", 200
 
+# i will have to make new testing functions
+# get all messages in a chatroom
+def get_all_messages(chatroomId, p=True):
+    if not os.path.exists("storage/conv1"):
+        return False
+
+    # sanitize chatroom id used for path
+    chatroomId_d, status_code = security.sanitize_chatroomId(chatroom_Id) # save non-encoded version for file path
+    if status_code != 200:
+        return chatroomId_d, status_code
+
+
+    try:
+        db_connection = sqlite3.connect(f'storage/{chatroomId_d}/chatroom.db')
+        db_cursor = db_connection.cursor()
+        db_cursor.execute(f"SELECT * FROM messages")
+    except sqlite3.OperationalError as e:
+        log(level='fail', msg=f'[server/dbhandler/get_all_messages/0] database operation failed:  {e}')
+        return False
+
+    a = db_cursor.fetchall()
+
+    if p:
+        for b in a:
+            print(b)
+
+    db_connection.close()
+
+    return True
 
 #
 ## check if email is required in chatroom
