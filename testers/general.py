@@ -174,7 +174,7 @@ def create_chatroom():
 
     res = globals()['s'].post(url=url, json=a)
     if res.status_code == 200:
-        globals()['chatroom_id'] = str(res.text).strip('\n').strip('"')
+        globals()['chatroom_id'] = json.loads(str(res.text).strip('\n').strip('"')).get('chatroom')
 
     return res.text
 
@@ -193,14 +193,13 @@ def get_chatroms():
 
 
 def get_invite():
-    url = globals()['url'] + "/api/v0/invite/"
+    url = globals()['url'] + "/api/v0/invite/" + globals()['chatroom_id']
 
     a = {
 
             "username": globals()['username'],
-            "chatroom": globals()['chatroom_id'],
             "expr_time": str(time.time() + 60 * 60 * 24),
-            "uses": str(10)
+            "uses": str(int(input("uses: ")))
             }
 
     res = globals()['s'].get(url=url, headers=a)

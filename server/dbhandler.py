@@ -162,7 +162,7 @@ def save_new_user(username, nickname, password, chatroomId, email=None, admin=Fa
 
 
     # save user in database. format = 'username', 'email', 'nickname', 'password', 'cookies', 'colour', 'admin'
-    sql = "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)"
     data, status_code = database_execute(chatroomId, sql, (username, email, nickname, password, cookie, colour, admin))
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/save_new_user/2] || Error occured while adding user to database: {data}")
@@ -423,26 +423,31 @@ def check_perms(username, chatroomId, permission="admin"):
 
 
 
-# get the name of a chatroom from main.db
-def get_chatname(chatroomId):
-    sql = f"SELECT chatroom_name FROM settings"
-    data, status_code = database_execute(chatroomId, sql, ())
+
+# check the permissons of one user
+def check_settings(chatroomId, setting):
+    sql = f"SELECT setting_value FROM settings WHERE setting_name = ?"
+    data, status_code = database_execute(chatroomId, sql, (setting,))
     if status_code != 200:
-        log(level='error', msg=f"[dbhandler/get_chatname/0] || Database operation, getting chatname failed: {data}")
-        return "[dbhandler/get_chatname/0] || Could not get chatname: Internal database error", 500
+        log(level='error', msg=f"[dbhandler/check_settings/0] || Databse opertion, getting setting value failed: {data}")
+        return "[dbhandler/check_settings/0] || Internal database error while checking chatroom settings", 500
 
-
-    # unwrap chatname
     try:
-        chatroom_name = d(data[0][0])
+        # unwrap data
+        value = data[0][0]
+
+        # if its a string then its encoded
+        if type(value) == str:
+            value = d(value)
 
 
-    except Exception as e:
-        log(level='fail', msg=f'[server/dbhandler/get_chatname/1] Failed to get chatroom name:  {e}')
-        return "[dbhandler/get_chatname/1] || Could not get chatroom name", 500
+    except:
+        log(level='error', msg=f"[dbhandler/check_settings/1] || An error occured while formatting setting value: {data}")
+        return "[dbhandler/check_settings/1] || Internal server error while checking chatroom settings", 500
 
 
-    return chatroom_name, 200
+    return value, 200
+
 
 
 

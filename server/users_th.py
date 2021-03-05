@@ -69,52 +69,48 @@ def check_cookie(cookie, data, chatroomId):
         return False
 
 
-def add_user(json_data, email=True):
-    email_ad   = json_data.get('email')
-    username   = json_data.get('username')
-    nickname   = json_data.get('nickname')
-    password   = json_data.get('password')
-    chatroomId = json_data.get('chatroom')
+def add_user(username, email, nickname, password, chatroomId):
+    if not username  or not nickname or not password or not chatroomId:
+        log(level='error', msg="[users/add_user/0] || Some values required by the function were not supplied")
+        return "[users/add_user/0] || Internal server error", 500
 
 
-    # username, nickname, and password are required. Thus server will error if not supplied
-    if not username or not nickname or not password:
-        return 'username, nickname or password empty', 400
+
+    # NOTE could later make this a server setting as well
+    if len(password) < 10:
+        return "[users/add_user/1] || Password has to be at least 10 characters", 400
 
 
-    # if the server policy requires an email then it must be sent, and will fail if not
-    if email == True and not email_ad:
-        return 'This servers policy requires an email address for registering', 400
 
-    # if the server doesnt require and email then it should not be set, and should be cleared just in case stupid users set it
-    if email == False:
-        email_ad = None
+    # check if the chatroom requires emails
+    response, status_code = database.check_settings(chatroomId, "require_email")
+    if status_code != 200:
+        return response, status_code
+    need_email = response
+
+
+
+    # if email is needed then make sure the use sends it
+    if need_email != False and not email:
+        return "[users/add_user/2] || This chatrooms policy requires you to send verify with an email address", 400
+    else:
+        # make sure email is actually none if the chatroom doesnt require it
+        email = None
 
 
     #check incase user has already registered
-    response, status_code = database.check_user_exists(chatroomId, username=username, email=email_ad)
+    response, status_code = database.check_user_exists(chatroomId, username, email)
     if status_code != 200:
         return response, status_code
 
 
-    # response is true, then the user already exists
-    if response:
-        return "username or email already registered", 400
+    # dont allow the reuse of usernames or passwords
+    if response != False:
+        return "[usrs/add_user/3] Username or email has already been registered", 400
 
 
-    # save details of new user
-    #'username', 'email', 'nickname', 'password', 'cookies', 'colour', 'admin'
-    response, status = database.save_new_user(username, nickname, password, chatroomId, email=email_ad, admin=True)
 
-
-    # if saving failed
-    if status != 200:
-        log(level='fail', msg=f'[server/users/register/0] error while saving new user. Traceback: {response}')
-        return response, status
-
-
-    # everything OK, registered
-    log(level='log', msg=f'new user: "{username}" just registered')
+    log(level='log', msg=f'new user: "{username}", just registered to chatroom: "{chatroomId}"')
     return "succesfully registered", 200
 
 

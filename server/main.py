@@ -13,9 +13,9 @@ from flask_restful import Resource
 #from api import message_get
 #from api import message_send
 #from api import download_file
-#from api import create_invite
 #from api import process_invite
 #from api import get_chatrooms
+from api import create_invite
 from api import create_chatroom
 
 from users_th import add_user
@@ -125,25 +125,15 @@ class api__chatroom(Resource):
 
 
 
-    #def get(self): # create chatroom
-    #    if not request.headers: return "no data sent", 401
-    #    if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
 
-    #    response, status_code = get_chatrooms(request.headers)
-    #    return response, status_code
+class api__invites(Resource):
+    def get(self, chatroomId):
+        if not request.headers: return "no data sent", 401
+        if not check_cookie(request.cookies.get('access'), request.headers, chatroomId): return "client not logged in", 401
 
+        response, status_code = create_invite(request.headers, chatroomId)
+        return response, status_code
 
-
-#
-#
-#class api__invites(Resource):
-#    def get(self):
-#        if not request.headers: return "no data sent", 401
-#        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
-#
-#        response, status_code = create_invite(request.headers)
-#        return response, status_code
-#
 #    def post(self):
 #        if not request.get_json(): return "no data sent", 401
 #        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
@@ -161,8 +151,8 @@ api.add_resource(index, '/')
 #api.add_resource(login, '/login/')
 #api.add_resource(register, '/register/')
 #api.add_resource(api__files, '/api/v0/file/<chatroomId>')
-#api.add_resource(api__invites, '/api/v0/invite/<chatroomId>')
 #api.add_resource(api__messages, '/api/v0/message/<chatroomId>')
+api.add_resource(api__invites, '/api/v0/invite/<chatroomId>')
 api.add_resource(api__chatroom, '/api/v0/chatroom/')
 
 

@@ -7,8 +7,8 @@ from os.path import isfile as os_isfile
 import dbhandler
 import security_th as security
 import filesystem_th as filehander
-from logging_th import logger as log
-
+import users_th as users
+from logging_th import logger as log 
 
 
 
@@ -25,20 +25,22 @@ def create_chatroom(json_data):
 
     # make sure client sent all needed data
     if not username or not email or not nickname or not password or not chatroom_name:
-        return '[api/create_chatroom/0] One or more of the required arguments are not supplied. required = [username, email, nickname, password, chatroom_name]', 400
+        return '[api/create_chatroom/0] || One or more of the required arguments are not supplied. required = [username, email, nickname, password, chatroom_name]', 400
+
 
 
     # create folders needed for chatroom
     response, status_code = filehander.create_chatroom_folders(chatroomId)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/create_chatroom/0] could not create chatroom')
+        log(level='error', msg=f'[api/create_chatroom/2] || could not create chatroom')
         return response, 500
+
 
 
     # create chatroom.db inside chatroom the chatrom folder
     response, status_code = dbhandler.init_chat(chatroomId, chatroom_name)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/create_chatroom/1] could not create chatroom database\n Traceback: {response}')
+        log(level='error', msg=f'[api/create_chatroom/3] || could not create chatroom database\n Traceback: {response}')
 
         # remove chatroom
         filehander.remove_chatroom(chatroomId)
@@ -47,10 +49,9 @@ def create_chatroom(json_data):
 
 
 
-    # add the user that created the chatroom as chatroom admin
-    response, status_code = dbhandler.save_new_user(username, nickname, password, chatroomId, email, True)
+    response, status_code = users.add_user(username, email, nickname, password, chatroomId)
     if status_code != 200:
-        log(level='error', msg=f"[server/api/create_chatroom/4] failed to add chatroom admin")
+        log(level='error', msg="[api/create_chatroom/4] || Failed to add chatroom admin")
 
         # remove chatroom
         filehander.remove_chatroom(chatroomId)
@@ -58,9 +59,67 @@ def create_chatroom(json_data):
         return response, status_code
 
 
+    response, status_code = dbhandler.check_settings(chatroomId, "chatroom_name")
+    if status_code != 200:
+        return response, status_code
 
-    return chatroomId, 200
 
+
+    # format chat object
+    try:
+        chat_obj = {
+                "name": response,
+                "chatroom": chatroomId
+                }
+    except Exception as e:
+        log(level='error', msg=f"[api/create_chatroom/5] || Formattng chat_obj failed: {e}")
+        return "[api/create_chatroom/5] || Internal server errror while formatting chat object", 500
+
+
+    return chat_obj, 200
+
+
+def create_invite(json_data, chatroomId):
+    username   = json_data.get('username')
+    expr_time  = json_data.get('expr_time')
+    uses       = json_data.get('uses')
+    inviteId   = str(uuid.uuid1())
+
+
+    # make sure we got all the data
+    if not username or not chatroomId or not uses or not expr_time:
+        return "[api/create_invite/0] || One or more of the required arguments were not supplied. Required=[username, chatroom, expr_time, uses]", 400
+
+
+    # make sure the format is good on time and uses
+    try:
+        expr_time = float(expr_time)
+        uses = int(uses)
+
+
+    # no
+    except:
+        return "[api/create_invite/1] || Invalid format: expr_time has to be type: FLOAT AND uses has to by type: INT", 400
+
+
+    # invites can only be created if you are admin
+    has_permission, status_code = dbhandler.check_perms(username, chatroomId, permission="admin")
+    if status_code != 200:
+        return has_permission, status_code
+
+
+    if has_permission != True:
+        return "[api/create_invite/2] || Permission denied: your user does not have permission to perform this action", 403
+
+
+    # save this invite in the database
+    response, status_code = dbhandler.save_invite(chatroomId, inviteId, expr_time, uses)
+    if status_code != 200:
+        return response, status_code
+
+
+    # ok
+    return inviteId, 200
 
 
 
@@ -306,48 +365,6 @@ def create_chatroom(json_data):
 #    return response, 200
 #
 #
-#
-#def create_invite(json_data):
-#    username   = json_data.get('username')
-#    chatroomId = json_data.get('chatroom')
-#    expr_time  = json_data.get('expr_time')
-#    uses       = json_data.get('uses')
-#    inviteId   = str(uuid.uuid1())
-#
-#
-#    # make sure we got all the data
-#    if not username or not chatroomId or not uses or not expr_time:
-#        return "one or more of the required arguments were not supplied. Required=[username, chatroom, expr_time, uses]", 400
-#
-#
-#    # make sure the format is good on time and uses
-#    try:
-#        expr_time = float(expr_time)
-#        uses = int(uses)
-#
-#
-#    # no
-#    except:
-#        return "Invalid format: expr_time has to be type: FLOAT AND uses has to by type: INT", 400
-#
-#
-#    # invites can only be created if you are admin
-#    has_permission, status_code = dbhandler.check_perms(username, chatroomId, permission="admin")
-#    if status_code != 200:
-#        return has_permission, status_code
-#
-#    if has_permission != True:
-#        return "Permission denied: your user does not have permission to perform this action", 403
-#
-#
-#    # save this invite in the database
-#    response, status_code = dbhandler.save_invite(chatroomId, inviteId, expr_time, uses)
-#    if status_code != 200:
-#        return response, status_code
-#
-#
-#    # ok
-#    return inviteId, 200
 #
 #
 #
