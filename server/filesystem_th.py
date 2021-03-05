@@ -53,8 +53,10 @@ def create_chatroom_folders(chatroomId):
         return "Internal server error: tried to assing existing chatroom ID", 400
 
     try:
-        os.mkdir(f'storage/{chatroomId}')
-        os.mkdir(f'storage/{chatroomId}/uploads')
+        os.mkdir(f'storage/chatrooms/{chatroomId}')
+        os.mkdir(f'storage/chatrooms/{chatroomId}/uploads')
+        a = open(f"storage/chatrooms/{chatroomId}/main.db", "w+")
+        a.close()
 
     except Exception as e:
         log(level='error', msg=f'[server/filehanler/create_chatroom_folders/0] could not create chatroom folders\n Traceback: {e}')
@@ -65,7 +67,7 @@ def create_chatroom_folders(chatroomId):
 
 def remove_chatroom(chatroom):
     try:
-        shutil.rmtree(f'storage/{chatroom}', ignore_errors=True)
+        shutil.rmtree(f'storage/chatrooms/{chatroom}', ignore_errors=True)
 
 
     except Exception as e:

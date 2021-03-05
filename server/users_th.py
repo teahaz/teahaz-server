@@ -48,9 +48,8 @@ def set_cookie(json_data, email=True):
         return response, status
 
 
-def check_cookie(cookie, data):
+def check_cookie(cookie, data, chatroomId):
     username   = data.get('username')
-    chatroomId = data.get('chatroom')
 
     # check if username exists
     if not username:

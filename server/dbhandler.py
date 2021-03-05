@@ -58,10 +58,10 @@ def init_chat(chatroomId, chatroom_name):
     log(level='log', msg=f"[dbhandler/init_chat/0] || creating chatroom: {chatroomId}")
 
     try:
-        chatroom_name = d(chatroom_name)
-    except:
-        log(level='error', msg="[dbhandler/init_chat/1] || could not encode chatroom name")
-        return "Chatroom name couild not be encoded: Invalid data", 400
+        chatroom_name = b(chatroom_name)
+    except Exception as e:
+        log(level='error', msg=f"[dbhandler/init_chat/1] || could not encode chatroom name: {e}")
+        return "[dbhandler/init_chat/1] || Chatroom name could not be encoded: Invalid data", 400
 
     # create users table
     #                          |                       auth                          | settings | perms |
@@ -99,7 +99,7 @@ def init_chat(chatroomId, chatroom_name):
 
 
     # set the chatroom name
-    sql = "INSERT INTO settings VALUES ('?', '?', '?')"
+    sql = "INSERT INTO settings VALUES (?, ?, ?)"
     data, status_code = database_execute(chatroomId, sql, ("chatroom_name", chatroom_name, True))
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/init_chat/6] || Failed to set chatroom name {data}")
@@ -107,7 +107,7 @@ def init_chat(chatroomId, chatroom_name):
 
 
     # set use email to false by default
-    sql = "INSERT INTO settings VALUES ('?', '?', '?')"
+    sql = "INSERT INTO settings VALUES (?, ?, ?)"
     data, status_code = database_execute(chatroomId, sql, ("require_email", False, True))
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/init_chat/7] || Failed to set settting 'require_email': {data}")
@@ -697,27 +697,37 @@ def check_databses():
         log(level='log', msg=f'checking chatroom: {chatroom}')
 
         if not os.path.exists(f"storage/chatrooms/{chatroom}/main.db"):
-            return f"{chatroom} does not have a database file", 500
+            log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" does not have a database file')
+            # returning 200 bc this is not bad enough to kill the server
+            return f"{chatroom} does not have a database file", 200
 
         sql = "SELECT * FROM users"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
-            return f"{chatroom} database is corrupted: {data}", 500
+            log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
+            # returning 200 bc this is not bad enough to kill the server
+            return f"{chatroom} database is corrupted: {data}", 200
 
         sql = "SELECT * FROM invites"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
-            return f"{chatroom} database is corrupted: {data}", 500
+            log(level="error", msg=f'[healthcheck/1] || chatrom: "{chatroom}" database is corrupted: {data}')
+            # returning 200 bc this is not bad enough to kill the server
+            return f"{chatroom} database is corrupted: {data}", 200
 
         sql = "SELECT * FROM messages"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
-            return f"{chatroom} database is corrupted: {data}", 500
+            log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
+            # returning 200 bc this is not bad enough to kill the server
+            return f"{chatroom} database is corrupted: {data}", 200
 
         sql = "SELECT * FROM settings"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
-            return f"{chatroom} database is corrupted: {data}", 500
+            log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
+            # returning 200 bc this is not bad enough to kill the server
+            return f"{chatroom} database is corrupted: {data}", 200
 
 
 

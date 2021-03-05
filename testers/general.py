@@ -15,8 +15,8 @@ global s
 global url
 global username
 global chatroom_id
-url = "http://butorhaz.hopto.org:13337"
-#url = "http://localhost:13337"
+#url = "http://butorhaz.hopto.org:13337"
+url = "http://localhost:13337"
 
 def get():
     url = globals()['url'] + "/api/v0/message/"
@@ -163,8 +163,12 @@ def register():
 def create_chatroom():
     url = globals()['url'] + "/api/v0/chatroom/"
 
+    globals()['username'] = input("username: ")
     a = {
             "username": globals()['username'],
+            "email": input("email: "),
+            "nickname": input("nickname: "),
+            "password" : input("password: "),
             "chatroom_name": input("chatroom_name: ")
             }
 
