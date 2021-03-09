@@ -24,13 +24,15 @@ def d(a):
 
 
 def database_execute(chatroom='', statement='', variables=()):
+    chatroom = chatroom.strip(' ')
     chatroom = security.sanitize_uuid(chatroom)
     if not chatroom:
-        return "invalid chatrom id format", 500
+        return "[database/database_execute/0] || invalid chatrom id format", 500
+
 
 
     if not os.path.exists(f'storage/chatrooms/{chatroom}/main.db'):
-        return "Chatroom does not exist", 500
+        return "[database/database_execute/1] || Chatroom does not exist", 500
 
 
     try:
@@ -42,7 +44,7 @@ def database_execute(chatroom='', statement='', variables=()):
         db_connection.close()
 
     except Exception as e:
-        return f"Database operation failed: {e}", 500
+        return f"[database/database_execute/2] || Database operation failed: {e}", 500
 
 
     return data, 200
@@ -331,11 +333,12 @@ def get_cookies(chatroomId, username):
     try:
         username = b(username)
     except Exception as e:
+        log(level='error', msg=f"[dbhandler/get_cookies/0] || Could not encode username: {e}")
         return "[dbhandler/get_cookies/0] username could not be encoded", 400
 
 
     # get all  stored cookies of the user
-    sql = f"SELECT cookies FROM users WHERE username = ?",
+    sql = f"SELECT cookies FROM users WHERE username = ?"
     data, status_code = database_execute(chatroomId, sql, (username,))
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/get_cookies/1] || Failed to get cookies from database: {data}")
@@ -517,28 +520,25 @@ def use_invite(chatroomId, inviteId):
         return "[dbhandler/use_invite/2] || Could not check invite: Internal database error", 500
 
     invite = data
-    print('invite: ',invite , type(invite))
 
 
 
     # check if there weren't any valid invites
     if len(invite) == 0:
-        return "Invite ID incorrect or expired", 400
+        return "[dbhandler/use_invite/3] || Invite ID incorrect or expired", 400
 
 
 
     # get data from the invite
     try:
-        print('invite: ',invite , type(invite))
         invite = invite[0]
-        print('invite: ',invite , type(invite))
-        uses = int(invite[3])
+        uses = int(invite[2])
 
 
 
     # somethings wrong with the database format
     except Exception as e:
-        log(level='error', msg=f"[server/dbhandler/use_invite/3] error occured while processing invite database possibly corrupted\nTraceback: {e}")
+        log(level='error', msg=f"[dbhandler/use_invite/4] || error occured while processing invite database possibly corrupted\nTraceback: {e}")
         return "Internal databse error: could not process data from databse", 500
 
 
@@ -547,15 +547,15 @@ def use_invite(chatroomId, inviteId):
     if uses > 0:
         uses = uses - 1
     else:
-        return "invite cannot be used as it has exeeded its maximum capacity", 403
+        return "[dbhandler/use_invite/5] || invite cannot be used as it has exeeded its maximum capacity", 403
 
 
 
     sql = f"UPDATE invites SET uses = ? WHERE inviteId = ?"
     data, status_code = database_execute(chatroomId, sql, (str(uses), inviteId))
     if status_code != 200:
-        log(level='error', msg=f"[dbhandler/use_invite/3] || Could not return decremented uses value to database: {data}")
-        return "[dbhandler/use_invite/3] || Could not check invite: Internal database error", 500
+        log(level='error', msg=f"[dbhandler/use_invite/6] || Could not return decremented uses value to database: {data}")
+        return "[dbhandler/use_invite/6] || Could not check invite: Internal database error", 500
 
 
 

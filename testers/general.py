@@ -86,6 +86,23 @@ def send_message():
     return res.text
 
 
+def send_n():
+    url = globals()['url'] + "/api/v0/message/"
+
+    message = "\x0a"
+
+    a = {
+        "username": globals()['username'],
+        "type": "text",
+        "chatroom": globals()['chatroom_id'],
+        "message": encode(message)
+    }
+
+    res = globals()['s'].post(url, json=a)
+    print("status_code: ", res.status_code)
+
+    return res.text
+
 
 def get_file():
     url = globals()['url'] + "/api/v0/file/"
@@ -104,7 +121,7 @@ def get_file():
 
 
 def login():
-    url = globals()['url'] + "/login/"
+    url = globals()['url'] + "/login/" + globals()['chatroom_id']
 
     choice = input("login with email or username? [e/u]")
 
@@ -210,11 +227,14 @@ def get_invite():
 
 
 def use_invite():
-    url = globals()['url'] + "/api/v0/invite/"
+    globals()['chatroom'] = input("chatroom: ")
+    url = globals()['url'] + "/api/v0/invite/"+globals()['chatroom']
 
     a = {
 
-            "username": globals()['username'],
+            "username": input("username: "),
+            "nickname": input('nickname: '),
+            "password": input('password: '),
             "inviteId": input("invite: ")
             }
 
@@ -256,6 +276,12 @@ while 1:
         print(get_invite())
     elif choice == 'uinvite':
         print(use_invite())
+    else:
+        try:
+            send_n()
+            # print(eval(choice))
+        except:
+            print("comand failed")
 
     print("username: ", globals()['username'])
     print("chatroom_id: ", globals()['chatroom_id'])

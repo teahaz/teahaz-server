@@ -76,7 +76,9 @@ def create_chatroom(json_data):
         return "[api/create_chatroom/5] || Internal server errror while formatting chat object", 500
 
 
+    # run set_cookie for autolong, and chatobj for returning at the end
     return chat_obj, 200
+
 
 
 def create_invite(json_data, chatroomId):
@@ -120,10 +122,6 @@ def create_invite(json_data, chatroomId):
 
     # ok
     return inviteId, 200
-
-
-
-
 
 
 
@@ -366,51 +364,5 @@ def create_invite(json_data, chatroomId):
 #
 #
 #
-#
-#
-#def process_invite(json_data):
-#    username   = json_data.get('username')
-#    inviteId   = json_data.get('inviteId')
-#    chatroomId = json_data.get('chatroom')
-#
-#
-#    # make sure we got all the data
-#    if not username or not inviteId:
-#        return "one or more of the required arguments were not supplied. Required=[username, inviteId]", 400
-#
-#
-#    # we need to sanitize
-#    inviteId = security.sanitize_uuid(inviteId)
-#    if not inviteId:
-#        return "invalid format for invite ID", 400
-#
-#
-#    chatroomId, status_code = dbhandler.use_invite(chatroomId, inviteId)
-#    if status_code != 200:
-#        return chatroomId, status_code
-#
-#
-#    response, status_code = dbhandler.add_user_to_chatroom(username, chatroomId, admin=False)
-#    if status_code != 200:
-#        return response, status_code
-#
-#
-#    response, status_code = dbhandler.user_save_chatroom(username, chatroomId)
-#    if status_code != 200:
-#        dbhandler.remove_user_from_chatroom(username, chatroomId)
-#        return response, status_code
-#
-#
-#    chatname, status_code = dbhandler.get_chatname(chatroomId)
-#    if status_code != 200:
-#        return chatname, status_code
-#
-#
-#    chat_obj = {
-#            "name": chatname,
-#            "chatroom": chatroomId
-#            }
-#
-#    return chat_obj, 200
 #
 #

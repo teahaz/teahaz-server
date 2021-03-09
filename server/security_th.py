@@ -8,16 +8,19 @@ from hashlib import sha256
 from logging_th import logger as log
 
 def sanitize_uuid(ID):
+    ID = str(ID)
     ID = ID.replace('..', '')
     ID = ID.replace('/', '')
 
     if len(ID) != 36:
+        print('ID: ',ID , len(ID))
         return False
 
     # validate uuid:
     try:
         uuid.UUID(ID).version
-    except ValueError:
+    except ValueError as e:
+        print('ID: ',ID , type(ID))
         return False
 
 
@@ -44,8 +47,8 @@ def sanitize_chatroomId(chatroom_id):
     return chatroom_id, 200
 
 
-# yes this is overly simple, and yes its like this bc im pretty sure it wont be this simple for long
-def generate_cookie():
+# yes this is overly simple but lets me control all uuids in one place
+def gen_uuid():
     cookie = str(uuid.uuid1())
     return cookie
 

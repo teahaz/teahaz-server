@@ -37,7 +37,7 @@ def logger(level='log', msg=""):
 
     # level = the type of log [colours, etc]
     level = level.lower()
-    msg_log = colour_templates[level] + f"[ {level} ] {time.time()}  ||  {msg}" + colours.RESET
+    msg_log = colour_templates[level] + f"[ {level} ]".ljust(12, " ") + f" {time.time()}".ljust(21, " ") + f"||  {msg}" + colours.RESET
     print(msg_log, file=sys.stderr)
 
     # keep all logs in a file for later
