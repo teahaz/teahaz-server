@@ -13,3 +13,4 @@ The server manages each chatroom individually. It doesnt store any centralized d
 
 ### chatroom structure
 
+![image of server structure](images/chatroom_nice.png)
