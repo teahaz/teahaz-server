@@ -226,11 +226,12 @@ def get_invite():
 
 def use_invite():
     globals()['chatroom'] = input("chatroom: ")
+    globals()['username'] = input("username: ")
     url = globals()['url'] + "/api/v0/invite/"+globals()['chatroom']
 
     a = {
 
-            "username": input("username: "),
+            "username": globals()['username'],
             "nickname": input('nickname: '),
             "password": input('password: '),
             "inviteId": input("invite: ")

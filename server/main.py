@@ -80,7 +80,7 @@ class api__messages(Resource):
 
     def post(self, chatroomId): # sends message
         if not request.get_json(): return "no data sent", 401
-        if not check_cookie(request.cookies.get(chatroomId), request.get_json(), chatroomId): return "", 401
+        if not check_cookie(request.cookies.get(chatroomId), request.get_json(), chatroomId): return "client not logged in", 401
 
         data, status_code = message_send(request.get_json(), chatroomId)
         return data, status_code
