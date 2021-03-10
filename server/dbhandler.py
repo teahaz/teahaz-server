@@ -709,6 +709,14 @@ def check_databses():
         except Exception as e:
             return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500
 
+    if not os.path.isdir("storage/chatrooms"):
+        try:
+            log(level='warning', msg='[health check] creating chatrooms folder')
+            os.mkdir("storage/chatrooms")
+
+        except Exception as e:
+            return f"could not create chatrooms folder: {e}\n Please make sure you have to correct permissions", 500
+
 
     for chatroom in os.listdir('storage/chatrooms/'):
         log(level='log', msg=f'checking chatroom: {chatroom}')
