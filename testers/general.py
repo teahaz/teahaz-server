@@ -19,12 +19,11 @@ global chatroom_id
 url = "http://localhost:13337"
 
 def get():
-    url = globals()['url'] + "/api/v0/message/"
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id']
 
     headers = {
         "username": globals()['username'],
-        "time": "1604951915.377928",
-        "chatroom": globals()['chatroom_id'],
+        "time": "1604951915.377928"
     }
 
 
@@ -69,14 +68,13 @@ def send_file():
 
 
 def send_message():
-    url = globals()['url'] + "/api/v0/message/"
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id']
 
     message = input(">> ")
 
     a = {
         "username": globals()['username'],
         "type": "text",
-        "chatroom": globals()['chatroom_id'],
         "message": encode(message)
     }
 
@@ -149,7 +147,7 @@ def login():
 
 
 def clogin():
-    url = globals()['url'] + "/login/"
+    url = globals()['url'] + "/login/"+globals()['chatroom']
 
     a = {
         "username": globals()['username'],

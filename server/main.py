@@ -10,8 +10,8 @@ from flask_restful import Api
 from flask_restful import Resource
 
 #from api import upload_file
-#from api import message_get
-#from api import message_send
+from api import message_get
+from api import message_send
 #from api import download_file
 from api import create_invite
 from api import create_chatroom
@@ -60,32 +60,32 @@ class login(Resource):
         else:
             # if the cookie fails to set then this is not actaully a cookie but an error message
             return cookie, status_code
-#
-#    def get(self):
-#        if not request.headers: return "no data sent", 401
-#        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
-#        return "OK", 200
-#
-#
-#
-## handles messages
-#class api__messages(Resource):
-#    def get(self): # gets messages since {time.time()}
-#        if not request.headers: return "no data sent", 401
-#        if not check_cookie(request.cookies.get('access'), request.headers): return "client not logged in", 401
-#
-#        data, status_code = message_get(request.headers)
-#        return data, status_code
-#
-#
-#    def post(self): # sends message
-#        if not request.get_json(): return "no data sent", 401
-#        if not check_cookie(request.cookies.get('access'), request.get_json()): return "client not logged in", 401
-#
-#        data, status_code = message_send(request.get_json())
-#        return data, status_code
-#
-#
+
+    def get(self, chatroomId):
+        if not request.headers: return "no data sent", 401
+        if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
+        return "OK", 200
+
+
+
+# handles messages
+class api__messages(Resource):
+    def get(self, chatroomId): # gets messages since {time.time()}
+        if not request.headers: return "no data sent", 401
+        if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
+
+        data, status_code = message_get(request.headers, chatroomId)
+        return data, status_code
+
+
+    def post(self, chatroomId): # sends message
+        if not request.get_json(): return "no data sent", 401
+        if not check_cookie(request.cookies.get(chatroomId), request.get_json(), chatroomId): return "", 401
+
+        data, status_code = message_send(request.get_json(), chatroomId)
+        return data, status_code
+
+
 #
 ## handles file
 #class api__files(Resource):
@@ -127,7 +127,7 @@ class api__chatroom(Resource):
                 return cookie, status_code
 
 
-        return response, status_code
+        return chat_obj, status_code
 
 
 
@@ -175,9 +175,9 @@ api.add_resource(index, '/')
 api.add_resource(login, '/login/<chatroomId>')
 #api.add_resource(register, '/register/')
 #api.add_resource(api__files, '/api/v0/file/<chatroomId>')
-#api.add_resource(api__messages, '/api/v0/message/<chatroomId>')
-api.add_resource(api__invites, '/api/v0/invite/<chatroomId>')
 api.add_resource(api__chatroom, '/api/v0/chatroom/')
+api.add_resource(api__invites, '/api/v0/invite/<chatroomId>')
+api.add_resource(api__messages, '/api/v0/message/<chatroomId>')
 
 
 

@@ -125,6 +125,173 @@ def create_invite(json_data, chatroomId):
 
 
 
+def message_send(json_data, chatroomId):
+    messageId = str(uuid.uuid1())
+    replyId = json_data.get('replyId')
+    message = json_data.get('message')
+    username = json_data.get('username')
+    message_type = json_data.get('type')
+
+
+
+    # make sure all of the needed data is present and is not 'None'
+    if not username or not message or not message_type or not chatroomId:
+        return '[api/message_send/0] || one or more of the required arguments are not supplied, needed=[username, message, type, chatroomId]', 400
+
+
+    # check message type
+    if message_type != "text":
+        return "[api/message_send/1] || posting non-'text' type to /message is forbidden", 405
+
+
+    # store message that got sent
+    #NOTE
+    response , status_code = dbhandler.save_in_db(
+                                time         = time.time(),
+                                messageId    = messageId,
+                                replyId      = replyId,
+                                username     = username,
+                                chatroomId   = chatroomId,
+                                message_type = 'text',
+                                message      = message
+                                )
+
+
+    # make sure saving worked without any errors
+    if status_code != 200:
+        return response, status_code
+
+    # all is well
+    return "OK", 200
+
+
+
+def message_get(headers, chatroomId):
+    last_time = headers.get('time')
+    username = headers.get('username')
+
+
+    # make sure the client sent everything
+    if not last_time or not username or not chatroomId:
+        return '[api/message_get/0] || one or more of the required arguments are not supplied. Required=[time, username, chatroomId]', 400
+
+
+    # time needs to be converted to a number
+    try:
+        last_time = float(last_time)
+
+
+    # please supply a valid time
+    except:
+        return 'value for time is not a number', 400
+
+
+    # get messages since last_time
+    return_data, status_code = dbhandler.get_messages_db(chatroomId, last_time=last_time)
+
+
+    # if gettting messages failed
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/message_get/3] server error while getting messages\n Traceback  {return_data}')
+        return return_data, status_code
+
+
+    # all is well
+    return return_data, 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+#def download_file(headers):
+#    username     = headers.get('username')
+#    filename     = headers.get('filename')
+#    chatroom_id  = headers.get('chatroom')
+#
+#
+#    # make sure client sent all data
+#    if not username or not filename or not chatroom_id:
+#        return 'one or more of the required arguments are not supplied', 400
+#
+#
+#    # check if chatroom_id is valid, this is important as its used as part of a path and in sql
+#    chatroom_id, status_code = security.sanitize_chatroomId(chatroom_id)
+#    if status_code != 200:
+#        return chatroom_id, status_code
+#
+#
+#    # gotta sanitize shit
+#    filename = security.sanitize_uuid(filename)
+#    if not filename:
+#        return "invalid format from filename", 400
+#
+#
+#    # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
+#    if not os_isfile(f'storage/{chatroom_id}/uploads/{filename}'):
+#        return "file requested by client does not exist", 404
+#
+#
+#    # read file requested by user
+#    data, status_code = filehander.read_file(chatroom_id, filename)
+#    if status_code != 200:
+#        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
+#        return data, status_code
+#
+#
+#    # all is well
+#    return data, 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -187,118 +354,7 @@ def create_invite(json_data, chatroomId):
 
 
 #
-#def message_get(headers):
-#    last_time = headers.get('time')
-#    username = headers.get('username')
-#    chatroom_id = headers.get('chatroom')
 #
-#
-#    # make sure the client sent everything
-#    if not last_time or not username or not chatroom_id:
-#        return 'one or more of the required arguments are not supplied', 400
-#
-#
-#    # time needs to be converted to a number
-#    try:
-#        last_time = float(last_time)
-#
-#
-#    # please supply a valid time
-#    except:
-#        return 'value for time is not a number', 400
-#
-#
-#    # get messages since last_time
-#    return_data, status_code = dbhandler.get_messages_db(chatroom_id, last_time=last_time, )
-#
-#
-#    # if gettting messages failed
-#    if status_code != 200:
-#        log(level='error', msg=f'[server/api/message_get/3] server error while getting messages\n Traceback  {return_data}')
-#        return return_data, status_code
-#
-#
-#    # all is well
-#    return return_data, 200
-#
-#
-#
-#def message_send(json_data):
-#    chatroom_id = json_data.get('chatroom')
-#    username = json_data.get('username')
-#    message_type = json_data.get('type')
-#    message = json_data.get('message')
-#    messageId = str(uuid.uuid1())
-#
-#
-#    # make sure all of the needed data is present and is not 'None'
-#    if not username or not message or not message_type or not chatroom_id:
-#        return 'one or more of the required arguments are not supplied, needed=[chatroom_id, type, message]', 400
-#
-#
-#    # check message type
-#    if message_type != "text":
-#        return "posting non-'text' type to /message is forbidden", 405
-#
-#
-#    # store message that got sent
-#    #NOTE
-#    response , status_code = dbhandler.save_in_db(
-#                                time         = time.time(),
-#                                messageId    = messageId,
-#                                username     = username,
-#                                chatroomId  = chatroom_id,
-#                                message_type = 'text',
-#                                message      = message
-#                                )
-#
-#
-#    # make sure saving worked without any errors
-#    if status_code != 200:
-#        return response, status_code
-#
-#    # all is well
-#    return "OK", 200
-#
-#
-#
-#def download_file(headers):
-#    username     = headers.get('username')
-#    filename     = headers.get('filename')
-#    chatroom_id  = headers.get('chatroom')
-#
-#
-#    # make sure client sent all data
-#    if not username or not filename or not chatroom_id:
-#        return 'one or more of the required arguments are not supplied', 400
-#
-#
-#    # check if chatroom_id is valid, this is important as its used as part of a path and in sql
-#    chatroom_id, status_code = security.sanitize_chatroomId(chatroom_id)
-#    if status_code != 200:
-#        return chatroom_id, status_code
-#
-#
-#    # gotta sanitize shit
-#    filename = security.sanitize_uuid(filename)
-#    if not filename:
-#        return "invalid format from filename", 400
-#
-#
-#    # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
-#    if not os_isfile(f'storage/{chatroom_id}/uploads/{filename}'):
-#        return "file requested by client does not exist", 404
-#
-#
-#    # read file requested by user
-#    data, status_code = filehander.read_file(chatroom_id, filename)
-#    if status_code != 200:
-#        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
-#        return data, status_code
-#
-#
-#    # all is well
-#    return data, 200
 #
 #
 #

@@ -84,7 +84,7 @@ def init_chat(chatroomId, chatroom_name):
 
     # create messages table
     #                          |                       general                    | type | message |          files         |
-    sql = "CREATE TABLE messages ('time', 'messageId', 'username', 'chatroomId', 'type', 'message', 'filename', 'extension')"
+    sql = "CREATE TABLE messages ('time', 'messageId', 'replyId', 'username', 'type', 'message', 'filename', 'extension')"
     data, status_code = database_execute(chatroomId, sql, ())
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/init_chat/4] || {data}")
@@ -377,7 +377,6 @@ def get_nickname(chatroomId, username):
 
 
     # sqlite3 wraps the username in a tuple inside of a list
-    #print(data)
     try:
         nickname = d(data[0][0])
     except:
@@ -571,7 +570,7 @@ def use_invite(chatroomId, inviteId):
 
 
 # save a message in the database (both texts and files)
-def save_in_db(time, messageId, username, chatroomId, message_type, message=None, filename=None, extension=None ):
+def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None, message=None, filename=None, extension=None ):
     if not time  or not messageId  or not username  or not chatroomId  or not message_type :
         # making sure that all values that are needed exist
         log(level='error', msg='[dbhandler/save_in_db/0] || one or more of the required fields passed to function "save_in_db" are not present [time, username, chatroomId, message_type]')
@@ -582,25 +581,36 @@ def save_in_db(time, messageId, username, chatroomId, message_type, message=None
     try:
         username = b(username)
         messageId = b(messageId)
-        chatroomId = b(chatroomId)
         message_type = b(message_type)
 
 
     # if this fails its bc the user sent bad data
     except Exception as e:
-        log(level='error', msg='[dbhandler/save_in_db/1] || could not encode some data: {e}')
+        log(level='error', msg=f'[dbhandler/save_in_db/1] || could not encode some data: {e}')
         return "[dbhandler/save_in_db/1] || corrupted data sent to server", 400
 
 
     # encode non compulsary values
     if message: message = b(message)
-    if filename: filename = b(filename)
     if extension: extension = b(extension)
+
+
+    # validate, and encode uuids
+    if filename:
+        filename = security.sanitize_uuid(filename)
+        if filename: filename = b(filename)
+        else: return "[database/save_in_db/2] || Invalid uuid sent for filename", 400
+
+    if replyId:
+        replyId = security.sanitize_uuid(replyId)
+        if replyId: replyId = b(replyId)
+        else: return "[database/save_in_db/2] || Invalid uuid sent for replyId", 400
+
 
 
 
     sql = f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    variables = (time, messageId, username, chatroomId, message_type, message, filename, extension)
+    variables = (time, messageId, replyId, username, message_type, message, filename, extension)
     data, status_code = database_execute(chatroomId, sql, variables)
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/save_in_db/2] || Failed to save message: {data}")
@@ -627,16 +637,16 @@ def get_messages_db(chatroomId, last_time=0):
     json_data = []
 
     # format messages for returning
-    try:
+    # try:
+    if True:
         for element in data:
-            nickname = get_nickname(chatroomId, d(element[2]))
+            nickname = get_nickname(chatroomId, "chatroom_name")
 
             # get compulsary data, all but time need to be decoded
             send_time = element[0]
             messageId = d(element[1])
-            username = d(element[2])
-            chatroom = d(element[3])
-            msg_type = d(element[4])
+            username  = d(element[3])
+            msg_type  = d(element[4])
 
             # get optional data, they may or may not be present
             message = element[5]
@@ -645,14 +655,16 @@ def get_messages_db(chatroomId, last_time=0):
             if filename: filename = d(filename)
             extension = element[7]
             if extension: extension = d(extension)
+            replyId   = element[2]
+            if replyId: replyId = d(replyId)
 
             # make return dict
             a = {
                 'time': send_time,
                 'messageId': messageId,
+                'replyId' : replyId,
                 'username': username,
                 'nickname': nickname,
-                'chatroom': chatroom,
                 'type': msg_type,
                 'message': message,
                 'filename': filename,
@@ -664,9 +676,9 @@ def get_messages_db(chatroomId, last_time=0):
 
 
     # message format error
-    except Exception as e:
-    #else:
-        log(level='error', msg=f"[dbhandler/get_messages/1] || Error while formatting message data: {e}")
+    # except Exception as e:
+    else:
+        # log(level='error', msg=f"[dbhandler/get_messages/1] || Error while formatting message data: {e}")
         return "[dbhandler/get_messages/1] || Could not format data: Internal databse error", 500
 
 
