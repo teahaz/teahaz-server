@@ -20,14 +20,14 @@ docs of /api/v0
 messages
 ========
 ## endpoints:
-* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
+* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
 
 files
 =====
 ## endpoints:
-* GET: `http(s)://url:port/api/v0/file/<chatroomId>`
+* GET: `http(s)://url:port/api/v0/file/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
 
@@ -100,7 +100,7 @@ Creating an invite so other people can join your chatroom
 <br />
 
 ## endpoints:
-* GET: `http(s)://url:port/api/v0/invite/<chatroomId>`
+* GET: `http(s)://url:port/api/v0/invite/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
 
@@ -152,7 +152,7 @@ Chatrooms are in effect their own segregated server-like systems([check out the 
 
 
 ## endpoints:
-* POST: `http(s)://url:port/api/v0/invite/<chatroomId>`
+* POST: `http(s)://url:port/api/v0/invite/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
 
