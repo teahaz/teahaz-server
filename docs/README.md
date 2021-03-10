@@ -43,5 +43,5 @@ This table stores information on every user. The table is responsible for handli
     sql = "CREATE TABLE users ('username', 'email', 'nickname', 'password', 'cookies', 'colour', 'admin')"
 
 
-
+docs are incomplete bc I had better things to do
 
