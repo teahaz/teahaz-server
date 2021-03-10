@@ -368,9 +368,9 @@ def get_cookies(chatroomId, username):
 
 
 # get the nickname of a user
-def get_nickname(chatroomId, username):
+def get_nickname(chatroomId, username_encoded):
     sql = f"SELECT nickname FROM users WHERE username = ?"
-    data, status_code = database_execute(chatroomId, sql, (username,))
+    data, status_code = database_execute(chatroomId, sql, (username_encoded,))
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/get_nickname/0] || Failed to get nickname: {data}")
         return "ERR: could not get nickname"
@@ -379,7 +379,8 @@ def get_nickname(chatroomId, username):
     # sqlite3 wraps the username in a tuple inside of a list
     try:
         nickname = d(data[0][0])
-    except:
+    except Exception as e:
+        log(level='warning', msg=f"[dbhandler/get_nickname/1] || could not get users nickname: {e}")
         nickname = "ERR: could not get nickname"
 
 
@@ -640,7 +641,7 @@ def get_messages_db(chatroomId, last_time=0):
     # try:
     if True:
         for element in data:
-            nickname = get_nickname(chatroomId, "chatroom_name")
+            nickname = get_nickname(chatroomId, element[3])
 
             # get compulsary data, all but time need to be decoded
             send_time = element[0]
