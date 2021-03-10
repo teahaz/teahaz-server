@@ -18,14 +18,14 @@ docs of /api/v0
 
 messages
 ========
-## endpoints:
+### endpoints:
 * GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
 
 files
 =====
-## endpoints:
+### endpoints:
 * GET: `http(s)://url:port/api/v0/file/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
@@ -98,7 +98,7 @@ Creating an invite so other people can join your chatroom
 **NOTE:** On default settings the creator of the invite, has to be admin on the server
 <br />
 
-## endpoints:
+### endpoints:
 * GET: `http(s)://url:port/api/v0/invite/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
@@ -150,7 +150,7 @@ Using that invite you found on a shady website.<br />
 Chatrooms are in effect their own segregated server-like systems([check out the docs](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs)), which means that when using an Invite you have to send all details for registering
 
 
-## endpoints:
+### endpoints:
 * POST: `http(s)://url:port/api/v0/invite/<chatroomId>`<br />
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
