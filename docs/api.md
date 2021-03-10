@@ -77,7 +77,7 @@ print(res.text)
 Server returns the ID of the chatroom created
 
 **NOTE**: Due to python being slow at cryptographic operations, this might take a few seconds.
-```
+```json
 {
   "chatroom": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec", 
   "name": "best chatroom ever"
@@ -135,7 +135,7 @@ print(res.text)
 
 ### example output:
 Returns the ID of the invite
-```
+```json
 "1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
 ```
 **NOTE:** This is probably best returned to the user as `chatroomID/inviteId`
