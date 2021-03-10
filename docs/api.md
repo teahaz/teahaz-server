@@ -42,11 +42,11 @@ Method should create a new chatroom. Chatrooms are in effect their own segregate
 * Creator becomes chatroom admin
 <br />
 
-## endpoints:
+### endpoints:
 * POST: `http(s)://url:port/api/v0/chatroom/`
 <br />
 
-#### required fields:
+### required fields:
 * username
 * email ( the server owner can change whether the chatroom owner needs an email or not )
 * nickname
@@ -54,7 +54,7 @@ Method should create a new chatroom. Chatrooms are in effect their own segregate
 * chatroom_name ( this is not equivalent to the ID, which will be assigned at random )
 <br />
 
-#### code example:
+### code example:
 ```py
 url = http:/<server url>/api/v0/chatroom/"
 
@@ -73,7 +73,7 @@ res = session_obj.post(url=url, json=data)
 print(res.text)
 ```
 
-#### example output:
+### example output:
 Server returns the ID of the chatroom created
 
 **NOTE**: Due to python being slow at cryptographic operations, this might take a few seconds.
@@ -103,7 +103,7 @@ Creating an invite so other people can join your chatroom
 `<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
 <br />
 
-#### required fields:
+### required fields:
 * username
 * expr_time
     - Expiration time of the invite.
@@ -115,7 +115,7 @@ Creating an invite so other people can join your chatroom
 <br />
 
 
-#### code example:
+### code example:
 ```py
 import time
 url = http(s)://url:port/api/v0/invite/" + chatroomId
@@ -133,7 +133,7 @@ print(res.text)
 ```
 <br />
 
-#### example output:
+### example output:
 Returns the ID of the invite
 ```
 "1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
@@ -156,7 +156,7 @@ Chatrooms are in effect their own segregated server-like systems([check out the 
 <br />
 
 
-#### required fields:
+### required fields:
 * username
 * email ( the server owner can change whether the chatroom owner needs an email or not )
 * nickname
@@ -166,7 +166,7 @@ Chatrooms are in effect their own segregated server-like systems([check out the 
 <br />
 
 
-#### code example:
+### code example:
 ```py
 url = http://<teahouse server>/api/v0/invite/" + chatroomId
 
@@ -184,7 +184,7 @@ print(res.text)
 ```
 
 
-#### example output
+### example output
 returns a json object with the chatroom name and ID
 ```json
 {
