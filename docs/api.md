@@ -19,65 +19,41 @@ docs of /api/v0
 
 messages
 ========
-
-
+## endpoints:
+* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
+`<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
+<br />
 
 files
 =====
-
-
+## endpoints:
+* GET: `http(s)://url:port/api/v0/file/<chatroomId>`
+`<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
+<br />
 
 chatrooms
 =========
-Checking chatrooms you have access to
--------------------------------------
-A GET request to `/chatroom/` should return all chatrooms that your user has access to
-
-#### required fields:
-* username
-
-
-#### code example:
-```py
-url = http:/<server url>/api/v0/chatroom/"
-
-data = {
-        "username": username,
-        }
-
-#NOTE: In GET requests data has to be sent in the http header
-res = session_obj.get(url=url, headers=data)
-
-print(res.text)
-```
-
-
-
-#### example return data:
-Server returns both the name and the ID of every chatroom the user is in
-```json
-[
-    {
-        "name": "chatroom_name1",
-        "chatroom": "77e3d806-7c07-11eb-87af-b5145ad18bcb"
-    },
-    {
-        "name": "chatroom_name1",
-        "chatroom": "fd4f0462-7c10-11eb-87af-b5145ad18bcb"
-    }
-]
-```
-
-
 Creating a new chatroom
 -----------------------
-Sending a POST request to `/chatroom/` should create a new chatroom. The creator of the chatroom will automatically be added as an admin.
+Method should create a new chatroom. Chatrooms are in effect their own segregated server-like systems([check out the docs](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs)), which means the user creating a chatroom will have to send all details for registering.
+<br />
+
+### chat defaults:
+* require_email is on
+* Creator becomes chatroom admin
+<br />
+
+## endpoints:
+* POST: `http(s)://url:port/api/v0/chatroom/`
+<br />
 
 #### required fields:
 * username
-* chatroom_name
-   - chatroom name is the nickname of the chatroom and **not** the ID
-
+* email ( the server owner can change whether the chatroom owner needs an email or not )
+* nickname
+* password
+* chatroom_name ( this is not equivalent to the ID, which will be assigned at random )
+<br />
 
 #### code example:
 ```py
@@ -85,8 +61,11 @@ url = http:/<server url>/api/v0/chatroom/"
 
 # format required data in json format
 data = {
-        "username": username,
-        "chatroom_name": input("chatroom name: ")
+        "username"      : "me",
+        "email"         : "me@email.com",
+        "nickname"      : "not_me:)",
+        "password"      : "password123",
+        "chatroom_name" : "best chatroom ever"
         }
 
 # make post request. NOTE: data is sent in the json field 
@@ -97,10 +76,13 @@ print(res.text)
 
 #### example output:
 Server returns the ID of the chatroom created
-```
-chatroom_name: best chat ever
 
-"47aec55e-7c27-11eb-87af-b5145ad18bcb"
+**NOTE**: Due to python being slow at cryptographic operations, this might take a few seconds.
+```
+{
+  "chatroom": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec", 
+  "name": "best chatroom ever"
+}
 ```
 
 
@@ -113,32 +95,34 @@ invites
 =======
 Creating an invite
 ------------------
-Sending a GET request to `/invite/` should create an invite.
-**NOTE:** The creator of the invite has to be admin of the chatroom they are creating an invite for!
+Creating an invite so other people can join your chatroom
+**NOTE:** On default settings the creator of the invite, has to be admin on the server
+<br />
+
+## endpoints:
+* GET: `http(s)://url:port/api/v0/invite/<chatroomId>`
+`<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
+<br />
 
 #### required fields:
 * username
-* chatroom
-    - The chatrooms ID
-
 * expr_time
     - Expiration time of the invite.
     - This has to be a date in Epoch time format.
     - if you dont want the invite to expire then set this to 0.
-
 * uses
     - The number of users that can join with this link.
     - There is no option for unlimited, however there is no upper limit.
+<br />
 
 
 #### code example:
 ```py
 import time
-url = http://<teahouse server>/api/v0/invite/"
+url = http(s)://url:port/api/v0/invite/" + chatroomId
 
 data = {
         "username": username,
-        "chatroom": chatroomId,
         "expr_time": str(time.time() + 60 * 60 * 24),
         "uses": str(10)
         }
@@ -148,37 +132,56 @@ res = session_obj.get(url=url, headers=data)
 
 print(res.text)
 ```
+<br />
 
 #### example output:
 Returns the ID of the invite
 ```
 "1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
 ```
-
+**NOTE:** This is probably best returned to the user as `chatroomID/inviteId`
+(**ps**: I will probably change this to an object with `name`, `chatroom` and `inviteID`. Its staying like this bc I only came up with the idea while writing the docs and I dont have energy rn)
+<br />
+<br />
 
 Using an invite
 ---------------
-Sending a POST request to `/invite/` with an invite ID should add your use to the chatroom the invite corresponds to.
+Using that invite you found on a shady website.<br />
+(/s Please dont use our project for anything illegal.)<br />
+Chatrooms are in effect their own segregated server-like systems([check out the docs](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs)), which means that when using an Invite you have to send all details for registering
+
+
+## endpoints:
+* POST: `http(s)://url:port/api/v0/invite/<chatroomId>`
+`<chatroomId>` should be replaced by the ID of the chatroom that you wish to create an invite for.
+<br />
+
 
 #### required fields:
 * username
+* email ( the server owner can change whether the chatroom owner needs an email or not )
+* nickname
+* password
 * inviteID
- - the same invite ID that appeared in section [Creating an invite](#creating-an-invite)
-
+   - the same invite ID that appeared in section [Creating an invite](#creating-an-invite)
+<br />
 
 
 #### code example:
 ```py
-url = http://<teahouse server>/api/v0/invite/"
+url = http://<teahouse server>/api/v0/invite/" + chatroomId
 
 data = {
-        "username": username,
-        "inviteId": input("invite: ")
+        "username"      : "me",
+        "email"         : "me@email.com",
+        "nickname"      : "not_me:)",
+        "password"      : "password123",
+        "inviteID"      : "1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
         }
 
 # make post request with data in the json field
 res = session_obj.post(url=url, json=data)
-return res.text
+print(res.text)
 ```
 
 
