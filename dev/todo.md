@@ -1,5 +1,9 @@
 general
 =======
+[ ] there are some permission issues with running the server for the first time if the server was cloned as a root user
+
+
+
 [ ] get server configs
 
 [ ] get user configs
