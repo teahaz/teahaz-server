@@ -48,6 +48,7 @@ def set_cookie(json_data, chatroomId):
     # check if storing was succesful
     if status == 200:
         log(level='log', msg=f'[users/set_cookie/2] || "{username}" just logged in')
+        # return a cookie and the chatname, that will be expanded later
         return cookie, 200
     else:
         # if not succesful, send the response back to the user

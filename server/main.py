@@ -21,6 +21,7 @@ from users_th import add_user
 from users_th import set_cookie
 from users_th import check_cookie
 
+from dbhandler import check_settings
 from dbhandler import check_databses
 
 from logging_th import logger as log
@@ -50,10 +51,18 @@ class login(Resource):
         # authenticate and get cookie data
         cookie, status_code = set_cookie(request.get_json(), chatroomId)
 
+
+        # NOTE : this is temporary
+        # TODO all these endpoints get the chatname in a different way. TODO: make it more uniform
+        chat_name, status_code = check_settings(chatroomId, "chatroom_name")
+        if status_code != 200:
+            return chat_name, status_code
+        # NOTE : this is temporary ^^
+
         # using 200 and not True bc it gets sent along to the client
         if status_code == 200:
             # set cookie
-            res = make_response("assigning new cookie")
+            res = make_response({"name": chat_name, "chatroom": chatroomId})
             res.set_cookie(chatroomId, cookie)
             return res
 
