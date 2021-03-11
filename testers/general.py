@@ -15,11 +15,11 @@ global s
 global url
 global username
 global chatroom_id
-#url = "http://butorhaz.hopto.org:13337"
+# url = "http://butorhaz.hopto.org:13337"
 url = "http://localhost:13337"
 
 def get():
-    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id']
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] + '/'
 
     headers = {
         "username": globals()['username'],
@@ -68,7 +68,7 @@ def send_file():
 
 
 def send_message():
-    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id']
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] +'/'
 
     message = input(">> ")
 
@@ -232,7 +232,8 @@ def use_invite():
     a = {
 
             "username": globals()['username'],
-            "nickname": input('nickname: '),
+            "nickname": "\x0aB\x0a",
+            # "nickname": input('nickname: '),
             "password": input('password: '),
             "inviteId": input("invite: ")
             }

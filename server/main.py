@@ -172,12 +172,11 @@ api.add_resource(index, '/')
 
 
 
-api.add_resource(login, '/login/<chatroomId>')
-#api.add_resource(register, '/register/')
-#api.add_resource(api__files, '/api/v0/file/<chatroomId>')
-api.add_resource(api__chatroom, '/api/v0/chatroom/')
-api.add_resource(api__invites, '/api/v0/invite/<chatroomId>')
-api.add_resource(api__messages, '/api/v0/message/<chatroomId>')
+api.add_resource(login, '/login/<chatroomId>', '/login/<chatroomId>')
+api.add_resource(api__chatroom, '/api/v0/chatroom/', '/api/v0/chatroom/')
+#api.add_resource(api__files, '/api/v0/file/<chatroomId>', '/api/v0/file/<chatroomId>')
+api.add_resource(api__invites, '/api/v0/invite/<chatroomId>', '/api/v0/invite/<chatroomId>/')
+api.add_resource(api__messages, '/api/v0/message/<chatroomId>', '/api/v0/message/<chatroomId>/')
 
 
 
