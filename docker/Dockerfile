@@ -1,17 +1,24 @@
-# install and update
 FROM ubuntu:20.04
+
+
+
+# arguments
+ARG TEAHAZ_PORT
+
+
+
+
+
+# install and update system stuff
 RUN apt-get update && apt-get upgrade -y
 RUN apt install apt-utils -y
 RUN apt install systemctl -y
 
 
-# evn
-ENV PYTHONUNBUFFERED=0
-ENV DEBIAN_FRONTEND=noninteractive 
 
 
 
-# install stuff
+# install other stuff
 RUN apt install git -y
 RUN apt install cron -y
 RUN apt install busybox -y
@@ -27,10 +34,14 @@ RUN pip3 install uuid
 RUN pip3 install bcrypt
 
 
+# evn
+ENV PYTHONUNBUFFERED=0
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TEAHAZ_PORT=${TEAHAZ_PORT}
 
 
 # setup
-EXPOSE 13337
+EXPOSE ${TEAHAZ_PORT}
 
 RUN (crontab -l 2>/dev/null; echo "* * * * * chown -R teahaz /home/teahaz") | crontab -
 RUN systemctl enable cron

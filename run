@@ -3,6 +3,34 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+
+# make sure its being run by root
+id | grep "uid=0" > /dev/null
+if [ "$?" != 0 ]
+then
+    echo "Please make sure you are running teahaz as root!"
+    exit
+fi
+
+# make suer docker is installed
+docker --version > /dev/null
+if [ "$?" != 0 ]
+then
+    echo "Please make sure you have docker installed!"
+    exit
+fi
+
+TEAHAZ_PORT=13337
+if [ "$1" != "" ]
+then
+    case $1 in
+        ''|*[!0-9]*) echo "Invalid port, using default!" ;;
+        *) TEAHAZ_PORT=$1  ;;
+    esac
+fi
+
+
+
 ID=""
 function get_dID {
     running=$( docker ps)
@@ -102,11 +130,11 @@ else
     then
         cd $DIR/docker
 
-        docker build -t teahaz_server:latest .
+        docker build --build-arg TEAHAZ_PORT=$TEAHAZ_PORT -t teahaz_server:latest .
 
         make_sure_cron_is_running &
 
-        docker run -p 13337:13337 -e PYTHONUNBUFFERED=0 --rm -v $DIR:/home/teahaz teahaz_server:latest
+        docker run -p $TEAHAZ_PORT:$TEAHAZ_PORT -e PYTHONUNBUFFERED=0 TEAHAZ_PORT=$TEAHAZ_PORT --rm -v $DIR:/home/teahaz teahaz_server:latest
 
     else
         echo "server is already running"
