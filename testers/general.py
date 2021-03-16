@@ -15,8 +15,9 @@ global s
 global url
 global username
 global chatroom_id
-url = "http://butorhaz.hopto.org:13337"
+# url = "http://butorhaz.hopto.org:13337"
 # url = "http://localhost:13337"
+url = "http://localhost:80"
 # url = "http://teahaz.co.uk:13337"
 
 def get():

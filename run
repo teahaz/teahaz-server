@@ -134,7 +134,7 @@ else
 
         make_sure_cron_is_running &
 
-        docker run -p $TEAHAZ_PORT:$TEAHAZ_PORT -e PYTHONUNBUFFERED=0 TEAHAZ_PORT=$TEAHAZ_PORT --rm -v $DIR:/home/teahaz teahaz_server:latest
+        docker run -p $TEAHAZ_PORT:$TEAHAZ_PORT -e PYTHONUNBUFFERED=0 -e TEAHAZ_PORT=$TEAHAZ_PORT --rm -v $DIR:/home/teahaz teahaz_server:latest
 
     else
         echo "server is already running"
