@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name 192.168.1.85;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://localhost:13337;
+    }
+}

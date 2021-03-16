@@ -1,7 +1,9 @@
 #!/bin/bash
 
-
+# make sure everything is running from the right directory
+# this way we can use relative paths
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR
 
 
 # make sure its being run by root
@@ -12,6 +14,7 @@ then
     exit
 fi
 
+
 # make suer docker is installed
 docker --version > /dev/null
 if [ "$?" != 0 ]
@@ -20,17 +23,10 @@ then
     exit
 fi
 
-TEAHAZ_PORT=13337
-if [ "$1" != "" ]
-then
-    case $1 in
-        ''|*[!0-9]*) echo "Invalid port, using default!" ;;
-        *) TEAHAZ_PORT=$1  ;;
-    esac
-fi
 
 
 
+# function gets the id of the running teahaz instance
 ID=""
 function get_dID {
     running=$( docker ps)
@@ -47,40 +43,33 @@ function get_dID {
 }
 
 
-function git_pull {
-
-    cd $DIR
-
-    git pull
-    if [ "$?" != 0 ]
-    then
-        echo "error while getting new updates"
-        exit
-    fi
-
-
-}
-
-function make_sure_cron_is_running {
+# TODO come back to this (stop using cron for something that clearly doesnt need cron)
+function run_root_scripts {
+    # its in a loop because it will only manage to run once the container is running
     while [ 1 ]
     do
-        if [ "$ID" == "" ]
-        then
-            get_dID
-        else
-            docker exec --user root $ID systemctl enable cron
-            docker exec --user root $ID systemctl start cron
+        get_dID
 
-            if [ "$?" == 0 ]
-            then
-                exit
-            fi
-            sleep 6
+        # if the container is running
+        if [ "$ID" != "" ]
+        then
+            # run root script inside container
+            docker exec --user root $ID /home/teahaz/docker/root_deploy.sh
+            exit
+
+            # if it fails, run it again
+            # if [ "$?" == 0 ]
+            # then
+            #     exit
+            # fi
+            # sleep 6
         fi
     done
 }
 
 
+
+# kill container on ./run kill
 if [ "$1" == "kill" ]
 then
 
@@ -97,6 +86,7 @@ then
 
 
 
+# get shell in container on ./run shell
 elif [ "$1" == "shell" ]
 then
 
@@ -114,6 +104,7 @@ then
 
 
 
+# rebuild container on ./run rebuild
 elif [ "$1" == "rebuild" ]
 then
 
@@ -122,19 +113,22 @@ then
     docker build --no-cache -t teahaz_server:latest .
 
 
-else
 
+
+# just run the container normally on ./run
+else
     get_dID
 
+    # if the server is not running, run it
     if [ "$ID" == "" ]
     then
         cd $DIR/docker
 
-        docker build --build-arg TEAHAZ_PORT=$TEAHAZ_PORT -t teahaz_server:latest .
+        docker build -t teahaz_server:latest .
 
-        make_sure_cron_is_running &
+        run_root_scripts &
 
-        docker run -p $TEAHAZ_PORT:$TEAHAZ_PORT -e PYTHONUNBUFFERED=0 -e TEAHAZ_PORT=$TEAHAZ_PORT --rm -v $DIR:/home/teahaz teahaz_server:latest
+        docker run -p 80:80 -p 443:443 -e PYTHONUNBUFFERED=0 -e TEAHAZ_PORT=13337 --rm -v $DIR:/home/teahaz teahaz_server:latest
 
     else
         echo "server is already running"
