@@ -35,8 +35,8 @@ if __name__ == "__main__":
     p = subprocess.Popen(f"cd {path}/static; python3 -m http.server 80 --bind 0.0.0.0", shell=True)
     try:
 
-        os.makedirs(f'{path}/.keys/live/{hostname}')
-        os.makedirs(f'{path}/.keys/archive/{hostname}')
+        os.system(f'mkdir -p {path}/.keys/live/{hostname}')
+        os.system(f'mkdir -p {path}/.keys/archive/{hostname}')
 
         res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' {path}/run")
         if res != 0: sys.exit(-1)
