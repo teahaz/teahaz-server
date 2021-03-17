@@ -36,6 +36,8 @@ server {
     }
 }
 """
+    with open(f"{path}/nginx_config", "w+")as outfile:
+        outfile.write(nginx_config)
 
     res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/*")
     if res != 0: sys.exit(-1)
@@ -84,6 +86,8 @@ server {
 }
 
 """
+    with open(f"{path}/nginx_config", "w+")as outfile:
+        outfile.write(nginx_config)
 
     os.system(f'mkdir {path}/static')
     p = subprocess.Popen(f"cd {path}/static; python3 -m http.server 80 --bind 0.0.0.0", shell=True)
