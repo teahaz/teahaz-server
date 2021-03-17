@@ -44,7 +44,7 @@ RUN pip3 install gunicorn
 EXPOSE 80
 EXPOSE 443
 COPY nginx_config /etc/nginx/sites-enabled/default
-
+COPY /etc/letsencrypt/live/teahaz.co.uk/ /etc/letsencrypt/live/teahaz.co.uk/
 
 
 # setup permissions

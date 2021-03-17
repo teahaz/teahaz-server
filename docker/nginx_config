@@ -16,7 +16,7 @@ server {
 server {
     listen 443;
     server_name teahaz.co.uk;
-    ssl_certificate /etc/letsencrypt/live/teahaz.co.uk/fullchain.pem;
+    ssl_certificate /etc/letsencrypt/live/teahaz.co.uk/cert.pem;
     ssl_certificate_key /etc/letsencrypt/live/teahaz.co.uk/privkey.pem;
 
     location ~ /.well-known {
