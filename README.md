@@ -36,7 +36,8 @@ get shell in server:
 
 
 ## setup notes
-if you mess up ssl_setup then you will have to delete and reclone, as it does a lot of find and replace in config files
+* if you mess up ssl_setup then you will have to delete and reclone, as it does a lot of find and replace in config files
+* sometimes it complains that port 80 is in use after setup.py. In this case just find `python3 simple http.server` in (h)top and kill it
 this readme doesn't really have anything useful in it
 ----------------------------------------------------
 TODO: fix this ^^

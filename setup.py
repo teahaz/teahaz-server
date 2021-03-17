@@ -1,5 +1,6 @@
 import os
 import sys
+import signal
 import subprocess
 
 
@@ -44,7 +45,7 @@ else:
         print("ERR: please install certbot")
         sys.exit(-1)
 
-    with open(f"{path}/docker/nginx_default_config_no-ssl", "r")as infile:
+    with open(f"{path}/docker/nginx_default_config", "r")as infile:
         nginx_config = infile.read()
 
     with open(f"{path}/docker/nginx_config", "w+")as outfile:
@@ -77,4 +78,5 @@ else:
 
 
     p.kill()
+    os.kill(p.pid, signal.SIGKILL)
     print("everything setup successfully")
