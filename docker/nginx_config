@@ -3,7 +3,7 @@ server {
     server_name teahaz.co.uk;
 
     location ~ /.well-known {
-        root /teahaz/static;
+        root /home/teahaz/static;
     }
 
     location / {
@@ -18,7 +18,7 @@ server {
     server_name teahaz.co.uk;
 
     location ~ /.well-known {
-        root /teahaz/static;
+        root /home/teahaz/static;
     }
 
     location / {
