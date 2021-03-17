@@ -26,17 +26,10 @@ path.strip(' ')
 
 
 if len(sys.argv) < 2:
-    nginx_config = """
-server {
-    listen 80;
-    server_name <REPLACE_SERVER_HOSTNAME>;
+    with open(f"{path}/docker/nginx_default_config_no-ssl", "r")as infile:
+        nginx_config = infile.read()
 
-    location / {
-        proxy_pass http://localhost:13337;
-    }
-}
-"""
-    with open(f"{path}/nginx_config", "w+")as outfile:
+    with open(f"{path}/docker/nginx_config", "w+")as outfile:
         outfile.write(nginx_config)
 
     res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/*")
@@ -51,43 +44,12 @@ else:
         print("ERR: please install certbot")
         sys.exit(-1)
 
+    with open(f"{path}/docker/nginx_default_config_no-ssl", "r")as infile:
+        nginx_config = infile.read()
 
-    nginx_config = """
-server {
-    listen 80;
-    server_name <REPLACE_SERVER_HOSTNAME>;
-
-    location ~ /.well-known {
-        root /home/teahaz/static;
-    }
-
-    location / {
-        include proxy_params;
-        proxy_pass http://localhost:13337;
-    }
-}
-
-
-server {
-    listen 443;
-    ssl on;
-    server_name <REPLACE_SERVER_HOSTNAME>;
-    ssl_certificate /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
-    ssl_certificate_key /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/privkey.pem;
-
-    location ~ /.well-known {
-        root /home/teahaz/static;
-    }
-
-    location / {
-        include proxy_params;
-        proxy_pass http://localhost:13337;
-    }
-}
-
-"""
-    with open(f"{path}/nginx_config", "w+")as outfile:
+    with open(f"{path}/docker/nginx_config", "w+")as outfile:
         outfile.write(nginx_config)
+
 
     os.system(f'mkdir {path}/static')
     p = subprocess.Popen(f"cd {path}/static; python3 -m http.server 80 --bind 0.0.0.0", shell=True)

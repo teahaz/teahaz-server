@@ -1,0 +1,14 @@
+server {
+    listen 80;
+    server_name <REPLACE_SERVER_HOSTNAME>;
+
+    location ~ /.well-known {
+        root /home/teahaz/static;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://localhost:13337;
+    }
+}
+
