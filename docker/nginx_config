@@ -16,7 +16,7 @@ server {
 server {
     listen 443;
     server_name teahaz.co.uk;
-    ssl_certificate /home/teahaz/.keys/fullchain.pem;
+    ssl_certificate /home/teahaz/.keys/fullchain1.pem;
     ssl_certificate_key /home/teahaz/.keys/privkey1.pem;
 
     location ~ /.well-known {
