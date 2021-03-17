@@ -122,6 +122,16 @@ else
     # if the server is not running, run it
     if [ "$ID" == "" ]
     then
+
+        # this hacky thing will only run if setup ssh hasnt been run
+        if [ "<REPLACE_SERVER_HOSTNAME>" != "<"* ]
+        then
+            cp -R /etc/letsencrypt/live/<REPLACE_SERVER_HOSTNAME> /teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>
+            cp -R /etc/letsencrypt/archive/<REPLACE_SERVER_HOSTNAME> /teahaz/.keys/archive/<REPLACE_SERVER_HOSTNAME>
+        done
+
+
+
         cd $DIR/docker
 
         docker build -t teahaz_server:latest .
