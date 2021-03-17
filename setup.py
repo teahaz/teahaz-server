@@ -23,6 +23,8 @@ path = input("absolute path to teahaz repository: ")
 path.strip(' ')
 
 
+os.system(f'rm -rf {path}/.keys')
+
 
 
 
@@ -66,9 +68,9 @@ else:
         res = os.system(f"sudo certbot certonly --webroot -w {path}/static -d {hostname}")
         if res != 0: sys.exit(-1)
 
-        res = os.system(f"cp -R /etc/letsencrypt/archive/{hostname} {path}/.keys/archive/{hostname}")
+        res = os.system(f"cp -R /etc/letsencrypt/archive/{hostname} {path}/.keys/archive/")
         if res != 0: sys.exit(-1)
-        res = os.system(f"cp -R /etc/letsencrypt/live/{hostname} {path}/.keys/live/{hostname}")
+        res = os.system(f"cp -R /etc/letsencrypt/live/{hostname} {path}/.keys/live/")
         if res != 0: sys.exit(-1)
 
     except Exception as e:
