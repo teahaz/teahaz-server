@@ -11,6 +11,13 @@ import subprocess
 
 
 if __name__ == "__main__":
+    res = os.system("which cerbot")
+    if res != 0:
+        print("ERR: please install cerbot")
+        sys.exit(-1)
+
+
+
     print("Some configuration files like nginx_config require the hostname of the server.\nIMPORANT: When typing the hostname below, make sure TO NOT mistype it and DO NOT ADD 'http(s)://' to the beginning")
     hostname = input("server hostname [eg: teahaz.co.uk]: ")
     hostname = hostname.strip('\n')
