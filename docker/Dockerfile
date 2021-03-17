@@ -44,12 +44,6 @@ EXPOSE 80
 EXPOSE 443
 COPY nginx_config /etc/nginx/sites-enabled/default
 
-RUN mkdir -p /etc/letsencrypt/live/teahaz.co.uk/
-RUN mkdir -p /etc/letsencrypt/archive/teahaz.co.uk/
-
-COPY /etc/letsencrypt/archive/teahaz.co.uk/ /etc/letsencrypt/archinve/teahaz.co.uk/
-COPY /etc/letsencrypt/live/teahaz.co.uk/ /etc/letsencrypt/live/teahaz.co.uk/
-
 
 # setup permissions
 RUN useradd -m teahaz
