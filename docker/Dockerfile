@@ -2,8 +2,7 @@ FROM ubuntu:20.04
 
 
 # arguments
-ARG TEAHAZ_PORT=13337
-
+ARG TEAHAZ_PORT=13337 
 
 # environment variables
 ENV PYTHONUNBUFFERED=0
@@ -44,10 +43,12 @@ RUN pip3 install gunicorn
 EXPOSE 80
 EXPOSE 443
 COPY nginx_config /etc/nginx/sites-enabled/default
-# RUN mkdir -p /etc/letsencrypt/live/teahaz.co.uk/
-# COPY /etc/letsencrypt/live/teahaz.co.uk/fullchain.pem /etc/letsencrypt/live/teahaz.co.uk/
-# COPY /etc/letsencrypt/live/teahaz.co.uk/cert.pem /etc/letsencrypt/live/teahaz.co.uk/
-# COPY /etc/letsencrypt/live/teahaz.co.uk/privkey.pem /etc/letsencrypt/live/teahaz.co.uk/
+
+RUN mkdir -p /etc/letsencrypt/live/teahaz.co.uk/
+RUN mkdir -p /etc/letsencrypt/archive/teahaz.co.uk/
+
+COPY /etc/letsencrypt/archive/teahaz.co.uk/ /etc/letsencrypt/archinve/teahaz.co.uk/
+COPY /etc/letsencrypt/live/teahaz.co.uk/ /etc/letsencrypt/live/teahaz.co.uk/
 
 
 # setup permissions
