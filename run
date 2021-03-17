@@ -128,7 +128,7 @@ else
         then
             cp -R /etc/letsencrypt/live/<REPLACE_SERVER_HOSTNAME> /teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>
             cp -R /etc/letsencrypt/archive/<REPLACE_SERVER_HOSTNAME> /teahaz/.keys/archive/<REPLACE_SERVER_HOSTNAME>
-        done
+        fi
 
 
 
