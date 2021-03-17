@@ -17,8 +17,8 @@ server {
     listen 443;
     ssl on;
     server_name teahaz.co.uk;
-    ssl_certificate /home/teahaz/.keys/fullchain1.pem;
-    ssl_certificate_key /home/teahaz/.keys/privkey1.pem;
+    ssl_certificate /home/teahaz/.keys/live/teahaz.co.uk/fullchain.pem;
+    ssl_certificate_key /home/teahaz/.keys/live/teahaz.co.uk/privkey.pem;
 
     location ~ /.well-known {
         root /home/teahaz/static;
