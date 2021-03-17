@@ -1,6 +1,27 @@
 server {
     listen 80;
-    server_name 192.168.1.85;
+    server_name teahaz.co.uk;
+
+    location ~ /.well-known {
+        root /teahaz/static;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://localhost:13337;
+    }
+}
+
+
+server {
+    listen 443;
+    server_name teahaz.co.uk;
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location ~ /.well-known {
+        root /teahaz/static;
+    }
 
     location / {
         include proxy_params;
