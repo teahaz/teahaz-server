@@ -61,7 +61,7 @@ RUN chmod -R g+wrx /home/teahaz
 
 
 # set user and work dir
-USER teahaz
+# USER teahaz
 WORKDIR /home/teahaz
 
 
