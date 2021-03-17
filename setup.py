@@ -33,7 +33,7 @@ if len(sys.argv) < 2:
     with open(f"{path}/docker/nginx_config", "w+")as outfile:
         outfile.write(nginx_config)
 
-    res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/*")
+    res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/nginx_config")
     if res != 0: sys.exit(-1)
     sys.exit()
 
