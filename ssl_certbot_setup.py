@@ -31,10 +31,10 @@ if __name__ == "__main__":
     path = input("absolute path to teahaz repository: ")
     path.strip(' ')
 
-    p = subprocess.Popen(f"cd {path}/static;python3 -m http.server 80 --bind 0.0.0.0", shell=True)
+    os.makedirs(f'{path}/static')
+    p = subprocess.Popen(f"cd {path}/static; python3 -m http.server 80 --bind 0.0.0.0", shell=True)
     try:
 
-        os.makedirs(f'{path}/static')
         os.makedirs(f'{path}/.keys/live/{hostname}')
         os.makedirs(f'{path}/.keys/archive/{hostname}')
 
