@@ -11,9 +11,9 @@ import subprocess
 
 
 if __name__ == "__main__":
-    res = os.system("which cerbot")
+    res = os.system("which certbot")
     if res != 0:
-        print("ERR: please install cerbot")
+        print("ERR: please install certbot")
         sys.exit(-1)
 
 
