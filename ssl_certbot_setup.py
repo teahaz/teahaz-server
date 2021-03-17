@@ -32,19 +32,24 @@ if __name__ == "__main__":
     path.strip(' ')
 
     p = subprocess.Popen(f"cd {path}/static;python3 -m http.server 80 --bind 0.0.0.0", shell=True)
+    try:
 
-    os.makedirs(f'.keys/live/{hostname}')
-    os.makedirs(f'.keys/archive/{hostname}')
+        os.makedirs(f'.keys/live/{hostname}')
+        os.makedirs(f'.keys/archive/{hostname}')
 
-    res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/*")
-    if res != 0: sys.exit(-1)
-    res = os.system(f"sudo certbot certonly --webroot -w {path}/static -d {hostname}")
-    if res != 0: sys.exit(-1)
+        res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/*")
+        if res != 0: sys.exit(-1)
+        res = os.system(f"sudo certbot certonly --webroot -w {path}/static -d {hostname}")
+        if res != 0: sys.exit(-1)
 
-    res = os.system("cp -R /etc/letsencrypt/archive/teahaz.co.uk /teahaz/.keys/archive/teahaz.co.uk")
-    if res != 0: sys.exit(-1)
-    res = os.system("cp -R /etc/letsencrypt/live/teahaz.co.uk /teahaz/.keys/live/teahaz.co.uk")
-    if res != 0: sys.exit(-1)
+        res = os.system("cp -R /etc/letsencrypt/archive/teahaz.co.uk /teahaz/.keys/archive/teahaz.co.uk")
+        if res != 0: sys.exit(-1)
+        res = os.system("cp -R /etc/letsencrypt/live/teahaz.co.uk /teahaz/.keys/live/teahaz.co.uk")
+        if res != 0: sys.exit(-1)
+
+    except Exception as e:
+        print("process failed: ", e)
+        p.kill()
 
 
     print("everything setup successfully")

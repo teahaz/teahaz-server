@@ -29,7 +29,16 @@ kill server:
 get shell in server:
 `sudo ./run shell`
 
+
+
+
+
+
+
+## setup notes
+if you mess up ssl_setup then you will have to delete and reclone, as it does a lot of find and replace in config files
 this readme doesn't really have anything useful in it
 ----------------------------------------------------
 TODO: fix this ^^
+
 
