@@ -45,9 +45,9 @@ if __name__ == "__main__":
         res = os.system(f"sudo certbot certonly --webroot -w {path}/static -d {hostname}")
         if res != 0: sys.exit(-1)
 
-        res = os.system("cp -R /etc/letsencrypt/archive/{hostname} /teahaz/.keys/archive/{hostname}")
+        res = os.system(f"cp -R /etc/letsencrypt/archive/{hostname} /teahaz/.keys/archive/{hostname}")
         if res != 0: sys.exit(-1)
-        res = os.system("cp -R /etc/letsencrypt/live/{hostname} /teahaz/.keys/live/{hostname}")
+        res = os.system(f"cp -R /etc/letsencrypt/live/{hostname} /teahaz/.keys/live/{hostname}")
         if res != 0: sys.exit(-1)
 
     except Exception as e:
