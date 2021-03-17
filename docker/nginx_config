@@ -16,8 +16,6 @@ server {
 server {
     listen 443;
     server_name teahaz.co.uk;
-    /* ssl_certificate /path/to/cert.pem; */
-    /* ssl_certificate_key /path/to/key.pem; */
 
     location ~ /.well-known {
         root /teahaz/static;
