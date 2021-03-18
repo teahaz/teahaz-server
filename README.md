@@ -70,19 +70,25 @@ This should setup itslef and run teahaz.
 <br />
 
 * kill container:
-`sudo ./run kill`
+```
+sudo ./run kill
+```
 This should stop teahaz.
 <br />
 <br />
 
 * get shell in container:
-`sudo ./run shell`
+```
+sudo ./run shell
+```
 Method allows you to get an unprivilaged shell inside the container, to make sure everything works fine.
 <br />
 <br />
 
 * rebuild container:
-`sudo ./run shell`
+```
+sudo ./run shell
+```
 If something breaks, or gets outdated. Rebuilding the container should try update and fix itself
 
 <br />
