@@ -444,8 +444,8 @@ def check_settings(chatroomId, setting):
             value = d(value)
 
 
-    except:
-        log(level='error', msg=f"[dbhandler/check_settings/1] || An error occured while formatting setting value: {data}")
+    except Exception as e:
+        log(level='error', msg=f"[dbhandler/check_settings/1] || An error occured while formatting setting value: {data}\n TRACEBACK: {e}")
         return "[dbhandler/check_settings/1] || Internal server error while checking chatroom settings", 500
 
 
