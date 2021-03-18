@@ -14,13 +14,14 @@ hostname = input("server hostname [eg: teahaz.co.uk]: ")
 hostname = hostname.strip('\n')
 hostname = hostname.strip(' ')
 hostname = hostname.strip('/')
-hostname = hostname.strip('http://')
-hostname = hostname.strip('https://')
+hostname = hostname.replace('http://', '')
+hostname = hostname.replace('https://', '')
 hostname = hostname.strip('/')
+print(hostname)
+sys.exit
 
 
 path = input("absolute path to teahaz repository: ")
-path.strip(' ')
 
 
 os.system(f'rm -rf {path}/.keys')
