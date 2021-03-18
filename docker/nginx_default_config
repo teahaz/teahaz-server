@@ -14,8 +14,7 @@ server {
 
 
 server {
-    listen 443;
-    ssl on;
+    listen 443 ssl;
     server_name <REPLACE_SERVER_HOSTNAME>;
     ssl_certificate /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
     ssl_certificate_key /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/privkey.pem;
