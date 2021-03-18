@@ -31,7 +31,7 @@ os.system(f'rm -rf {path}/.keys')
 
 
 
-if len(sys.argv) > 2:
+if len(sys.argv) < 2:
     res = os.system("which certbot")
     if res != 0:
         print("ERR: please install certbot")
