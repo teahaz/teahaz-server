@@ -8,7 +8,7 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://localhost:13337;
+        return 301 https://$host$request_uri;
     }
 }
 
