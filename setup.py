@@ -53,7 +53,7 @@ if len(sys.argv) < 2:
 
         res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' {path}/run")
         if res != 0: sys.exit(-1)
-        res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/*")
+        res = os.system(f"sed -i 's/<REPLACE_SERVER_HOSTNAME>/{hostname}/g' docker/nginx_config")
         if res != 0: sys.exit(-1)
         res = os.system(f"sudo certbot certonly --webroot -w {path}/static -d {hostname}")
         if res != 0: sys.exit(-1)
