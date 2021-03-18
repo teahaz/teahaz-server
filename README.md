@@ -14,30 +14,75 @@ This server is nowhere near done yet!
 
 usage
 =====
-requirements
+dependencies
 ------------
 * docker
+* python3
+* certbot (if you want to use ssl)
 
-run
----
-run server:
-`sudo ./run`
 
-kill server:
+
+setup
+-----
+**with ssl:**
+```bash
+python3 setup.py
+```
+You will need to enter your hostname (WITHOUT https or trailing slashes). Next you will have to enter the ABSOLUTE path to your teahaz installation repo [eg /teahaz]. Next certbot will ask you a few questions that you need to asnwer.
+<br />
+<br />
+If the program runs successfully, you should be almost done. Setup uses a temporary http server for certbot verification. This server doesnt always shutdown correctly, for best practice search for `python3 -m http.server` in ps aux/top/htop and kill it or run `killall python`.
+<br />
+<br />
+Your ssl setup should be complete :)
+<br />
+<br />
+
+
+**without ssl:**
+```
+python3 setup.py nossl
+```
+You will need to enter your hostname (WITHOUT https or trailing slashes). Next you will have to enter the ABSOLUTE path to your teahaz installation repo [eg /teahaz].
+<br />
+<br />
+If this runs without errors then your setup is complete
+
+
+usage
+-----
+There are four possible operations with the server:
+<br />
+
+* run container:
+```
+sudo ./run
+```
+This should setup itslef and run teahaz.
+<br />
+<br />
+
+* kill container:
 `sudo ./run kill`
+This should stop teahaz.
+<br />
+<br />
 
-get shell in server:
+* get shell in container:
 `sudo ./run shell`
+Method allows you to get an unprivilaged shell inside the container, to make sure everything works fine.
+<br />
+<br />
+
+* rebuild container:
+`sudo ./run shell`
+If something breaks, or gets outdated. Rebuilding the container should try update and fix itself
+
+<br />
+<br />
 
 
 
-
-
-
-
-## setup notes
-* if you mess up ssl_setup then you will have to delete and reclone, as it does a lot of find and replace in config files
-* sometimes it complains that port 80 is in use after setup.py. In this case just find `python3 simple http.server` in (h)top and kill it
 this readme doesn't really have anything useful in it
 ----------------------------------------------------
 TODO: fix this ^^
