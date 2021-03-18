@@ -31,17 +31,24 @@ os.system(f'rm -rf {path}/.keys')
 
 
 
+
 if len(sys.argv) < 2:
-    res = os.system("which certbot")
-    if res != 0:
-        print("ERR: please install certbot")
-        sys.exit(-1)
+    # res = os.system("which certbot")
+    # if res != 0:
+        # print("ERR: please install certbot")
+        # sys.exit(-1)
 
     with open(f"{path}/docker/nginx_default_config", "r")as infile:
         nginx_config = infile.read()
 
     with open(f"{path}/docker/nginx_config", "w+")as outfile:
         outfile.write(nginx_config)
+
+
+
+    cert_renew = '#!/bin/bash\n certbot renew\n \n DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"\n cd $DIR\n \n cp -R /etc/letsencrypt/archive/'+hostname+' '+path+'/.keys/archive/\n cp -R /etc/letsencrypt/live/'+hostname+' '+path+'/.keys/live/\n'
+    with open(f"{path}/cert-renew.sh", "w+")as outfile:
+        outfile.write(cert_renew)
 
 
     os.system(f'mkdir {path}/static')
