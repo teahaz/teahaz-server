@@ -34,6 +34,13 @@ You will need to enter your hostname (WITHOUT https or trailing slashes). Next y
 If the program runs successfully, you should be almost done. Setup uses a temporary http server for certbot verification. This server doesnt always shutdown correctly, for best practice search for `python3 -m http.server` in ps aux/top/htop and kill it or run `killall python`.
 <br />
 <br />
+Finally we need to sort out renewing certificates. You can manually run cert-renew.sh every couple months, or we suggest adding the following line to your root crontab. (`sudo crontab -e`)
+```
+0 0 1 * * sh <PATH_TO_TEAHAZ_DIR>/cert-renew.sh 
+```
+**NOTE:** replace `<PATH_TO_TEAHAZ_DIR>` with the directory you installed teahaz to [eg /teahaz]
+<br />
+<br />
 Your ssl setup should be complete :)
 <br />
 <br />
