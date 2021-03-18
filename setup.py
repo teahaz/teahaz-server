@@ -46,7 +46,7 @@ if len(sys.argv) < 2:
 
 
 
-    cert_renew = '#!/bin/bash\n certbot renew\n \n DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"\n cd $DIR\n \n cp -R /etc/letsencrypt/archive/'+hostname+' '+path+'/.keys/archive/\n cp -R /etc/letsencrypt/live/'+hostname+' '+path+'/.keys/live/\n'
+    cert_renew = '#!/bin/bash\n certbot renew\n\n cp -R /etc/letsencrypt/archive/'+hostname+' '+path+'/.keys/archive/\n cp -R /etc/letsencrypt/live/'+hostname+' '+path+'/.keys/live/\n'
     with open(f"{path}/cert-renew.sh", "w+")as outfile:
         outfile.write(cert_renew)
 
