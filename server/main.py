@@ -190,7 +190,8 @@ api.add_resource(api__messages, '/api/v0/message/<chatroomId>', '/api/v0/message
 
 
 
-if __name__ == "__main__":
+# in dev environment the server is not run as __main__ but this should still run
+def check_health():
     response, status_code = check_databses()
     if status_code != 200:
         log(level='fail', msg=f"[health check] ||  fatal erorr with databasess\nTraceback: {response}")
@@ -207,5 +208,8 @@ if __name__ == "__main__":
 
 
 
+check_health()
+
+if __name__ == "__main__":
     app.run(host='0.0.0.0', port=server_port, debug=True)
 
