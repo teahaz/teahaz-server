@@ -205,10 +205,11 @@ def check_health():
     if not server_port or server_port.isdigit() == False or int(server_port) > 655234 or int(server_port) < 1:
         log(level='log', msg=f"[setup] || TEAHAZ_PORT variable was not set, or is set to an invalid port. Defaulting to '13337'")
         server_port = 13337
+    return server_port
 
 
 
-check_health()
+server_port = check_health()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=server_port, debug=True)
