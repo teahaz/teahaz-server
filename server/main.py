@@ -191,7 +191,6 @@ api.add_resource(api__messages, '/api/v0/message/<chatroomId>', '/api/v0/message
 
 
 if __name__ == "__main__":
-    ## start the server in debug mode
     response, status_code = check_databses()
     if status_code != 200:
         log(level='fail', msg=f"[health check] ||  fatal erorr with databasess\nTraceback: {response}")
