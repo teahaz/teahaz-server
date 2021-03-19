@@ -12,7 +12,7 @@ from flask_restful import Resource
 from api import message_get
 from api import message_send
 from api import upload_file
-# from api import download_file
+from api import download_file
 from api import create_invite
 from api import create_chatroom
 
@@ -107,22 +107,23 @@ class api__messages(Resource):
 
 # handles file
 class api__files(Resource):
-    # def get(self, chatroomId): #gets file
-    #     if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
-    #     if not request.headers: return "no data sent", 401
-    #     if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
-    #
-    #     data, status_code = download_file(chatroomId, request.headers)
-    #     return data, status_code
+    def get(self, chatroomId): #gets file
+        if not request.headers: return "no data sent", 400
+        if not chatroomId: return "ChatroomId was not part of the path", 400
+        if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
+        if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
+
+        data, status_code = download_file(request.headers, chatroomId)
+        return data, status_code
 
 
     def post(self, chatroomId): # sends file
-        if not request.get_json(): return "no data sent", 401
+        if not request.get_json(): return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.get_json(), chatroomId): return "client not logged in", 401
 
-        data, status_code = upload_file(chatroomId, request.get_json())
+        data, status_code = upload_file(request.get_json(), chatroomId)
         return data, status_code
 
 

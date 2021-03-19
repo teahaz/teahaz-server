@@ -106,7 +106,7 @@ def send_n():
 
 
 def get_file():
-    url = globals()['url'] + "/api/v0/file/"
+    url = globals()['url'] + "/api/v0/file/" +globals()['chatroom_id']
 
     headers = {
             "username": globals()['username'],
@@ -279,12 +279,6 @@ while 1:
         print(get_invite())
     elif choice == 'uinvite':
         print(use_invite())
-    else:
-        try:
-            send_n()
-            # print(eval(choice))
-        except:
-            print("comand failed")
 
     print("username: ", globals()['username'])
     print("chatroom_id: ", globals()['chatroom_id'])

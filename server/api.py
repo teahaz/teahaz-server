@@ -247,12 +247,12 @@ def upload_file(json_data, chatroomId):
 
     # failed to save reference to file
     if status_code != 200:
-        log(level='warning', msg=f'[api/upload_file/1] failed to save file: {filename}, in database \n attempting to remove')
+        log(level='warning', msg=f'[api/upload_file/1] || failed to save file: {filename}, in database \n attempting to remove')
 
         # delete file because it could not be indexed
         _response, status_code = filehander.remove_file(chatroomId, filename)
         if status_code != 200:
-            log(level='error', msg=f'[api/upload_file/2] failed to delete corrupt file: {filename}')
+            log(level='error', msg=f'[api/upload_file/2] || failed to delete corrupt file: {filename}')
 
         # return error
         return response, status_code
@@ -263,51 +263,42 @@ def upload_file(json_data, chatroomId):
 
 
 
+def download_file(headers, chatroomId):
+    username     = headers.get('username')
+    filename     = headers.get('filename')
+
+
+    # make sure client sent all data
+    if not username or not filename or not chatroomId:
+        return '[api/download_file/0] || one or more of the required arguments are not supplied. Required = [username, filename]. Supplied=[{username}, {filename}]', 400
+
+
+    # sanitization is healthy
+    response, status_code = security.check_uuid(filename)
+    if status_code != 200:
+        return response, status_code
 
 
 
+    # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
+    if not os_isfile(f'storage/chatrooms/{chatroomId}/uploads/{filename}'):
+        return "[api/download_file/1] || The requested file doesnt exist", 404
 
-#
-# def download_file(headers):
-#     username     = headers.get('username')
-#     filename     = headers.get('filename')
-#     chatroom_id  = headers.get('chatroom')
-#
-#
-#     # make sure client sent all data
-#     if not username or not filename or not chatroom_id:
-#         return 'one or more of the required arguments are not supplied', 400
-#
-#
-#     # check if chatroom_id is valid, this is important as its used as part of a path and in sql
-#     chatroom_id, status_code = security.sanitize_chatroomId(chatroom_id)
-#     if status_code != 200:
-#         return chatroom_id, status_code
-#
-#
-#     # gotta sanitize shit
-#     filename = security.sanitize_uuid(filename)
-#     if not filename:
-#         return "invalid format from filename", 400
-#
-#
-#     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
-#     if not os_isfile(f'storage/{chatroom_id}/uploads/{filename}'):
-#         return "file requested by client does not exist", 404
-#
-#
-#     # read file requested by user
-#     data, status_code = filehander.read_file(chatroom_id, filename)
-#     if status_code != 200:
-#         log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
-#         return data, status_code
-#
-#
-#     # all is well
-#     return data, 200
-#
-#
-#
+
+
+    # read file requested by user
+    data, status_code = filehander.read_file(chatroomId, filename)
+    if status_code != 200:
+        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
+        return data, status_code
+
+
+
+    # all is well
+    return data, 200
+
+
+
 
 
 
