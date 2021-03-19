@@ -3,6 +3,7 @@ import time
 import os
 import json
 import base64
+import teahaz
 
 
 def encode(a):
@@ -21,6 +22,37 @@ url = "http://localhost:13337"
 # url = "http://localhost:80"
 # url = "https://teahaz.co.uk"
 
+
+def send_file():
+    url = globals()['url'] + "/api/v0/file/" + globals()['chatroom_id']
+
+    # get filename from user
+    filename = input(">> ")
+
+    # get file extension bc mimetype sucks sometimes
+
+    extension = filename.split(".")[-1]
+    print('extension: ',extension , type(extension))
+
+
+    response, status_code = teahaz.upload_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, extension)
+
+    return response
+
+
+def get_file():
+    # get filename from user
+    filename = input(">> ")
+    saved_filename = input("save as: ")
+
+
+    response, status_code = teahaz.download_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, saved_filename)
+
+
+    return response
+
+
+
 def get():
     url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] + '/'
 
@@ -34,39 +66,6 @@ def get():
 
     print("status_code: ", res.status_code)
     print(res.text)
-
-
-def send_file():
-    url = globals()['url'] + "/api/v0/file/" + globals()['chatroom_id']
-
-    # get filename from user
-    filename = input(">> ")
-
-    # this is just so i can test without typing a filename each time
-    if len(filename) == 0:
-        filename = '../notes.md'
-    print(filename)
-    with open(filename, 'rb')as infile:
-        contents = infile.read()
-
-    contents = encode_binary(contents)
-
-    # get file extension bc mimetype sucks sometimes
-    extension = filename.split(".")[-1]
-    print('extension: ',extension , type(extension))
-
-    a = {
-        "username": globals()['username'],
-        "chatroom": globals()['chatroom_id'],
-        "type": 'file',
-        'extension': extension,
-        'data': contents
-            }
-
-    res = globals()['s'].post(url=url, json=a)
-
-    print("status_code: ", res.status_code)
-    return res.text
 
 
 
@@ -101,21 +100,6 @@ def send_n():
 
     res = globals()['s'].post(url, json=a)
     print("status_code: ", res.status_code)
-
-    return res.text
-
-
-def get_file():
-    url = globals()['url'] + "/api/v0/file/" +globals()['chatroom_id']
-
-    headers = {
-            "username": globals()['username'],
-            "filename": input(">> "),
-            "chatroom": globals()['chatroom_id']
-            }
-
-    res = globals()['s'].get(url=url, headers=headers)
-
 
     return res.text
 
