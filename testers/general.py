@@ -216,7 +216,7 @@ def get_invite():
     a = {
 
             "username": globals()['username'],
-            "expr_time": str(time.time() + 60 * 60 * 24),
+            "__expr_time": str(time.time() + 60 * 60 * 24),
             "uses": str(int(input("uses: ")))
             }
 

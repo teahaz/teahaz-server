@@ -86,6 +86,7 @@ def create_invite(json_data, chatroomId):
     expr_time  = json_data.get('expr_time')
     uses       = json_data.get('uses')
     inviteId   = str(uuid.uuid1())
+    return expr_time, 200
 
 
     # make sure we got all the data
@@ -201,9 +202,64 @@ def message_get(headers, chatroomId):
 
 
 
+def upload_file(json_data, chatroomId):
+    username      = json_data.get('username')
+    message_type  = json_data.get('type')
+    data          = json_data.get('data')
+    extension     = json_data.get('extension')
+    messageId     = uuid.uuid1()
 
 
 
+    # make sure client sent all needed data
+    if not username or not chatroomId or not message_type or not data or not extension:
+        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, extension]  Supplied=[{username}, {type}, (type(data)){type(data)}, {extension})]', 400
+
+
+    # message type has to be file
+    if not message_type == "file":
+        return "[api/upload_file/1] || posting non-'file' type to /file is forbidden", 400
+
+
+
+    # generate filename
+    filename = str(uuid.uuid1())
+
+
+    # save file that user sent
+    response, status_code = filehander.save_file(data, chatroomId, extension, filename)
+    if status_code != 200:
+        log(level='error', msg=f'[api/upload_file/2] failed to save file: {filename}')
+        return response, status_code
+
+
+    # save a reference to the file in the chatroom database
+    response, status_code = dbhandler.save_in_db(
+            time          = time.time(),
+            messageId     = messageId,
+            username      = username,
+            chatroomId    = chatroomId,
+            message_type  = message_type,
+            filename      = filename,
+            extension     = extension
+            )
+
+
+    # failed to save reference to file
+    if status_code != 200:
+        log(level='warning', msg=f'[server/api/upload_file/1] failed to save file: {filename}, in database \n attempting to remove')
+
+        # delete file because it could not be indexed
+        _response, status_code = filehander.remove_file(chatroom_id, filename)
+        if status_code != 200:
+            log(level='error', msg=f'[server/api/upload_file/2] failed to delete corrupt file: {filename}')
+
+        # return error
+        return response, status_code
+
+
+    # all is well
+    return response, 200
 
 
 
@@ -212,46 +268,46 @@ def message_get(headers, chatroomId):
 
 
 #
-#def download_file(headers):
-#    username     = headers.get('username')
-#    filename     = headers.get('filename')
-#    chatroom_id  = headers.get('chatroom')
+# def download_file(headers):
+#     username     = headers.get('username')
+#     filename     = headers.get('filename')
+#     chatroom_id  = headers.get('chatroom')
 #
 #
-#    # make sure client sent all data
-#    if not username or not filename or not chatroom_id:
-#        return 'one or more of the required arguments are not supplied', 400
+#     # make sure client sent all data
+#     if not username or not filename or not chatroom_id:
+#         return 'one or more of the required arguments are not supplied', 400
 #
 #
-#    # check if chatroom_id is valid, this is important as its used as part of a path and in sql
-#    chatroom_id, status_code = security.sanitize_chatroomId(chatroom_id)
-#    if status_code != 200:
-#        return chatroom_id, status_code
+#     # check if chatroom_id is valid, this is important as its used as part of a path and in sql
+#     chatroom_id, status_code = security.sanitize_chatroomId(chatroom_id)
+#     if status_code != 200:
+#         return chatroom_id, status_code
 #
 #
-#    # gotta sanitize shit
-#    filename = security.sanitize_uuid(filename)
-#    if not filename:
-#        return "invalid format from filename", 400
+#     # gotta sanitize shit
+#     filename = security.sanitize_uuid(filename)
+#     if not filename:
+#         return "invalid format from filename", 400
 #
 #
-#    # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
-#    if not os_isfile(f'storage/{chatroom_id}/uploads/{filename}'):
-#        return "file requested by client does not exist", 404
+#     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
+#     if not os_isfile(f'storage/{chatroom_id}/uploads/{filename}'):
+#         return "file requested by client does not exist", 404
 #
 #
-#    # read file requested by user
-#    data, status_code = filehander.read_file(chatroom_id, filename)
-#    if status_code != 200:
-#        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
-#        return data, status_code
+#     # read file requested by user
+#     data, status_code = filehander.read_file(chatroom_id, filename)
+#     if status_code != 200:
+#         log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
+#         return data, status_code
 #
 #
-#    # all is well
-#    return data, 200
-
-
-
+#     # all is well
+#     return data, 200
+#
+#
+#
 
 
 
@@ -353,70 +409,6 @@ def message_get(headers, chatroomId):
 #    return response, status_code
 
 
-#
-#
-#
-#
-#
-#def upload_file(json_data):
-#    username      = json_data.get('username')
-#    chatroom_id   = json_data.get('chatroom')
-#    message_type  = json_data.get('type')
-#    data          = json_data.get('data')
-#    extension     = json_data.get('extension')
-#    messageId     = uuid.uuid1()
-#
-#
-#
-#    # make sure client sent all needed data
-#    if not username or not chatroom_id or not message_type or not data or not extension:
-#        return 'one or more of the required arguments are not supplied', 400
-#
-#
-#    # message type has to be file
-#    if not message_type == "file":
-#        return "posting non-'file' type to /file is forbidden", 400
-#
-#
-#
-#    # generate filename
-#    filename = str(uuid.uuid1())
-#
-#
-#    # save file that user sent
-#    response, status_code = filehander.save_file(data, chatroom_id, extension, filename)
-#    if status_code != 200:
-#        log(level='error', msg=f'[server/api/upload_file/0] failed to save file: {filename}')
-#        return response, status_code
-#
-#
-#    # save a reference to the file in the chatroom database
-#    response, status_code = dbhandler.save_in_db(
-#            time          = time.time(),
-#            messageId     = messageId,
-#            username      = username,
-#            chatroomId   = chatroom_id,
-#            message_type  = message_type,
-#            filename      = filename,
-#            extension     = extension
-#            )
-#
-#
-#    # failed to save reference to file
-#    if status_code != 200:
-#        log(level='warning', msg=f'[server/api/upload_file/1] failed to save file: {filename}, in database \n attempting to remove')
-#
-#        # delete file because it could not be indexed
-#        _response, status_code = filehander.remove_file(chatroom_id, filename)
-#        if status_code != 200:
-#            log(level='error', msg=f'[server/api/upload_file/2] failed to delete corrupt file: {filename}')
-#
-#        # return error
-#        return response, status_code
-#
-#
-#    # all is well
-#    return response, 200
 #
 #
 #

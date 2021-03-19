@@ -3,11 +3,14 @@
 import os
 import uuid
 import bcrypt
+import string
 from hashlib import sha256
 
 from logging_th import logger as log
 
+
 def sanitize_uuid(ID):
+    log(level='warning', msg="sanitize_uuid is now depricated and should be replaced with check_uuid")
     ID = str(ID)
     ID = ID.replace('..', '')
     ID = ID.replace('/', '')
@@ -26,6 +29,31 @@ def sanitize_uuid(ID):
 
     return ID
 
+
+def check_uuid(ID):
+    ID = str(ID)
+    allowed = string.digits + string.ascii_letters + '-'
+
+    for i in ID:
+        p = allowed.find(i)
+        if p < 0:
+            print('ID: ',ID , len(ID))
+            return f"[security/check_uuid/0] || Invalid or dangerous uuid send from user. Cannot contain: '{i}'", 400
+
+
+    if len(ID) != 36:
+        print('ID: ',ID , len(ID))
+        return f"[security/check_uuid/1] || Invalid uuid send from user. UUID length must equal to 36", 400
+
+    # validate uuid:
+    try:
+        uuid.UUID(ID).version
+    except ValueError as e:
+        print('ID: ',ID , type(ID))
+        return f"[security/check_uuid/3] || Invalid or dangerous uuid send from user. Not a UUID!", 400
+
+
+    return ID, 200
 
 
 def sanitize_chatroomId(chatroom_id):

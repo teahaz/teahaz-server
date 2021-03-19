@@ -1,7 +1,9 @@
 # this file handles all things connected to local files
 import os
 import shutil
+import security_th as security
 from logging_th import logger as log
+
 
 def save_file(data, chatroom, extension, filename):
     if not os.path.exists(f'storage/{chatroom}/uploads'): # make sure uploads folder exists
