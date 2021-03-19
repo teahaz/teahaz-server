@@ -247,12 +247,12 @@ def upload_file(json_data, chatroomId):
 
     # failed to save reference to file
     if status_code != 200:
-        log(level='warning', msg=f'[server/api/upload_file/1] failed to save file: {filename}, in database \n attempting to remove')
+        log(level='warning', msg=f'[api/upload_file/1] failed to save file: {filename}, in database \n attempting to remove')
 
         # delete file because it could not be indexed
-        _response, status_code = filehander.remove_file(chatroom_id, filename)
+        _response, status_code = filehander.remove_file(chatroomId, filename)
         if status_code != 200:
-            log(level='error', msg=f'[server/api/upload_file/2] failed to delete corrupt file: {filename}')
+            log(level='error', msg=f'[api/upload_file/2] failed to delete corrupt file: {filename}')
 
         # return error
         return response, status_code
