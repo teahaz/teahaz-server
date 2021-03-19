@@ -53,6 +53,8 @@ class login(Resource):
 
         # authenticate and get cookie data
         cookie, status_code = set_cookie(request.get_json(), chatroomId)
+        if status_code != 200:
+            return cookie, status_code
 
 
         # NOTE : this is temporary

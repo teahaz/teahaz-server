@@ -18,9 +18,9 @@ global username
 global chatroom_id
 # url = "http://butorhaz.hopto.org:13337"
 # url = "https://butorhaz.hopto.org"
-url = "http://localhost:13337"
+# url = "http://localhost:13337"
 # url = "http://localhost:80"
-# url = "https://teahaz.co.uk"
+url = "https://teahaz.co.uk"
 
 
 def send_file():
