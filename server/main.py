@@ -163,6 +163,7 @@ class api__invites(Resource):
         if not chatroomId: return "ChatroomId was not part of the path", 400
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
+        return str(request.headers), 400
 
         response, status_code = create_invite(request.headers, chatroomId)
         return response, status_code
