@@ -2,11 +2,14 @@ todos
 =====
 bug fixes
 ---------
-- [ ] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
+- [ ] fix depricated function warnings (sanitize\_uuid)
 
 fixed bugs
 ----------
 - [x] Issue #1: returned 200 for login with unrecognised username
+
+
+- [x] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
 
 upcoming
 --------
