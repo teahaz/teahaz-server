@@ -196,22 +196,16 @@ def get_chatroms():
 
 
 def get_invite():
-    url = globals()['url'] + "/api/v0/invite/" + globals()['chatroom_id']
+    url = globals()['url']
 
-    a = {
+    expr_time = str(time.time() + 60 * 60 * 24)
+    uses =  str(int(input("uses: "))).strip('\n')
 
-            "username": globals()['username'],
-            "expr-time": str(time.time() + 60 * 60 * 24),
-            "uses": str(int(input("uses: "))).strip('\n')
-            }
-    print(a)
+    response, status_code = teahaz.create_invite_v0(globals()['s'], url, globals()['chatroom_id'], globals()['username'], expr_time, uses)
+    if status_code == 200:
+        print("invite: ", str(response).strip('\n').strip('"'))
 
-    res = globals()['s'].get(url=url, headers=a)
-    print(res.headers)
-    if res.status_code == 200:
-        print("invite: ", str(res.text).strip('\n').strip('"'))
-
-    return res.text
+    return response, status_code
 
 
 def use_invite():

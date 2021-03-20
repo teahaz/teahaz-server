@@ -1,5 +1,17 @@
 Welcome to the long overdue documentation of this abomination that I call a rest API :)
 
+
+
+# warning
+this file is now a little bit outdated
+<br />
+for more up to date information check out the [api helper files](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-api-helper-files)
+
+
+
+
+
+
 docs of /api/v0
 ==============
 
