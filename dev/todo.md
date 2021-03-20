@@ -4,6 +4,9 @@ bug fixes
 ---------
 - [ ] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
 
+fixed bugs
+----------
+- [x] Issue #1: returned 200 for login with unrecognised username
 
 upcoming
 --------
