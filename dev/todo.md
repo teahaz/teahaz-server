@@ -2,15 +2,15 @@ todos
 =====
 bug fixes
 ---------
-[ ] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
+- [ ] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
 
 
 upcoming
 --------
-[ ] file transfer in chunks or sockets
+[_] file transfer in chunks or sockets
 
 
-[ ] method to get a message by its id
+- [_] method to get a message by its id
 
 
 [ ] endpint where a user can check/change their own configs
