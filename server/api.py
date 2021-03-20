@@ -84,18 +84,14 @@ def create_chatroom(json_data):
 def create_invite(json_data, chatroomId):
     username   = json_data.get('username')
     expr_time  = json_data.get('expr-time')
-    Expr_time  = json_data.get('Expr_time')
     uses       = json_data.get('uses')
     some_random= json_data.get('some-random')
-    Some_random= json_data.get('Some_random')
     inviteId   = str(uuid.uuid1())
-    return f"Supplied=[{username}, {expr_time}, {Expr_time}, {uses}, {inviteId}, {some_random}, {Some_random}]", 400
 
 
     # make sure we got all the data
     if not username or not chatroomId or not uses or not expr_time:
-        return f"Supplied=[{username}, {expr_time}, {inviteId}, {some_random}]", 400
-        # return f"[api/create_invite/0] || One or more of the required arguments were not supplied. Required=[username, chatroom, expr_time, uses]. Supplied=[{username}, {expr_time}, {inviteId}, {some_random}]", 400
+        return f"[api/create_invite/0] || One or more of the required arguments were not supplied. Required=[username, expr_time, uses]. Supplied=[{username}, {uses}, {expr_time}]", 400
 
 
     # make sure the format is good on time and uses
