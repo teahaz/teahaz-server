@@ -145,9 +145,9 @@ def process_invite(json_data, chatroomId):
 
 
     # we need to sanitize
-    inviteId = security.sanitize_uuid(inviteId)
-    if not inviteId:
-       return "[users/process_invite/1] || invalid format for invite ID", 400
+    res, status = security.sanitize_uuid(inviteId)
+    if status != 200:
+       return res, status
 
 
 

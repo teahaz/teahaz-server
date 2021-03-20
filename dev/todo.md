@@ -2,14 +2,7 @@ todos
 =====
 bug fixes
 ---------
-- [ ] fix depricated function warnings (sanitize\_uuid)
-
-fixed bugs
-----------
-- [x] Issue #1: returned 200 for login with unrecognised username
-
-
-- [x] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
+None :)
 
 upcoming
 --------
@@ -65,3 +58,17 @@ maybe
 - [ ] multiple channels in one chatroom
 
 
+
+
+fixed bugs
+----------
+- [x] Issue #1: returned 200 for login with unrecognised username
+
+
+- [x] expr\_time gets overwritten to None in create\_invite. \(only in production mode\)
+
+
+- [x] fix depricated function warnings (sanitize\_uuid)
+
+implemented
+-----------

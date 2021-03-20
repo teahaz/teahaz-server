@@ -25,9 +25,9 @@ def d(a):
 
 def database_execute(chatroom='', statement='', variables=()):
     chatroom = chatroom.strip(' ')
-    chatroom = security.sanitize_uuid(chatroom)
-    if not chatroom:
-        return "[database/database_execute/0] || invalid chatrom id format", 500
+    res, status = security.check_uuid(chatroom)
+    if status != 200:
+        return res, status
 
 
 
@@ -598,12 +598,19 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
 
     # validate, and encode uuids
     if filename:
-        filename = security.sanitize_uuid(filename)
+        res, status = security.check_uuid(filename)
+        if status != 200:
+            return res, status
+
         if filename: filename = b(filename)
         else: return "[database/save_in_db/2] || Invalid uuid sent for filename", 400
 
+
     if replyId:
-        replyId = security.sanitize_uuid(replyId)
+        res, status = security.check_uuid(replyId)
+        if status != 200:
+            return res, status
+
         if replyId: replyId = b(replyId)
         else: return "[database/save_in_db/2] || Invalid uuid sent for replyId", 400
 
