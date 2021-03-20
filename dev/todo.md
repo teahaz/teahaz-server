@@ -10,7 +10,13 @@ fixed bugs
 
 upcoming
 --------
+- [ ] replace in files: filename --> fileId; extension --> original\_name
+
+
 - [ ] file transfer in chunks or sockets
+
+
+- [ ] add kid (Key ID) field to messages
 
 
 - [ ] method to get a message by its id
