@@ -85,7 +85,6 @@ def create_invite(json_data, chatroomId):
     username   = json_data.get('username')
     expr_time  = json_data.get('expr-time')
     uses       = json_data.get('uses')
-    some_random= json_data.get('some-random')
     inviteId   = str(uuid.uuid1())
 
 
@@ -204,16 +203,18 @@ def message_get(headers, chatroomId):
 
 def upload_file(json_data, chatroomId):
     username      = json_data.get('username')
+    filename      = json_data.get('filename')
+    fileId        = json_data.get('fileId')
     message_type  = json_data.get('type')
+    part          = json_data.get('part')
     data          = json_data.get('data')
-    extension     = json_data.get('extension')
-    messageId     = uuid.uuid1()
+    messageId     = str(uuid.uuid1())
 
 
 
     # make sure client sent all needed data
-    if not username or not chatroomId or not message_type or not data or not extension:
-        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, extension]  Supplied=[{username}, {type}, (type(data)){type(data)}, {extension})]', 400
+    if not username or not chatroomId or not message_type or not data or not filename:
+        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, filename]  Supplied=[{username}, {type}, (type(data)){type(data)}, {filename})]', 400
 
 
     # message type has to be file
@@ -222,45 +223,58 @@ def upload_file(json_data, chatroomId):
 
 
 
-    # generate filename
-    filename = str(uuid.uuid1())
+    # NOTE: this should be a global setting
+    max_chunk_size = 1048576 # one megabyte
+
+    # check if the 
+    if len(data) > max_chunk_size:
+        return f'[api/upload_file/2] || data field exeeded the maximum chunk-size permitted by the server. Maximum={max_chunk_size}', 400
+
+
+
+    # if a fileId is sent then the file is a part that should be appended to the already existing file
+    # elif the fileId is not sent then generate a random one
+    if not fileId:
+        fileId = str(uuid.uuid1())
 
 
     # save file that user sent
-    response, status_code = filehander.save_file(data, chatroomId, extension, filename)
+    response, status_code = filehander.save_file_chunk(data, chatroomId, filename, filename, username)
     if status_code != 200:
-        log(level='error', msg=f'[api/upload_file/2] failed to save file: {filename}')
+        log(level='error', msg=f'[api/upload_file/2] failed to save file: {fileId}')
         return response, status_code
 
 
-    # save a reference to the file in the chatroom database
-    response, status_code = dbhandler.save_in_db(
-            time          = time.time(),
-            messageId     = messageId,
-            username      = username,
-            chatroomId    = chatroomId,
-            message_type  = message_type,
-            filename      = filename,
-            extension     = extension
-            )
 
 
-    # failed to save reference to file
-    if status_code != 200:
-        log(level='warning', msg=f'[api/upload_file/1] || failed to save file: {filename}, in database \n attempting to remove')
+    # if the file is small or its the last part: save a reference to the file in the chatroom database
+    if not part:
+        response, status_code = dbhandler.save_in_db(
+                time          = time.time(),
+                messageId     = messageId,
+                username      = username,
+                chatroomId    = chatroomId,
+                message_type  = message_type,
+                fileId        = fileId,
+                filename      = filename
+                )
 
-        # delete file because it could not be indexed
-        _response, status_code = filehander.remove_file(chatroomId, filename)
+
+        # failed to save reference to file
         if status_code != 200:
-            log(level='error', msg=f'[api/upload_file/2] || failed to delete corrupt file: {filename}')
+            log(level='warning', msg=f'[api/upload_file/3] || failed to save file: {fileId}, in database \n attempting to remove')
 
-        # return error
-        return response, status_code
+            # delete file because it could not be indexed
+            _response, status_code = filehander.remove_file(chatroomId, fileId)
+            if status_code != 200:
+                log(level='error', msg=f'[api/upload_file/4] || failed to delete corrupt file: {fileId}')
+
+            # return error
+            return response, status_code
 
 
     # all is well
-    return response, 200
-
+    return "OK", 200
 
 
 def download_file(headers, chatroomId):

@@ -28,21 +28,19 @@ def send_file():
     url = globals()['url'] + "/api/v0/file/" + globals()['chatroom_id']
 
     # get filename from user
-    filename = input(">> ")
+    filepath = input(">> ")
 
     # get file extension bc mimetype sucks sometimes
-
-    extension = filename.split(".")[-1]
+    filename = filename.split("/")[-1]
     print('extension: ',extension , type(extension))
 
 
-    response, status_code = teahaz.upload_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, extension)
+    response, status_code = teahaz.upload_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filepath, filename)
 
     return response
 
 
 def get_file():
-    # get filename from user
     filename = input(">> ")
     saved_filename = input("save as: ")
 

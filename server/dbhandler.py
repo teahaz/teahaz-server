@@ -83,8 +83,8 @@ def init_chat(chatroomId, chatroom_name):
 
 
     # create messages table
-    #                          |                       general                    | type | message |          files         |
-    sql = "CREATE TABLE messages ('time', 'messageId', 'replyId', 'username', 'type', 'message', 'filename', 'extension')"
+    #                          |                    general                  | type | message |          files         |
+    sql = "CREATE TABLE messages ('time', 'messageId', 'replyId', 'username', 'type', 'message', 'fileId', 'filename')"
     data, status_code = database_execute(chatroomId, sql, ())
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/init_chat/4] || {data}")
@@ -571,10 +571,10 @@ def use_invite(chatroomId, inviteId):
 
 
 # save a message in the database (both texts and files)
-def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None, message=None, filename=None, extension=None ):
+def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None, message=None, fileId=None, filename=None ):
     if not time  or not messageId  or not username  or not chatroomId  or not message_type :
         # making sure that all values that are needed exist
-        log(level='error', msg='[dbhandler/save_in_db/0] || one or more of the required fields passed to function "save_in_db" are not present [time, username, chatroomId, message_type]')
+        log(level='error', msg='[dbhandler/save_in_db/0] || one or more of the required fields passed to function "save_in_db" are not present ')
         return "[dbhandler/save_in_db/0] || internal server error: missing arguments", 500
 
 
@@ -593,12 +593,12 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
 
     # encode non compulsary values
     if message: message = b(message)
-    if extension: extension = b(extension)
+    if filename: filename = b(filename)
 
 
     # validate, and encode uuids
-    if filename:
-        res, status = security.check_uuid(filename)
+    if fileId:
+        res, status = security.check_uuid(fileId)
         if status != 200:
             return res, status
 
@@ -618,7 +618,7 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
 
 
     sql = f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    variables = (time, messageId, replyId, username, message_type, message, filename, extension)
+    variables = (time, messageId, replyId, username, message_type, message, fileId, filename)
     data, status_code = database_execute(chatroomId, sql, variables)
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/save_in_db/2] || Failed to save message: {data}")
@@ -659,10 +659,10 @@ def get_messages_db(chatroomId, last_time=0):
             # get optional data, they may or may not be present
             message = element[5]
             if message: message = d(message)
-            filename = element[6]
+            fileId = element[6]
+            if fileId: fileId = d(fileId)
+            filename = element[7]
             if filename: filename = d(filename)
-            extension = element[7]
-            if extension: extension = d(extension)
             replyId   = element[2]
             if replyId: replyId = d(replyId)
 
@@ -675,8 +675,8 @@ def get_messages_db(chatroomId, last_time=0):
                 'nickname': nickname,
                 'type': msg_type,
                 'message': message,
-                'filename': filename,
-                'extension': extension
+                'fileId': fileId,
+                'filename': filename
                     }
 
             # add to list
