@@ -7,49 +7,49 @@ bug fixes
 
 upcoming
 --------
-[_] file transfer in chunks or sockets
+- [ ] file transfer in chunks or sockets
 
 
-- [_] method to get a message by its id
+- [ ] method to get a message by its id
 
 
-[ ] endpint where a user can check/change their own configs
+- [ ] endpint where a user can check/change their own configs
 
 
-[ ] endpoint where the client can get some server configs that it needs to know
+- [ ] endpoint where the client can get some server configs that it needs to know
     - max request size
     - max stored filesize
     - does creating a chatroom require verified email
 
 
-[ ] endpoint to check chatroom configs (and some permissions should be able to change them)
+- [ ] endpoint to check chatroom configs (and some permissions should be able to change them)
     - maximum text size limit
     - not sure what else yet
 
 
-[ ] more per-user permissions. (currently we only have `admin=bool`)
+- [ ] more per-user permissions. (currently we only have `admin=bool`)
     - send-message
     - create-invite
     - etc
 
 
-[ ] cookie lifetimes
+- [ ] cookie lifetimes
     - currently cookies have an infinate lifetime.
     - this should be changed by storing an end date alongside the cookie in the database
     - also should probably include this same expiration date as a max_age header so browsers will understand it automatically
 
 
-[ ] send and check verification codes sent to emails
+- [ ] send and check verification codes sent to emails
 
 
 
 maybe
 -----
-[ ] user avatars
+- [ ] user avatars
 
-[ ] invites with permissions attached to them
+- [ ] invites with permissions attached to them
     - eg an invite without send-message permission
 
-[ ] multiple channels in one chatroom
+- [ ] multiple channels in one chatroom
 
 
