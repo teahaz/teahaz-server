@@ -201,8 +201,8 @@ def get_invite():
     a = {
 
             "username": globals()['username'],
-            "expr_time": str(time.time() + 60 * 60 * 24),
-            "some_random": "heyhey",
+            "expr-time": str(time.time() + 60 * 60 * 24),
+            "some-random": "heyhey",
             "uses": str(int(input("uses: "))).strip('\n')
             }
     print(a)
