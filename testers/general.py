@@ -202,11 +202,13 @@ def get_invite():
 
             "username": globals()['username'],
             "expr_time": str(time.time() + 60 * 60 * 24),
-            "some_random": str(time.time() + 60 * 60 * 24),
-            "uses": str(int(input("uses: ")))
+            "some_random": "heyhey",
+            "uses": str(int(input("uses: "))).strip('\n')
             }
+    print(a)
 
     res = globals()['s'].get(url=url, headers=a)
+    print(res.headers)
     if res.status_code == 200:
         print("invite: ", str(res.text).strip('\n').strip('"'))
 
