@@ -18,10 +18,10 @@ global username
 global chatroom_id
 # url = "http://butorhaz.hopto.org:13337"
 # url = "https://butorhaz.hopto.org"
-# url = "http://localhost:13337"
+url = "http://localhost:13337"
 # url = "http://localhost:80"
 # url = "https://teahaz.co.uk"
-url = "http://192.168.1.75"
+# url = "http://192.168.1.75"
 
 
 def send_file():
@@ -31,8 +31,7 @@ def send_file():
     filepath = input(">> ")
 
     # get file extension bc mimetype sucks sometimes
-    filename = filename.split("/")[-1]
-    print('extension: ',extension , type(extension))
+    filename = filepath.split("/")[-1]
 
 
     response, status_code = teahaz.upload_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filepath, filename)

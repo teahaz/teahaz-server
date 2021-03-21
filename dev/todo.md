@@ -2,7 +2,7 @@ todos
 =====
 bug fixes
 ---------
-None :)
+- [ ] get invite crashes when using teahaz.py
 
 upcoming
 --------
@@ -13,6 +13,9 @@ upcoming
 
 
 - [ ] add kid (Key ID) field to messages
+
+
+- [ ] server signing cookies (cookies should be signed with (origin, useragnet, secret\_key))
 
 
 - [ ] method to get a message by its id

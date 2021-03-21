@@ -210,11 +210,22 @@ def upload_file(json_data, chatroomId):
     data          = json_data.get('data')
     messageId     = str(uuid.uuid1())
 
+    if not username:
+        return "nouname", 400
 
+    if not message_type:
+        return "nomessagetype", 400
+
+    if not data:
+        return data, 400
+
+    if not filename:
+        return "nofilename", 400
 
     # make sure client sent all needed data
-    if not username or not chatroomId or not message_type or not data or not filename:
-        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, filename]  Supplied=[{username}, {type}, (type(data)){type(data)}, {filename})]', 400
+    if not username or not message_type or not data or not filename:
+        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, filename]  Supplied=[{username}, {message_type}, (type(data)){type(data)}, {filename})]', 400
+
 
 
     # message type has to be file
@@ -239,7 +250,7 @@ def upload_file(json_data, chatroomId):
 
 
     # save file that user sent
-    response, status_code = filehander.save_file_chunk(data, chatroomId, filename, filename, username)
+    response, status_code = filehander.save_file_chunk(data, chatroomId, fileId, fileId, username)
     if status_code != 200:
         log(level='error', msg=f'[api/upload_file/2] failed to save file: {fileId}')
         return response, status_code
@@ -274,7 +285,8 @@ def upload_file(json_data, chatroomId):
 
 
     # all is well
-    return "OK", 200
+    return fileId, 200
+
 
 
 def download_file(headers, chatroomId):

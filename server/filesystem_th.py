@@ -6,6 +6,7 @@ from logging_th import logger as log
 
 
 def save_file_chunk(data, chatroom, extension, fileId, username):
+    print('fileId: ',fileId , type(fileId))
     res, status = security.check_uuid(fileId)
     if status != 200:
         return res, status
