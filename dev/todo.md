@@ -56,7 +56,10 @@ maybe
     - eg an invite without send-message permission
 
 - [ ] multiple channels in one chatroom
+    - could be implemented entirely in json (ei a channel field)
+    - and yes this would still allow you to have permissions, just stored in a db
 
+- [ ] heartbeat
 
 
 
