@@ -8,6 +8,7 @@ upcoming
 --------
 - [ ] replace in files: filename --> fileId; extension --> original\_name
 
+- [ ] sanitize filenames on client side
 
 - [ ] file transfer in chunks or sockets
 

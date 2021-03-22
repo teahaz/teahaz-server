@@ -73,17 +73,52 @@ def save_file_chunk(data, chatroom, extension, fileId, username):
     # all is well
     return "OK", 200
 
+def read_file_chunk(chatroom, fileId, section):
+    if not os.path.isfile('storage/chatrooms/{chatroom}/uploads/{fileId}'):
+        return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
 
-def read_file(chatroom, filename):
+
+
+    # try open file
     try:
-        # as all files are base64 encoded text files, they can all be read without 'b'
-        with open(f'storage/chatrooms/{chatroom}/uploads/{filename}', 'r')as infile:
-            data = infile.read()
-    except:
-        return "Internal server error", 500
+        f = open('storage/chatrooms/{chatroom}/uploads/{fileId}', 'r')
+    except Exception as e:
+        log(level='error', msg=f"[filesystem/read_file_chunk/1] || could not open file for reading. \n Traceback: {e}")
+        return '[filesystem/read_file_chunk/1] || could not open file for reading.', 500
 
-    # all is well
+
+    # try read file
+    # NOTE this might get incredibly slow in large files, and we might want to find a better way
+    try:
+        data = ''
+        current_section = 0
+        while 1:
+            #read one byte
+            c = f.read(1)
+
+            # if byte is a section delimiter then mark new section and continu
+            if c == ';':
+                current_section += 1
+
+            # if in the right section then add it to the return data
+            elif current_section == section:
+                data += c
+
+            # dont waste time by scanning sections we dont need
+            elif current_section > section:
+                break
+
+
+    except Exception as e:
+        log(level='error', msg=f"[filesystem/read_file_chunk/2] || An error occured while reading file \n Traceback: {e}")
+        return '[filesystem/read_file_chunk/2] || An error occured while reading file', 500
+
+
     return data, 200
+
+
+
+
 
 
 def remove_file(chatroom, filename):

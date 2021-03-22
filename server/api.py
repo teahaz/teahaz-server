@@ -291,29 +291,30 @@ def upload_file(json_data, chatroomId):
 
 def download_file(headers, chatroomId):
     username     = headers.get('username')
-    filename     = headers.get('filename')
+    section      = headers.get('section')
+    fileId       = headers.get('fileId')
 
 
     # make sure client sent all data
-    if not username or not filename or not chatroomId:
-        return '[api/download_file/0] || one or more of the required arguments are not supplied. Required = [username, filename]. Supplied=[{username}, {filename}]', 400
+    if not username or not fileId  or not section:
+        return '[api/download_file/0] || one or more of the required arguments are not supplied. Required = [username, filename, section]. Supplied=[{username}, {filename}, {section}]', 400
 
 
     # sanitization is healthy
-    response, status_code = security.check_uuid(filename)
+    response, status_code = security.check_uuid(fileId)
     if status_code != 200:
         return response, status_code
 
 
 
     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
-    if not os_isfile(f'storage/chatrooms/{chatroomId}/uploads/{filename}'):
+    if not os_isfile(f'storage/chatrooms/{chatroomId}/uploads/{fileId}'):
         return "[api/download_file/1] || The requested file doesnt exist", 404
 
 
 
     # read file requested by user
-    data, status_code = filehander.read_file(chatroomId, filename)
+    data, status_code = filehander.read_file_chunk(chatroomId, fileId)
     if status_code != 200:
         log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
         return data, status_code
