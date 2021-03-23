@@ -74,16 +74,12 @@ def save_file_chunk(data, chatroom, extension, fileId, username):
     return "OK", 200
 
 def read_file_chunk(chatroom, fileId, section):
-    print(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
-
-    if not os.path.isfile('storage/chatrooms/{chatroom}/uploads/{fileId}'):
+    if not os.path.isfile(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
         return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
-
-
 
     # try open file
     try:
-        f = open('storage/chatrooms/{chatroom}/uploads/{fileId}', 'r')
+        f = open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'r')
     except Exception as e:
         log(level='error', msg=f"[filesystem/read_file_chunk/1] || could not open file for reading. \n Traceback: {e}")
         return '[filesystem/read_file_chunk/1] || could not open file for reading.', 500
@@ -92,11 +88,23 @@ def read_file_chunk(chatroom, fileId, section):
     # try read file
     # NOTE this might get incredibly slow in large files, and we might want to find a better way
     try:
+        # prev is the last file location. if this is the sam across 2 loops then we are at the end of the file
+        prev = -1
         data = ''
         current_section = 0
         while 1:
             #read one byte
             c = f.read(1)
+
+            # get current location
+            current = f.tell()
+            # check if it changed since the last loop
+            if current == prev:
+                # if not then we have reached the end of the file
+                break
+            else:
+                prev = current
+
 
             # if byte is a section delimiter then mark new section and continu
             if c == ';':
@@ -117,7 +125,6 @@ def read_file_chunk(chatroom, fileId, section):
 
 
     return data, 200
-
 
 
 def remove_file(chatroom, filename):
