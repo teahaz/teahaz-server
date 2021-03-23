@@ -5,19 +5,9 @@ bug fixes
 
 upcoming
 --------
-- [ ] replace in files: filename --> fileId; extension --> original\_name
-
-
-- [ ] sanitize filenames on client side
-
-
-- [ ] file transfer in chunks or sockets
-
 
 - [ ] add kid (Key ID) field to messages
 
-
-- [ ] server signing cookies (cookies should be signed with (origin, useragnet, secret\_key))
 
 
 - [ ] method to get a message by its id
@@ -43,6 +33,11 @@ upcoming
     - not sure what else yet
 
 
+- [ ] multiple channels in one chatroom
+    - could be implemented entirely in json (ei a channel field)
+    - and yes this would still allow you to have permissions, just stored in a db
+
+
 - [ ] more per-user permissions. (currently we only have `admin=bool`)
     - send-message
     - create-invite
@@ -66,11 +61,13 @@ maybe
 - [ ] invites with permissions attached to them
     - eg an invite without send-message permission
 
-- [ ] multiple channels in one chatroom
-    - could be implemented entirely in json (ei a channel field)
-    - and yes this would still allow you to have permissions, just stored in a db
 
 - [ ] heartbeat
+
+
+- [ ] server signing cookies (cookies should be signed with (origin, useragnet, secret\_key))
+    - downside is that changing IP might log you out
+
 
 
 
@@ -87,5 +84,15 @@ fixed bugs
 
 - [x] get invite crashes when using teahaz.py
 
+
 implemented
 -----------
+- [x] replace in files: filename --> fileId; extension --> original\_name
+
+
+- [x] sanitize filenames on client side
+    - although on the recieving side its up to the client to call teahaz.sanitize\_filename
+
+
+- [x] file transfer in chunks or sockets
+    - doing chunks for now
