@@ -74,6 +74,8 @@ def save_file_chunk(data, chatroom, extension, fileId, username):
     return "OK", 200
 
 def read_file_chunk(chatroom, fileId, section):
+    print(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
+
     if not os.path.isfile('storage/chatrooms/{chatroom}/uploads/{fileId}'):
         return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
 
@@ -115,9 +117,6 @@ def read_file_chunk(chatroom, fileId, section):
 
 
     return data, 200
-
-
-
 
 
 

@@ -596,24 +596,18 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
     if filename: filename = b(filename)
 
 
-    # validate, and encode uuids
+
+    # validate uuids
+    # uuids dont need to be encoded as they are alredy validated
     if fileId:
         res, status = security.check_uuid(fileId)
         if status != 200:
             return res, status
 
-        if filename: filename = b(filename)
-        else: return "[database/save_in_db/2] || Invalid uuid sent for filename", 400
-
-
     if replyId:
         res, status = security.check_uuid(replyId)
         if status != 200:
             return res, status
-
-        if replyId: replyId = b(replyId)
-        else: return "[database/save_in_db/2] || Invalid uuid sent for replyId", 400
-
 
 
 
@@ -656,15 +650,15 @@ def get_messages_db(chatroomId, last_time=0):
             username  = d(element[3])
             msg_type  = d(element[4])
 
+            # get optional but non-encoded data
+            fileId    = element[6]
+            replyId   = element[2]
+
             # get optional data, they may or may not be present
             message = element[5]
             if message: message = d(message)
-            fileId = element[6]
-            if fileId: fileId = d(fileId)
             filename = element[7]
             if filename: filename = d(filename)
-            replyId   = element[2]
-            if replyId: replyId = d(replyId)
 
             # make return dict
             a = {

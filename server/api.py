@@ -244,9 +244,10 @@ def upload_file(json_data, chatroomId):
 
 
     # if a fileId is sent then the file is a part that should be appended to the already existing file
-    # elif the fileId is not sent then generate a random one
+    # elif the fileId is not sent then set it the same as the messageId
     if not fileId:
-        fileId = str(uuid.uuid1())
+        fileId = messageId
+
 
 
     # save file that user sent

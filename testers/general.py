@@ -46,7 +46,7 @@ def get_file():
 
     response, status_code = teahaz.download_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, saved_filename)
 
-
+    print(status_code)
     return response
 
 
