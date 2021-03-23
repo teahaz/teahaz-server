@@ -300,6 +300,14 @@ def download_file(headers, chatroomId):
         return '[api/download_file/0] || one or more of the required arguments are not supplied. Required = [username, filename, section]. Supplied=[{username}, {filename}, {section}]', 400
 
 
+    # make sure section is int
+    try:
+        section = int(section)
+    except Exception as e:
+        return f'[api/download_file/1] || invalid data sent for section filed. Type has to be INT. Traceback: {e}'
+
+
+
     # sanitization is healthy
     response, status_code = security.check_uuid(fileId)
     if status_code != 200:
@@ -314,9 +322,9 @@ def download_file(headers, chatroomId):
 
 
     # read file requested by user
-    data, status_code = filehander.read_file_chunk(chatroomId, fileId)
+    data, status_code = filehander.read_file_chunk(chatroomId, fileId, section)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {filename}')
+        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {fileId}')
         return data, status_code
 
 

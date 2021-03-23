@@ -2,13 +2,14 @@ todos
 =====
 bug fixes
 ---------
-- [ ] get invite crashes when using teahaz.py
 
 upcoming
 --------
 - [ ] replace in files: filename --> fileId; extension --> original\_name
 
+
 - [ ] sanitize filenames on client side
+
 
 - [ ] file transfer in chunks or sockets
 
@@ -23,6 +24,12 @@ upcoming
 
 
 - [ ] endpint where a user can check/change their own configs
+
+
+- [ ] chatroom configs
+
+
+- [ ] server configs
 
 
 - [ ] endpoint where the client can get some server configs that it needs to know
@@ -73,6 +80,9 @@ fixed bugs
 
 
 - [x] fix depricated function warnings (sanitize\_uuid)
+
+
+- [x] get invite crashes when using teahaz.py
 
 implemented
 -----------
