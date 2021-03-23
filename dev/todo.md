@@ -2,11 +2,13 @@ todos
 =====
 bug fixes
 ---------
-None :)
 
 upcoming
 --------
 - [ ] replace in files: filename --> fileId; extension --> original\_name
+
+
+- [ ] sanitize filenames on client side
 
 
 - [ ] file transfer in chunks or sockets
@@ -15,10 +17,19 @@ upcoming
 - [ ] add kid (Key ID) field to messages
 
 
+- [ ] server signing cookies (cookies should be signed with (origin, useragnet, secret\_key))
+
+
 - [ ] method to get a message by its id
 
 
 - [ ] endpint where a user can check/change their own configs
+
+
+- [ ] chatroom configs
+
+
+- [ ] server configs
 
 
 - [ ] endpoint where the client can get some server configs that it needs to know
@@ -72,6 +83,9 @@ fixed bugs
 
 
 - [x] fix depricated function warnings (sanitize\_uuid)
+
+
+- [x] get invite crashes when using teahaz.py
 
 implemented
 -----------

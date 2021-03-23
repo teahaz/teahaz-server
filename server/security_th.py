@@ -2,11 +2,20 @@
     # some functions seem small but are here for modularity purposes
 import os
 import uuid
+import base64
 import bcrypt
 import string
 from hashlib import sha256
 
 from logging_th import logger as log
+
+# base64 encode messages
+def encode(a):
+    return base64.b64encode(str(a).encode('utf-8')).decode('utf-8')
+
+# base64 decode messages
+def decode(a):
+    return base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
 
 
 def sanitize_uuid(ID):
