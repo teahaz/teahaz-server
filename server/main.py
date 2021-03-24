@@ -219,7 +219,7 @@ def check_health():
     server_port = environ.get('TEAHAZ_PORT')
     print('server_port: ',server_port , type(server_port))
     if not server_port or server_port.isdigit() == False or int(server_port) > 655234 or int(server_port) < 1:
-        log(level='log', msg=f"[setup]  || TEAHAZ_PORT variable was not set, or is set to an invalid port. Defaulting to '13337'")
+        log(level='log', msg=f"[setup]  ||  TEAHAZ_PORT variable was not set, or is set to an invalid port. Defaulting to '13337'")
         server_port = 13337
     return server_port
 

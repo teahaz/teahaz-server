@@ -626,7 +626,8 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
 
 
 # get all messages from database since `last_time`
-def get_messages_db(chatroomId, last_time=0):
+def get_messages_db(chatroomId, last_time=0, messageId=None):
+    need to modify this function to accomodate for the two differnet types of message-get
     sql = "SELECT * FROM messages WHERE time >= ?"
     data, status_code = database_execute(chatroomId, sql, (last_time,))
     if status_code != 200:

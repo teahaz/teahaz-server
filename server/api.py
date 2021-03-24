@@ -167,27 +167,55 @@ def message_send(json_data, chatroomId):
 
 
 def message_get(headers, chatroomId):
-    last_time = headers.get('time')
     username = headers.get('username')
+    last_time = headers.get('time')
+    messageId = headers.get('messageId')
 
 
     # make sure the client sent everything
-    if not last_time or not username or not chatroomId:
-        return '[api/message_get/0] || one or more of the required arguments are not supplied. Required=[time, username, chatroomId]', 400
+    if  not username or not chatroomId:
+        return '[api/message_get/0] || one or more of the required arguments are not supplied. Required=[username] Supplied=[{username}]', 400
 
 
-    # time needs to be converted to a number
-    try:
-        last_time = float(last_time)
+    # if messageId is set then just get the message with that Id
+    if messageId:
+        # set the function mode to single message
+        mode = 'single'
+
+        # make sure the messageId is valid
+        res, status = security.check_uuid(messageId)
+        if status != 200:
+            return res, status
+
+        # make sure the other is set to None
+        last_time = None
 
 
-    # please supply a valid time
-    except:
-        return 'value for time is not a number', 400
+
+    # if messageId is not set then get all messages since <last_time>
+    elif last_time:
+        # set the function mode to multiple messages
+        mode = 'multiple'
+
+        # time needs to be converted to a number
+        try:
+            last_time = float(last_time)
+
+        # please supply a valid time
+        except:
+            return '[api/message_get/1] || value for time is not a number', 400
+
+
+        # make sure the other is set to None
+        messageId = None
+
+
+    else:
+        return "[api/message_get/2] || Must send either messageId or time", 400
 
 
     # get messages since last_time
-    return_data, status_code = dbhandler.get_messages_db(chatroomId, last_time=last_time)
+    return_data, status_code = dbhandler.get_messages_db(chatroomId, last_time=last_time, messageId=messageId)
 
 
     # if gettting messages failed
