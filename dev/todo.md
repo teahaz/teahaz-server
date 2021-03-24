@@ -6,12 +6,14 @@ bug fixes
 upcoming
 --------
 
+- [ ] method to get a message by its id
+
+
 - [ ] add kid (Key ID) field to messages
 
 
-- [ ] method to get a message by its id
-
 - [ ] fix incredibly slow file downloads (server side)
+
 
 - [ ] endpint where a user can check/change their own configs
 
