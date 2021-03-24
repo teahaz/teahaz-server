@@ -18,6 +18,7 @@ server {
     server_name <REPLACE_SERVER_HOSTNAME>;
     ssl_certificate /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
     ssl_certificate_key /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/privkey.pem;
+    client_max_body_size 1G;
 
     location ~ /.well-known {
         root /home/teahaz/static;

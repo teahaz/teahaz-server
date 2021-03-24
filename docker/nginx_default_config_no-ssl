@@ -1,6 +1,7 @@
 server {
     listen 80;
     server_name <REPLACE_SERVER_HOSTNAME>;
+    client_max_body_size 1G;
 
     location ~ /.well-known {
         root /home/teahaz/static;
