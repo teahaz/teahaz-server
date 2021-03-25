@@ -32,7 +32,7 @@ Main db is an sqlite3 database file that stores all information the chatroom nee
 **Users table:** <br />
 This table stores information on every user. The table is responsible for handling login related data as well as some user options.
 * username:
-   - The username of the user ¯\_(ツ)_/¯. 
+   - The username of the user ¯\\_(ツ)_/¯. 
    - The username should not really ever be displayed to other users, for that we have the nickname.
    - The username cannot be changed by the user <br />
 * email:
