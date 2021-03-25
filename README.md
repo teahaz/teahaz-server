@@ -1,10 +1,11 @@
-Teahaz / teahouse
-=================
-a messaging platform a friend and I are building.
-Server is mostly self hosted, thus file size limits are configurable
-
-
-Also plan on adding a method to stream files to each other, creating essentially and unlimited file transfer
+Teahaz
+======
+Teahaz (or teahouse) aims to be a secure alternative to discord and irc. This repo holds the code to the server back-end of Teahaz.
+<br />
+**Current and upcoming features:**
+* Discord-like chatrooms (servers on discord) with multiple channles
+* End to end encryption
+* Unlimited file transfers by directly streaming files to your friends ( mediated by the server to not expose IP addresses )
 
 
 IMPORTANT
