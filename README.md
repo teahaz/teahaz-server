@@ -2,6 +2,7 @@ Teahaz
 ======
 Teahaz (or teahouse) aims to be a secure alternative to discord and irc. This repository holds the code to the server back-end of Teahaz. 
 <br />
+Check out the [official client](https://github.com/bczsalba/teahaz-client)
 <br />
 <br />
 **Current and upcoming features:**
