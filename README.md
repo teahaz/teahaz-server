@@ -6,12 +6,13 @@ Teahaz (or teahouse) aims to be a secure alternative to discord and irc. This re
 <br />
 **Current and upcoming features:**
 - [ ] End to end encryption
-- [x] Completely free official server ((teahaz.co.uk)[https://teahaz.co.uk])
+- [x] Sending messages and files
+- [ ] Discord-like chatrooms (servers on discord) with multiple channles
+- [ ] Unlimited file transfers by directly streaming files to your friends ( mediated by the server to not expose IP addresses )
+- [x] Completely free official server ([teahaz.co.uk](https://teahaz.co.uk))
 - [x] Availability to host your own server.
 - [x] Terminal based client.
 - [ ] Api and Libraries to make creating 3rd party clients easy.
-- [ ] Discord-like chatrooms (servers on discord) with multiple channles
-- [ ] Unlimited file transfers by directly streaming files to your friends ( mediated by the server to not expose IP addresses )
 
 
 IMPORTANT
