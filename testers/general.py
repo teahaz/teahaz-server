@@ -18,9 +18,9 @@ global username
 global chatroom_id
 # url = "http://butorhaz.hopto.org:13337"
 # url = "https://butorhaz.hopto.org"
-# url = "http://localhost:13337"
+url = "http://localhost:13337"
 # url = "http://localhost:80"
-url = "https://teahaz.co.uk"
+# url = "https://teahaz.co.uk"
 # url = "http://192.168.1.75"
 
 
@@ -65,6 +65,19 @@ def get():
     print("status_code: ", res.status_code)
     print(res.text)
 
+def gid():
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] + '/'
+
+    headers = {
+        "username": globals()['username'],
+        "messageId": input('id >>')
+    }
+
+
+    res = globals()['s'].get(url=url, headers=headers)
+
+    print("status_code: ", res.status_code)
+    print(res.text)
 
 
 def send_message():
@@ -239,6 +252,8 @@ while 1:
         print(send_message())
     elif choice == 'get':
         print(get())
+    elif choice == 'gid':
+        print(gid())
     elif choice == 'logout':
         s = requests.Session()
     elif choice == 'register':

@@ -580,8 +580,8 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
 
     # encode cumpolsary values
     try:
+        messageId = messageId
         username = b(username)
-        messageId = b(messageId)
         message_type = b(message_type)
 
 
@@ -627,12 +627,24 @@ def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None
 
 # get all messages from database since `last_time`
 def get_messages_db(chatroomId, last_time=0, messageId=None):
-    need to modify this function to accomodate for the two differnet types of message-get
-    sql = "SELECT * FROM messages WHERE time >= ?"
-    data, status_code = database_execute(chatroomId, sql, (last_time,))
+    if messageId:
+        sql = "SELECT * FROM messages WHERE messageId = ?"
+        key = messageId
+
+    elif last_time != None:
+        sql = "SELECT * FROM messages WHERE time >= ?"
+        key = last_time
+
+    else:
+        log(level='error', msg="[dbhandler/get_messages_db/0] || Either last_time or messageId must be set")
+        return "[dbhandler/get_messages_db/0] || Either last_time or messageId must be set", 500
+
+
+
+    data, status_code = database_execute(chatroomId, sql, (key,))
     if status_code != 200:
-        log(level='error', msg=f"[dbhandler/get_messages_db/0] || Could not get messages from db: {data}")
-        return "[dbhandler/get_messages_db/0] || Failed to get messages: Internal database error", 500
+        log(level='error', msg=f"[dbhandler/get_messages_db/1] || Could not get messages from db: {data}")
+        return "[dbhandler/get_messages_db/1] || Failed to get messages: Internal database error", 500
 
 
 
@@ -647,7 +659,7 @@ def get_messages_db(chatroomId, last_time=0, messageId=None):
 
             # get compulsary data, all but time need to be decoded
             send_time = element[0]
-            messageId = d(element[1])
+            messageId = element[1]
             username  = d(element[3])
             msg_type  = d(element[4])
 
@@ -682,7 +694,7 @@ def get_messages_db(chatroomId, last_time=0, messageId=None):
     # except Exception as e:
     else:
         # log(level='error', msg=f"[dbhandler/get_messages/1] || Error while formatting message data: {e}")
-        return "[dbhandler/get_messages/1] || Could not format data: Internal databse error", 500
+        return "[dbhandler/get_messages/2] || Could not format data: Internal databse error", 500
 
 
     # all is well
