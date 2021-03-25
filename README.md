@@ -1,11 +1,17 @@
 Teahaz
 ======
-Teahaz (or teahouse) aims to be a secure alternative to discord and irc. This repo holds the code to the server back-end of Teahaz.
+Teahaz (or teahouse) aims to be a secure alternative to discord and irc. This repo holds the code to the server back-end of Teahaz. 
+<br />
+<br />
 <br />
 **Current and upcoming features:**
-* Discord-like chatrooms (servers on discord) with multiple channles
-* End to end encryption
-* Unlimited file transfers by directly streaming files to your friends ( mediated by the server to not expose IP addresses )
+- [ ] End to end encryption
+- [x] Completely free official server ((teahaz.co.uk)[https://teahaz.co.uk])
+- [x] Availability to host your own server.
+- [x] Terminal based client.
+- [ ] Api and Libraries to make creating 3rd party clients easy.
+- [ ] Discord-like chatrooms (servers on discord) with multiple channles
+- [ ] Unlimited file transfers by directly streaming files to your friends ( mediated by the server to not expose IP addresses )
 
 
 IMPORTANT
