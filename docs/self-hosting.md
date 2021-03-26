@@ -45,7 +45,9 @@ You will need to enter your hostname (WITHOUT https or trailing slashes). Next y
 If this runs without errors then your setup is complete
 
 
-
+<br />
+<br />
+<br />
 
 
 Manual setup
