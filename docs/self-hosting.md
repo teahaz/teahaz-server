@@ -13,7 +13,7 @@ Automatic setup
 A script called `setup.py` is included with the repository. This script will attempt to automate the server setup, however its incredibly unstable and if it fails we recomend doing the manual setup.
 <br />
 <br />
-**with ssl:**
+### with ssl:
 ```bash
 python3 setup.py
 ```
@@ -35,7 +35,7 @@ Your ssl setup should be complete :)
 <br />
 
 
-**without ssl:**
+### without ssl:
 ```
 python3 setup.py nossl
 ```
