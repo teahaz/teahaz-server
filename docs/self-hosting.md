@@ -4,7 +4,7 @@ dependencies
 ------------
 * docker
 * python3
-* certbot (if you want to use ssl)
+* certbot (Only for ssl)
 
 
 
