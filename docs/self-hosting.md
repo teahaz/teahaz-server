@@ -54,15 +54,14 @@ Manual setup
 
 ### With ssl:
 0. What you will need:
-    - A domain name. This will be later refered to as `{hostname}`. Anywhere you see `{hostname}` in the next sections, you should replace it with your domain. **Do not** add http[s] to the end of the domain.
+    - A domain name. This will be later refered to as `{hostname}`. Anywhere you see `{hostname}` in the next sections, you should replace it with your domain. **Do not** add http(s) to the end of the domain.
     - A linux server
     - port 80 and 443 exposed
 <br />
 <br />
 
 
-1. Downloading the server
-<br />
+1. Downloading the server:
 ```
 git clone https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server
 cd teahaz-server/
