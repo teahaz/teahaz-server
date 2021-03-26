@@ -17,7 +17,7 @@ python3 setup.py
 You will need to enter your hostname (WITHOUT https or trailing slashes). Next you will have to enter the ABSOLUTE path to your teahaz installation repo [eg /teahaz]. Next certbot will ask you a few questions that you need to answer.
 <br />
 <br />
-If the program runs successfully, you should be almost done. Setup uses a temporary http server for certbot verification. This server doesn't always shutdown correctly, for best practice search for `python3 -m http.server` in ps aux/top/htop and kill it or run `killall python`.
+If the program runs successfully, you should be almost done. Setup uses a temporary http server for certbot verification. This server doesn't always shutdown correctly, for best practice search for `python3 -m http.server` in ps aux/top/htop and kill it or run `killall python3`.
 <br />
 <br />
 Finally we need to sort out renewing certificates. You can manually run cert-renew.sh every couple months, or we suggest adding the following line to your root crontab. (`sudo crontab -e`)
