@@ -63,7 +63,7 @@ Manual setup
 
 1. Downloading the server
 <br />
-```bash
+```
 git clone https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server
 cd teahaz-server/
 ```
@@ -73,7 +73,7 @@ cd teahaz-server/
 <br />
 <br />
 * Creating direcorories for certbot keys:
-```bash
+```
 mkdir static/
 mkdir -p .keys/live/{hostname}
 mkdir -p .keys/archive/{hostname}
@@ -85,14 +85,14 @@ mkdir -p .keys/archive/{hostname}
 <br />
 For certbot to verify your certificate it needs to be able to contact your server. Teahaz currently doesnt have the capacity to do this without going through 2 different setups. For this reasont we are going to run a simple http server that comes with python3.
 <br />
-```bash
+```
 cd static/
 python3 -m http.server 80 --bind 0.0.0.0
 ```
 Let the server run and open a new terminal for the next parts of the walkthrough.
 <br />
 * Run certbot to get certificates:
-```bash
+```
 cd {TEAHAZ_REPOSITORY}
 sudo certbot certonly --webroot -w static/ -d {hostname}
 ```
@@ -100,7 +100,7 @@ sudo certbot certonly --webroot -w static/ -d {hostname}
 <br />
 <br />
 * copy ssl keys to the repository directory so they can be included with docker:
-```bash
+```
 cp -R /etc/letsencrypt/archive/{hostname} {TEAHAZ_REPOSITORY}/.keys/archive/
 cp -R /etc/letsencrypt/live/{hostname} {TEAHAZ_REPOSITORY}/.keys/live/
 ```
@@ -109,7 +109,7 @@ cp -R /etc/letsencrypt/live/{hostname} {TEAHAZ_REPOSITORY}/.keys/live/
 3. Configuring nginx
 <br />
 Make a copy of the sample nginx file, and call it nginx\_config:
-```bash
+```
 cd docker/
 cp nginx_default_config nginx_config
 ```
@@ -120,7 +120,7 @@ Open the config config file (`nginx_config`) with your preferred text editor, th
 vim nginx_config
 ```
 The config file *should* look something like this:
-```config
+```
 server {
     listen 80;
     server_name <REPLACE_SERVER_HOSTNAME>;
