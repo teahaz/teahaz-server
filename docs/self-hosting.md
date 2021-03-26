@@ -8,8 +8,11 @@ dependencies
 
 
 
-setup
------
+Automatic setup
+---------------
+A script called `setup.py` is included with the repository. This script will attempt to automate the server setup, however its incredibly unstable and if it fails we recomend doing the manual setup.
+<br />
+<br />
 **with ssl:**
 ```bash
 python3 setup.py
