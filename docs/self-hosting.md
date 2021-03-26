@@ -75,7 +75,7 @@ cd teahaz-server/
 <br />
 2. getting ssl certificates
 
-* Creating direcorories for certbot keys
+* Creating directories for certbot keys
 
 ```
 mkdir static/
