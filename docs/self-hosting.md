@@ -36,7 +36,6 @@ Your ssl setup should be complete :)
 
 <br />
 <br />
-<br />
 
 
 ### without ssl:
@@ -182,7 +181,7 @@ yea ill come back to this
 
 
 
-
+<br /><br /><br />
 
 
 usage
