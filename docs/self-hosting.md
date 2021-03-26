@@ -12,7 +12,7 @@ dependencies
 
 Automatic setup
 ---------------
-A script called `setup.py` is included with the repository. This script will attempt to automate the server setup, however its incredibly unstable and if it fails we recomend doing the manual setup.
+A script called `setup.py` is included with the repository. This script will attempt to automate the server setup, however its incredibly unstable and if it fails we recommend doing the manual setup.
 <br />
 <br />
 ### with ssl:
@@ -59,7 +59,7 @@ Manual setup
 
 ### With ssl:
 0. What you will need:
-    - A domain name. This will be later refered to as `{hostname}`. Anywhere you see `{hostname}` in the next sections, you should replace it with your domain. **Do not** add http(s) to the end of the domain.
+    - A domain name. This will be later referred to as `{hostname}`. Anywhere you see `{hostname}` in the next sections, you should replace it with your domain. **Do not** add http(s) to the end of the domain.
     - A linux server
     - port 80 and 443 exposed
 <br />
@@ -86,16 +86,16 @@ mkdir -p .keys/archive/{hostname}
 **Remember** to replace `{hostname}` with your servers domain name
 <br />
 <br />
-* seting up a temporary http server
+* setting up a temporary http server
 <br />
-For certbot to verify your certificate it needs to be able to contact your server. Teahaz currently doesnt have the capacity to do this without going through 2 different setups. For this reasont we are going to run a simple http server that comes with python3.
+For certbot to verify your certificate it needs to be able to contact your server. Teahaz currently doesn't have the capacity to do this without going through 2 different setups. For this reason we are going to run a simple http server that comes with python3.
 
 ```
 cd static/
 python3 -m http.server 80 --bind 0.0.0.0
 ```
 
-Let the server run and open a new terminal for the next parts of the walkthrough.
+Let the server run and open a new terminal for the next parts of the walk-through.
 <br />
 * Run certbot to get certificates:
 
