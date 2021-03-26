@@ -19,7 +19,7 @@ Check out the [official client](https://github.com/bczsalba/teahaz-client)!
 <br />
 <br />
 
-documentation:
+**documentation:**
 * [hosting your own server](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/blob/master/docs/self-hosting.md)
 * [api](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/blob/master/docs/api.md)
 * [server/backend structure](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/tree/master/docs)
