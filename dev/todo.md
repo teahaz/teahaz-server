@@ -6,9 +6,6 @@ bug fixes
 upcoming
 --------
 
-- [ ] method to get a message by its id
-
-
 - [ ] add kid (Key ID) field to messages
 
 
@@ -98,3 +95,6 @@ implemented
 
 - [x] file transfer in chunks or sockets
     - doing chunks for now
+
+
+- [x] method to get a message by its id
