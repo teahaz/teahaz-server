@@ -1,17 +1,3 @@
-Welcome to the long overdue documentation of this abomination that I call a rest API :)
-
-
-
-# warning
-this file is now a little bit outdated
-<br />
-for more up to date information check out the [api helper files](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-api-helper-files)
-
-
-
-
-
-
 docs of /api/v0
 ==============
 
@@ -30,10 +16,124 @@ docs of /api/v0
 
 messages
 ========
-### endpoints:
-* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`<br />
+Getting messages by messageId
+-----------------------------
+This method should return one messasge, with the messageId that the client supplied
+
+
+
+### Endpoints:
+* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
 `<chatroomId>` should be replaced by the ID of the chatroom
 <br />
+
+### Required fields:
+* username
+* messageId
+* chatroomId
+
+<br />
+
+### Code example:
+
+```py
+
+url = http:/<server url>/api/v0/message/" + chatroomId
+
+headers = {
+    "username": "best_user",
+    "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec"
+}
+
+
+res = session.get(url=url, headers=headers)
+
+print("status_code: ", res.status_code)
+print(res.text)
+```
+
+<br />
+
+### Example output:
+
+```json
+[
+    {
+        "time": 1617019313.8090487,
+        "messageId": "8d7340f6-9086-11eb-9d99-b42e99435986",
+        "replyId": null,
+        "username": "best_user",
+        "nickname": "best_nickname",
+        "type": "text",
+        "message": "Z2V0",
+        "fileId": null,
+        "filename": null
+    }
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
 
 files
 =====

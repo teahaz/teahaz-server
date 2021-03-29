@@ -461,22 +461,16 @@ def check_settings(chatroomId, setting):
 
 
 def save_invite(chatroomId, inviteId, expr_time, uses):
-    if not chatroomId or not inviteId or not expr_time or not uses:
+    if not chatroomId or not inviteId or not (type(expr_time) != float or type(expr_time) != int) or not type(uses) != int:
         log(level='error', msg="[dbhandler.py/save_invite/0] || missing arguments to save_invite function")
-        return "internal server error: missing arguments", 500
+        return "[dbhandler.py/save_invite/0] || internal server error: missing or invalid arguments", 500
 
 
     # encode data: no sqli pls
-    try:
-        inviteId   = b(inviteId)
-        # expr_time and uses are not encoded so we can do cool sql statements
-
-
-    # could not encode the data for some reason
-    except Exception as e:
-        log(level='error', msg="[dbhandler.py/save_invite/1] || Error occured while encoding data: {e}")
-        return "[dbhanler/save_invite/1] || failed to encode data: Internal server error", 500
-
+    res, status = security.check_uuid(inviteId)
+    if status != 200:
+        return res, status
+    # expr_time and uses are not encoded so we can do cool sql statements
 
 
     # save inivte
@@ -500,14 +494,9 @@ def use_invite(chatroomId, inviteId):
 
 
 
-    # encode inviteId
-    try:
-        inviteId = b(inviteId)
-
-    except Exception as e:
-        log(level='warning', msg="[dbhandler.py/use_invite/1] inviteId could not be encoded\n Traceback: {e}")
-        return "inviteID format incorrect", 400
-
+    res, status = security.check_uuid(inviteId)
+    if status != 200:
+        return res, status
 
 
     # get all invite data from database
@@ -699,6 +688,7 @@ def get_messages_db(chatroomId, last_time=0, messageId=None):
 
     # all is well
     return json_data, 200
+
 
 
 def delete_message(messageId, chatroomId):
