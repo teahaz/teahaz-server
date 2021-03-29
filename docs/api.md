@@ -16,70 +16,40 @@ docs of /api/v0
 
 messages
 ========
-Getting messages by messageId
------------------------------
-This method should return one messasge, with the messageId that the client supplied
-
-
-
-### Endpoints:
-* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
-`<chatroomId>` should be replaced by the ID of the chatroom
-<br />
-
-### Required fields:
-* username
+Messages are stored in on the server in an sql database. You can use the methods below to interface with said database. 
+The server currently stores 9 values for each message:
+ * time
+    - the time when the message was sent
 * messageId
-* chatroomId
-
-<br />
-
-### Code example:
-
-```py
-
-url = http:/<server url>/api/v0/message/" + chatroomId
-
-headers = {
-    "username": "best_user",
-    "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec"
-}
-
-
-#NOTE get methods need to have data in the header field and not json
-res = session.get(url=url, headers=headers)
-
-print("status_code: ", res.status_code)
-print(res.text)
-```
-
-<br />
-
-### Example output:
-
-```json
-[
-    {
-        "time": 1617019313.8090487,
-        "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec",
-        "replyId": null,
-        "username": "best_user",
-        "nickname": "best_nickname",
-        "type": "text",
-        "message": "WW91IGhhdmUgbm8gbGlmZSEgWW91IGhhdmUgbm8gam9iLiBZb3UncmUgYmFyZWx5IGEgYmVlIQ==",
-        "fileId": null,
-        "filename": null
-    }
-]
-```
+    - a unique Id for each message assigned by the server
+* replyId
+    - An Id that can be set by the user to any other message's Id
+    - The value should be `null` if the message is not a reply to another message
+* username
+    - The username of the person who sent the message
+* nickname
+    - The nickname/display name of the user who sent the message
+* type
+    - The type of the message
+    - Currently this could either be `text` or `file`
+* message
+    - The text/body of the message
+    - This should be `null` if the `type == file`
+* fileId
+    - The id of a file sent
+    - This id is used as a filename on the server side, and is needed to download any file
+    - This should be `null` if the `type == text`
+* filename
+    - The original filename of a file
+    - This should be `null` if the `type == text`
 
 <br />
 <br />
-
 
 Getting all messages since \<time\>
 ---------------------------------
-This method should return all messages in a chatroom that were sent since the time variable. The time variable should be in epoch/unix time.
+This method should return all messages in a chatroom that were sent since the time variable. This method serves as the primary way to get messages back form the api, as it allows users to get many messages at once.
+
 
 ### Endpoints:
 * GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
@@ -91,6 +61,7 @@ This method should return all messages in a chatroom that were sent since the ti
 * username
 * chatroomId
 * time
+    - The time variable should be in epoch/unix time.
 
 <br />
 
@@ -155,6 +126,74 @@ print(res.text)
     }
 ]
 ```
+
+
+
+<br />
+<br />
+
+
+Getting messages by messageId
+-----------------------------
+This method should return one messasge, with the messageId that the client supplied. The purpose of this method is to look up individual messages for example as a way to get a reply.
+
+
+
+### Endpoints:
+* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
+`<chatroomId>` should be replaced by the ID of the chatroom
+<br />
+
+### Required fields:
+* username
+* messageId
+* chatroomId
+
+<br />
+
+### Code example:
+
+```py
+
+url = http:/<server url>/api/v0/message/" + chatroomId
+
+headers = {
+    "username": "best_user",
+    "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec"
+}
+
+
+#NOTE get methods need to have data in the header field and not json
+res = session.get(url=url, headers=headers)
+
+print("status_code: ", res.status_code)
+print(res.text)
+```
+
+<br />
+
+### Example output:
+
+```json
+[
+    {
+        "time": 1617019313.8090487,
+        "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec",
+        "replyId": null,
+        "username": "best_user",
+        "nickname": "best_nickname",
+        "type": "text",
+        "message": "WW91IGhhdmUgbm8gbGlmZSEgWW91IGhhdmUgbm8gam9iLiBZb3UncmUgYmFyZWx5IGEgYmVlIQ==",
+        "fileId": null,
+        "filename": null
+    }
+]
+```
+
+<br />
+<br />
+
+
 
 
 
