@@ -223,7 +223,7 @@ def get_chatroms():
 def get_invite():
     url = globals()['url']
 
-    expr_time = str(time.time() + 60 * 60 * 24)
+    expr_time = 0
     uses =  str(int(input("uses: "))).strip('\n')
 
     response, status_code = teahaz.create_invite_v0(globals()['s'], url, globals()['chatroom_id'], globals()['username'], expr_time, uses)

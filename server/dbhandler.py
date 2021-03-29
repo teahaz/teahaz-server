@@ -461,7 +461,9 @@ def check_settings(chatroomId, setting):
 
 
 def save_invite(chatroomId, inviteId, expr_time, uses):
-    if not chatroomId or not inviteId or not (type(expr_time) != float or type(expr_time) != int) or not type(uses) != int:
+    if not chatroomId or not inviteId or not (type(expr_time) == float or type(expr_time) == int) or not type(uses) == int:
+        print('uses: ',uses , type(uses))
+        print('expr_time: ',expr_time , type(expr_time))
         log(level='error', msg="[dbhandler.py/save_invite/0] || missing arguments to save_invite function")
         return "[dbhandler.py/save_invite/0] || internal server error: missing or invalid arguments", 500
 
