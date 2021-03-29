@@ -701,6 +701,31 @@ def get_messages_db(chatroomId, last_time=0, messageId=None):
     return json_data, 200
 
 
+def delete_message(messageId, chatroomId):
+    if not messageId or not chatroomId:
+        # making sure that all values that are needed exist
+        log(level='error', msg='[dbhandler/message_delete/0] || one or more of the required fields passed to function "delete_message" are not present ')
+        return "[dbhandler/save_in_db/0] || internal server error: missing arguments", 500
+
+
+    # gotta sanitize
+    res, status = security.check_uuid(messageId)
+    if status != 200:
+        return res, status
+
+
+    # delete from database
+    sql = f"DELETE FROM messages WHERE messageId = ?"
+    data, status_code = database_execute(chatroomId, sql, (messageId,))
+    if status_code != 200:
+        log(level='error', msg=f"[dbhandler/delete_message/1] || Failed to delete message: {data}")
+        return "[dbhandler/save_in_db/2] || Failed to delete message: Internal datase error", 500
+
+
+    return "OK", 200
+
+
+
 
 
 #================================================== !messages ==============================================

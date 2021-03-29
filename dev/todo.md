@@ -20,6 +20,7 @@ upcoming
 
 - [ ] server configs
 
+- [ ] endpoint to see current members of the chatroom
 
 - [ ] endpoint where the client can get some server configs that it needs to know
     - max request size

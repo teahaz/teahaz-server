@@ -11,8 +11,11 @@ from flask_restful import Resource
 
 from api import message_get
 from api import message_send
+from api import message_delete
+
 from api import upload_file
 from api import download_file
+
 from api import create_invite
 from api import create_chatroom
 
@@ -104,6 +107,16 @@ class api__messages(Resource):
 
         data, status_code = message_send(request.get_json(), chatroomId)
         return data, status_code
+
+
+    def delete(self, chatroomId): # deleting a message
+        if not request.get_json(): return "no data sent", 400
+        if not chatroomId: return "ChatroomId was not part of the path", 400
+        if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
+
+        data, status_code = message_delete(request.get_json(), chatroomId)
+        return data, status_code
+
 
 
 

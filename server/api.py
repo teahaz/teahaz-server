@@ -80,7 +80,6 @@ def create_chatroom(json_data):
     return chat_obj, 200
 
 
-
 def create_invite(json_data, chatroomId):
     username   = json_data.get('username')
     expr_time  = json_data.get('expr-time')
@@ -125,6 +124,7 @@ def create_invite(json_data, chatroomId):
 
 
 
+
 def message_send(json_data, chatroomId):
     messageId = str(uuid.uuid1())
     replyId = json_data.get('replyId')
@@ -163,7 +163,6 @@ def message_send(json_data, chatroomId):
 
     # all is well
     return "OK", 200
-
 
 
 def message_get(headers, chatroomId):
@@ -226,6 +225,52 @@ def message_get(headers, chatroomId):
 
     # all is well
     return return_data, 200
+
+
+def message_delete(json_data, chatroomId):
+    username = json_data.get('username')
+    messageId = json_data.get('messageId')
+
+
+    # make sure all of the needed data is present and is not 'None'
+    if not messageId or not username:
+        return f'[api/message_delete/0] || one or more of the required arguments are not supplied, needed=[messageId, username], Supplied=[{messageId}, {username}]', 400
+
+
+    # get message by id
+    response, status_code = message_get({'username': username, 'messageId': messageId}, chatroomId)
+    if status_code != 200:
+        return response, status_code
+
+
+    # if no message with said id
+    if len(response) > 0:
+        response = response[0]
+    else:
+        return f"[api/message_delete/1] || no message with specified ID", 404
+
+
+    # get sender name
+    sender_name = response.get('username')
+    if not sender_name:
+        log(level='error', msg='[api/message_delete/2] || could not get sender name')
+        return f"[api/message_delete/2] || could not get sender name", 500
+
+
+    # get admin status of user
+    admin, status = dbhandler.check_perms(username, chatroomId, 'admin')
+    if status != 200:
+        log(level='error', msg='[api/message_delete/3] || could not get chatroom permissions')
+        return f"[api/message_delete/3] || could not get chatroom permissions", 500
+
+
+    # if not (user sent the message or he is admin)
+    if not (username == sender_name or admin == True):
+        return f"[api/message_delete/4] || could not delete message: Permission denied", 403
+
+
+    return dbhandler.delete_message(messageId, chatroomId)
+
 
 
 
@@ -317,7 +362,6 @@ def upload_file(json_data, chatroomId):
     return fileId, 200
 
 
-
 def download_file(headers, chatroomId):
     username     = headers.get('username')
     section      = headers.get('section')
@@ -393,79 +437,3 @@ def download_file(headers, chatroomId):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#def get_chatrooms(headers):
-#    username = headers.get('username')
-#
-#
-#    # make sure we got all needed data
-#    if not username:
-#        return "username not supplied", 400
-#
-#
-#    # get a list of chatroom IDs that the user has access to
-#    response, status_code = dbhandler.user_get_chatrooms(username)
-#
-#    # if error
-#    if status_code != 200:
-#        log(level='error', msg=f'[server/api/get_chatrooms/3] could not get chatroom data from main.db')
-#        return response, status_code
-#
-#
-#    # if not error
-#    else:
-#        # if there are non then respond with 204
-#        if len(response) == 0:
-#            return "", 204
-#
-#        # create json with chatname and chat ID in it
-#        resp_list = []
-#        for chatroomId in response:
-#
-#            # get name corresponding to  chatroomId
-#            chatname, status_code = dbhandler.get_chatname(chatroomId)
-#            if status_code != 200:
-#                return chatname, status_code
-#
-#
-#            chat_obj = {
-#                    'name': chatname,
-#                    'chatroom': chatroomId
-#                    }
-#
-#
-#            resp_list.append(chat_obj)
-#        response = resp_list
-#
-#    # all is well
-#    return response, status_code
-
-
-#
-#
-#
-#
-#

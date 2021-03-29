@@ -80,6 +80,21 @@ def gid():
     print(res.text)
 
 
+def delete():
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] + '/'
+
+    a = {
+        "username": globals()['username'],
+        "messageId": input('id>> ')
+    }
+
+
+    res = globals()['s'].delete(url=url, json=a)
+
+    print("status_code: ", res.status_code)
+    print(res.text)
+
+
 def send_message():
     url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] +'/'
 
@@ -272,6 +287,8 @@ while 1:
         print(get_invite())
     elif choice == 'uinvite':
         print(use_invite())
+    elif choice == 'del':
+        print(delete())
 
     print("username: ", globals()['username'])
     print("chatroom_id: ", globals()['chatroom_id'])
