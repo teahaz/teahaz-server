@@ -46,6 +46,7 @@ headers = {
 }
 
 
+#NOTE get methods need to have data in the header field and not json
 res = session.get(url=url, headers=headers)
 
 print("status_code: ", res.status_code)
@@ -60,79 +61,117 @@ print(res.text)
 [
     {
         "time": 1617019313.8090487,
-        "messageId": "8d7340f6-9086-11eb-9d99-b42e99435986",
+        "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec",
         "replyId": null,
         "username": "best_user",
         "nickname": "best_nickname",
         "type": "text",
-        "message": "Z2V0",
+        "message": "WW91IGhhdmUgbm8gbGlmZSEgWW91IGhhdmUgbm8gam9iLiBZb3UncmUgYmFyZWx5IGEgYmVlIQ==",
         "fileId": null,
         "filename": null
     }
 ]
+```
 
+<br />
+<br />
+
+
+Getting all messages since \<time\>
+---------------------------------
+This method should return all messages in a chatroom that were sent since the time variable. The time variable should be in epoch/unix time.
+
+### Endpoints:
+* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
+`<chatroomId>` should be replaced by the ID of the chatroom
+<br />
+
+
+### Required fields:
+* username
+* chatroomId
+* time
+
+<br />
+
+### Code example:
+
+```py
+
+url = http:/<server url>/api/v0/message/" + chatroomId
+
+headers = {
+    "username": "best_user",
+    "time": "946681200.23243"
+}
+
+
+#NOTE get methods need to have data in the header field and not json
+res = session.get(url=url, headers=headers)
+
+print("status_code: ", res.status_code)
+print(res.text)
+```
+
+<br />
+
+
+### Example output:
+
+```json
+[
+    {
+        "time": 1617028913.9485404,
+        "messageId": "e7944966-909c-11eb-a14c-b42e99435986",
+        "replyId": null,
+        "username": "a",
+        "nickname": "a",
+        "type": "text",
+        "message": "QWNjb3JkaW5nIHRvIGFsbCBrbm93biBsYXdzIG9mIGF2aWF0aW9uLCB0aGVyZSBpcyBubyB3YXkgYSBiZWUgc2hvdWxkIGJlIGFibGUgdG8gZmx5Lg==",
+        "fileId": null,
+        "filename": null
+    },
+    {
+        "time": 1617028927.8282716,
+        "messageId": "efda2a96-909c-11eb-bd2f-b42e99435986",
+        "replyId": null,
+        "username": "a",
+        "nickname": "a",
+        "type": "text",
+        "message": "SXRzIHdpbmdzIGFyZSB0b28gc21hbGwgdG8gZ2V0IGl0cyBmYXQgbGl0dGxlIGJvZHkgb2ZmIHRoZSBncm91bmQu",
+        "fileId": null,
+        "filename": null
+    },
+    {
+        "time": 1617028941.5795443,
+        "messageId": "f80c717e-909c-11eb-b2a3-b42e99435986",
+        "replyId": null,
+        "username": "a",
+        "nickname": "a",
+        "type": "text",
+        "message": "VGhlIGJlZSwgb2YgY291cnNlLCBmbGllcyBhbnl3YXkgYmVjYXVzZSBiZWVzIGRvbid0IGNhcmUgd2hhdCBodW1hbnMgdGhpbmsgaXMgaW1wb3NzaWJsZS4g",
+        "fileId": null,
+        "filename": null
+    }
+]
 ```
 
 
 
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 
 
+Below this lies the unchecked and potentially harmful land of outdated documentation
+=======================================================================================
 
-
-
-
-
-
-
-
-
-
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
 
 
 files
