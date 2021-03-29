@@ -135,12 +135,12 @@ print(res.text)
 
 Getting messages by messageId
 -----------------------------
-This method should return one messasge, with the messageId that the client supplied. The purpose of this method is to look up individual messages for example as a way to get a reply.
+This method should return one message, with the messageId that the client supplied. The purpose of this method is to look up individual messages for example as a way to get a reply.
 
 
 
 ### Endpoints:
-* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
+* GET: `http(s)://url:port/api/v0/message/<chatroomId>`
 `<chatroomId>` should be replaced by the ID of the chatroom
 <br />
 
