@@ -31,6 +31,8 @@ from security_th import check_uuid
 
 from logging_th import logger as log
 
+from filesystem_th import chatroom_exists
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -52,6 +54,7 @@ class login(Resource):
     def post(self, chatroomId):
         if not request.get_json(): return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
 
         # authenticate and get cookie data
@@ -81,6 +84,7 @@ class login(Resource):
     def get(self, chatroomId):
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
         return "OK", 200
@@ -92,6 +96,7 @@ class api__messages(Resource):
     def get(self, chatroomId): # gets messages since {time.time()}
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
 
@@ -102,6 +107,7 @@ class api__messages(Resource):
     def post(self, chatroomId): # sends message
         if not request.get_json(): return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.get_json(), chatroomId): return "client not logged in", 401
 
@@ -112,6 +118,7 @@ class api__messages(Resource):
     def delete(self, chatroomId): # deleting a message
         if not request.get_json(): return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
 
         data, status_code = message_delete(request.get_json(), chatroomId)
@@ -125,6 +132,7 @@ class api__files(Resource):
     def get(self, chatroomId): #gets file
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
 
@@ -135,6 +143,7 @@ class api__files(Resource):
     def post(self, chatroomId): # sends file
         if not request.get_json(): return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.get_json(), chatroomId): return "client not logged in", 401
 
@@ -174,6 +183,7 @@ class api__invites(Resource):
     def get(self, chatroomId):
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
         if not check_cookie(request.cookies.get(chatroomId), request.headers, chatroomId): return "client not logged in", 401
 
@@ -184,6 +194,7 @@ class api__invites(Resource):
     def post(self, chatroomId):
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
+        if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)
 
         #process invite

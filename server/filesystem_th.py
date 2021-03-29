@@ -166,3 +166,9 @@ def remove_chatroom(chatroom):
 
 
     return "OK", 200
+
+
+def chatroom_exists(chatroom):
+    if not os.path.exists(f'storage/chatrooms/{chatroom}'):
+        return False
+    return True
