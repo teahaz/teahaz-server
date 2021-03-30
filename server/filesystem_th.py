@@ -5,75 +5,78 @@ import security_th as security
 from logging_th import logger as log
 
 
-def save_file_chunk(data, chatroom, extension, fileId, username):
-    print('fileId: ',fileId , type(fileId))
+
+def save_file_chunk(chatroom, username, fileId, data, chunk_id):
+    """ save one chunk of a file """
+
     res, status = security.check_uuid(fileId)
     if status != 200:
         return res, status
 
-
     # make sure the uploads folder exists
     if not os.path.exists(f'storage/chatrooms/{chatroom}/uploads'): # make sure uploads folder exists
-        log(level='error', msg=f'[filesystem_th/save_file/0] || uploads forlder does not exist for chatroom:  {chatroom}')
-        return "internal server error while saving file", 500
+        log(level='error', msg=f'[filesystem_th/save_file_chunk/0] || uploads forlder does not exist for chatroom:  {chatroom}')
+        return "[filesystem_th/save_file_chunk/0] || internal server error while saving file", 500
 
 
-    
-    # write the file owner to the beginning of the file
+    # check if file already exists
     if not os.path.exists(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
+        # if it doesnt then create it and write the owner
         try:
-            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'a+')as outfile:
-                outfile.write(security.encode(username)+';')
+            os.mkdir(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
 
+            # write owner
+            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/owner')as outfile:
+                outfile.write(security.encode(username))
+
+        # catch errors
         except Exception as e:
-            log(level='error', msg=f'[filesystem/save_file/1] || An error occured while setting the file owner.\n Traceback: {e}')
-            return '[filesystem/save_file/1] || An error occured while setting the file owner.', 500
+            log(level='fail', msg=f"[filesystem/save_file_chunk/1] || Failed to create dir for file or write its owner: {e}")
+            return "[filesystem/save_file_chunk/1] || Internal server error while setting up file", 500
 
 
-
-    # read the file owner from the file
-    else:
+    # if it exists and its a dir
+    elif os.path.isdir(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
+        # TODO: if subprocess.check_output(['du','-s', path]).split()[0].decode('utf-8') > max_filesize_kb
         try:
-            f = open(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
-            owner = ''
-            while True:
-                char = f.read(1)
+            # make sure part is int
+            chunk_id = int(chunk_id)
 
-                if not char:
-                    return "[filesystem/save_file/2] || an error occured while getting file owner", 500
 
-                elif char == ';':
-                    break
+            # get file owner
+            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/owner')as infile:
+                owner = infile.read()
+            owner = owner.strip('\n').strip(' ')
 
-                else:
-                    owner += char
 
-            f.close()
+            #  make sure file isnt being written to by a differnt user
             if owner != security.encode(username):
-                return "[filesystem/save_file/3] || This file was not created by you, and you dont have permission to edit it", 403
+                return "Permission denied! This file was not created by you, and you dont have the right to write to it", 403
 
+
+            # write chunk
+            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/{chunk_id}')as outfile:
+                outfile.write(security.encode(data))
+
+
+        # catch errors
         except Exception as e:
-            log(level='error', msg=f'[filesystem/save_file/4] || An error occured while getting the file owner.\n Traceback: {e}')
-            return '[filesystem/save_file/4] || An error occured while getting the file owner.', 500
+            log(level='fail', msg=f"[filesystem/save_file_chunk/2] || Failed to write chunk: {e}")
+            return f"[filesystem/save_file_chunk/2] || Internal server error while writing chunk: {chunk_id}", 500
 
 
-
-    # save file
-    try:
-        with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'a')as outfile:
-            outfile.write(data+';')
-
-
-    # failed to save file
-    except Exception as e:
-        log(level='error', msg=f'[filesystem_th/save_file/2] || failed to write file: storage/{chatroom}/uploads/{fileId}   exeption: {e}')
-        return "internal server error while saving file", 500
+    # if uploads/fileId exists but its not a folder
+    else:
+        log(level='fail', msg=f"[filesystem/save_file_chunk/3] || uploads/{fileId} exists, but is not a directory")
+        return f"[filesystem/save_file_chunk/3] || Internal server error while writing chunk: File data corrupted", 500
 
 
     # all is well
     return "OK", 200
 
-def read_file_chunk(chatroom, fileId, section):
+
+def read_file_chunk(chatroom, fileId, chunk):
+    """ read one chunk of a file"""
     if not os.path.isfile(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
         return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
 
@@ -129,7 +132,7 @@ def read_file_chunk(chatroom, fileId, section):
 
 def remove_file(chatroom, filename):
     try: # remove file
-        os.remove(f'storage/{chatroom}/{filename}')
+        shutil.rmtree(f'storage/{chatroom}/{filename}')
     except:
         return "internal server error while removeing file", 500
 
@@ -172,3 +175,73 @@ def chatroom_exists(chatroom):
     if not os.path.exists(f'storage/chatrooms/{chatroom}'):
         return False
     return True
+
+
+
+# def old_save_file_chunk(data, chatroom, extension, fileId, username):
+#     print('fileId: ',fileId , type(fileId))
+#     res, status = security.check_uuid(fileId)
+#     if status != 200:
+#         return res, status
+#
+#
+#     # make sure the uploads folder exists
+#     if not os.path.exists(f'storage/chatrooms/{chatroom}/uploads'): # make sure uploads folder exists
+#         log(level='error', msg=f'[filesystem_th/save_file/0] || uploads forlder does not exist for chatroom:  {chatroom}')
+#         return "internal server error while saving file", 500
+#
+#
+#     
+#     # write the file owner to the beginning of the file
+#     if not os.path.exists(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
+#         try:
+#             with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'a+')as outfile:
+#                 outfile.write(security.encode(username)+';')
+#
+#         except Exception as e:
+#             log(level='error', msg=f'[filesystem/save_file/1] || An error occured while setting the file owner.\n Traceback: {e}')
+#             return '[filesystem/save_file/1] || An error occured while setting the file owner.', 500
+#
+#
+#
+#     # read the file owner from the file
+#     else:
+#         try:
+#             f = open(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
+#             owner = ''
+#             while True:
+#                 char = f.read(1)
+#
+#                 if not char:
+#                     return "[filesystem/save_file/2] || an error occured while getting file owner", 500
+#
+#                 elif char == ';':
+#                     break
+#
+#                 else:
+#                     owner += char
+#
+#             f.close()
+#             if owner != security.encode(username):
+#                 return "[filesystem/save_file/3] || This file was not created by you, and you dont have permission to edit it", 403
+#
+#         except Exception as e:
+#             log(level='error', msg=f'[filesystem/save_file/4] || An error occured while getting the file owner.\n Traceback: {e}')
+#             return '[filesystem/save_file/4] || An error occured while getting the file owner.', 500
+#
+#
+#
+#     # save file
+#     try:
+#         with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'a')as outfile:
+#             outfile.write(data+';')
+#
+#
+#     # failed to save file
+#     except Exception as e:
+#         log(level='error', msg=f'[filesystem_th/save_file/2] || failed to write file: storage/{chatroom}/uploads/{fileId}   exeption: {e}')
+#         return "internal server error while saving file", 500
+#
+#
+#     # all is well
+#     return "OK", 200

@@ -277,23 +277,13 @@ def message_delete(json_data, chatroomId):
 def upload_file(json_data, chatroomId):
     username      = json_data.get('username')
     filename      = json_data.get('filename')
+    chunk_id      = json_data.get('chunk-id')
     fileId        = json_data.get('fileId')
     message_type  = json_data.get('type')
-    part          = json_data.get('part')
+    last          = json_data.get('last')
     data          = json_data.get('data')
     messageId     = str(uuid.uuid1())
 
-    if not username:
-        return "nouname", 400
-
-    if not message_type:
-        return "nomessagetype", 400
-
-    if not data:
-        return data, 400
-
-    if not filename:
-        return "nofilename", 400
 
     # make sure client sent all needed data
     if not username or not message_type or not data or not filename:
@@ -307,24 +297,37 @@ def upload_file(json_data, chatroomId):
 
 
 
+    # if there is not chunk_id then assume its the first chunk
+    if not chunk_id:
+        chunk_id = 0
+
+    # if there is a chunk_id then make sure its a positive intiger
+    else:
+        try:
+            chunk_id = abs(int(chunk_id))
+        except:
+            return "[api/upload_file/2] || Invalid chunk-id sent to server. chunk-id must be of type int", 400
+
+
+
     # NOTE: this should be a global setting
     max_chunk_size = 1048576 # one megabyte
 
-    # check if the 
+
+    # make sure chunk is not larger than the maximum allowed size
     if len(data) > max_chunk_size:
         return f'[api/upload_file/2] || data field exeeded the maximum chunk-size permitted by the server. Maximum={max_chunk_size}', 400
 
 
 
-    # if a fileId is sent then the file is a part that should be appended to the already existing file
-    # elif the fileId is not sent then set it the same as the messageId
+    # if a fileId is not sent, then this is the first part of the file, In this case the server assigns a fileId
     if not fileId:
         fileId = messageId
 
 
 
     # save file that user sent
-    response, status_code = filehander.save_file_chunk(data, chatroomId, fileId, fileId, username)
+    response, status_code = filehander.save_file_chunk(chatroomId, username, fileId, data, chunk_id)
     if status_code != 200:
         log(level='error', msg=f'[api/upload_file/2] failed to save file: {fileId}')
         return response, status_code
@@ -333,7 +336,7 @@ def upload_file(json_data, chatroomId):
 
 
     # if the file is small or its the last part: save a reference to the file in the chatroom database
-    if not part:
+    if last:
         response, status_code = dbhandler.save_in_db(
                 time          = time.time(),
                 messageId     = messageId,
