@@ -192,7 +192,7 @@ class api__invites(Resource):
 
 
     def post(self, chatroomId):
-        if not request.headers: return "no data sent", 400
+        if not request.get_json(): return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
         if not chatroom_exists(chatroomId): return "Chatroom does not exist", 404
         if check_uuid(chatroomId)[1] != 200: return check_uuid(chatroomId)

@@ -18,10 +18,11 @@ global username
 global chatroom_id
 # url = "http://butorhaz.hopto.org:13337"
 # url = "https://butorhaz.hopto.org"
-url = "http://localhost:13337"
+# url = "http://localhost:13337"
 # url = "http://localhost:80"
-# url = "https://teahaz.co.uk"
+url = "https://teahaz.co.uk"
 # url = "http://192.168.1.75"
+
 
 
 def send_file():
@@ -233,6 +234,21 @@ def get_invite():
     return response, status_code
 
 
+def bazsitest():
+    a = {
+            'User-Agent': 'teahaz.py-v0.0', 
+            'email': "sf",
+            'username': 'j',
+            'nickname': ':robot:johnny:robot:',
+            'password': '1234567890',
+            'inviteId': "21969daa-9127-11eb-a89b-0242ac110002"
+            }
+    url = 'https://teahaz.co.uk/api/v0/invite/1714e1a8-87ee-11eb-931c-0242ac110002'
+
+    res = globals()['s'].post(url=url, json=a)
+    print(res.text)
+
+
 def use_invite():
     globals()['chatroom'] = input("chatroom: ")
     globals()['username'] = input("username: ")
@@ -289,6 +305,8 @@ while 1:
         print(use_invite())
     elif choice == 'del':
         print(delete())
+    elif choice == 'biz':
+        print(bazsitest())
 
     print("username: ", globals()['username'])
     print("chatroom_id: ", globals()['chatroom_id'])
