@@ -2,6 +2,7 @@ import requests
 import time
 import os
 import json
+import string
 import base64
 import teahaz
 
@@ -12,15 +13,28 @@ def encode_binary(a):
     return base64.b64encode(a).decode('utf-8')
 
 
+def sanitize_filename(a):
+    allowed = string.ascii_letters + string.digits + '_-.'
+    a = a.replace('..', '_')
+
+    filename = ''
+    for i in a:
+        if i not in allowed:
+            i = '_'
+        filename += i
+
+    return filename
+
+
 global s
 global url
 global username
 global chatroom_id
 # url = "http://butorhaz.hopto.org:13337"
 # url = "https://butorhaz.hopto.org"
-# url = "http://localhost:13337"
+url = "http://localhost:13337"
 # url = "http://localhost:80"
-url = "https://teahaz.co.uk"
+# url = "https://teahaz.co.uk"
 # url = "http://192.168.1.75"
 
 
@@ -30,14 +44,65 @@ def send_file():
 
     # get filename from user
     filepath = input(">> ")
+    print('filepath: ',filepath , type(filepath))
+
+    if not os.path.exists(filepath):
+        return "sorry this file doesnt exist"
 
     # get file extension bc mimetype sucks sometimes
     filename = filepath.split("/")[-1]
+    filename = sanitize_filename(filename)
 
 
-    response, status_code = teahaz.upload_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filepath, filename)
+    # get length of file
+    f = open(filepath, 'ab+')
+    length = f.tell()
+    print('length: ',length , type(length))
+    f.close()
 
-    return response
+
+    # set chunk size
+    chunk_size = int((1048576*3)/4) -1
+
+    # response, status_code = teahaz.upload_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filepath, filename)
+    f = open(filepath, "rb")
+
+    fileId = input('fileId: ')
+    if len(fileId) < 33:
+        fileId = None
+
+    last = False
+    fileId = None
+    while not last:
+        c = f.read(chunk_size)
+
+
+        # check if this will be the last part
+        if len(c) < chunk_size or f.tell() >= length :
+            last = True
+
+
+        data = {
+                "username" : globals()['username'],
+                "filename" : filename, 
+                "fileId"   : fileId,
+                "type"     : 'file',
+                "last"     : last,
+                "data"     : encode_binary(c),
+                "kId"      : None
+                }
+
+
+        # make request
+        response = globals()['s'].post(url, json=data)
+        if response.status_code != 200:
+            break
+        else:
+            fileId = response.json().get('fileId')
+
+    f.close()
+    # return the response if the loop stopped
+    return response.text, response.status_code
 
 
 def get_file():
@@ -45,10 +110,10 @@ def get_file():
     saved_filename = input("save as: ")
 
 
-    response, status_code = teahaz.download_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, saved_filename)
+    # response, status_code = teahaz.download_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, saved_filename)
 
-    print(status_code)
-    return response
+    # print(status_code)
+    # return response
 
 
 
@@ -65,6 +130,7 @@ def get():
 
     print("status_code: ", res.status_code)
     print(res.text)
+
 
 def gid():
     url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] + '/'
@@ -252,12 +318,14 @@ def bazsitest():
 def use_invite():
     globals()['chatroom'] = input("chatroom: ")
     globals()['username'] = input("username: ")
+    globals()['email'] = input("email: ")
     url = globals()['url'] + "/api/v0/invite/"+globals()['chatroom']
 
     a = {
 
             "username": globals()['username'],
             "nickname": "\x0aB\x0a",
+            "email": globals()['email'],
             # "nickname": input('nickname: '),
             "password": input('password: '),
             "inviteId": input("invite: ")

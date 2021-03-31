@@ -1,12 +1,13 @@
 # this file handles all things connected to local files
 import os
+import time
 import shutil
 import security_th as security
 from logging_th import logger as log
 
 
 
-def save_file_chunk(chatroom, username, fileId, data, chunk_id):
+def save_file_chunk(chatroom, username, fileId, data, last):
     """ save one chunk of a file """
 
     res, status = security.check_uuid(fileId)
@@ -26,7 +27,7 @@ def save_file_chunk(chatroom, username, fileId, data, chunk_id):
             os.mkdir(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
 
             # write owner
-            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/owner')as outfile:
+            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/owner', 'w+')as outfile:
                 outfile.write(security.encode(username))
 
         # catch errors
@@ -36,15 +37,16 @@ def save_file_chunk(chatroom, username, fileId, data, chunk_id):
 
 
     # if it exists and its a dir
-    elif os.path.isdir(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
+    if os.path.isdir(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
         # TODO: if subprocess.check_output(['du','-s', path]).split()[0].decode('utf-8') > max_filesize_kb
         try:
-            # make sure part is int
-            chunk_id = int(chunk_id)
+            # make sure file hasnt been finalized and can still be written to
+            if os.path.exists(f'storage/chatrooms/{chatroom}/uploads/{fileId}/done'):
+                return "[] || This file has already been finalized and cannot be written to", 403
 
 
             # get file owner
-            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/owner')as infile:
+            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/owner', 'r')as infile:
                 owner = infile.read()
             owner = owner.strip('\n').strip(' ')
 
@@ -54,15 +56,20 @@ def save_file_chunk(chatroom, username, fileId, data, chunk_id):
                 return "Permission denied! This file was not created by you, and you dont have the right to write to it", 403
 
 
+            # get the id of the current chunk
+            chunks = os.listdir(f'storage/chatrooms/{chatroom}/uploads/{fileId}')
+            # -1 because of the owner file
+            current_chunk = int(abs(len(chunks) -1))
+
             # write chunk
-            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/{chunk_id}')as outfile:
+            with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/{current_chunk}', 'w+')as outfile:
                 outfile.write(security.encode(data))
 
 
         # catch errors
         except Exception as e:
             log(level='fail', msg=f"[filesystem/save_file_chunk/2] || Failed to write chunk: {e}")
-            return f"[filesystem/save_file_chunk/2] || Internal server error while writing chunk: {chunk_id}", 500
+            return f"[filesystem/save_file_chunk/2] || Internal server error while writing chunk: {current_chunk}", 500
 
 
     # if uploads/fileId exists but its not a folder
@@ -71,8 +78,14 @@ def save_file_chunk(chatroom, username, fileId, data, chunk_id):
         return f"[filesystem/save_file_chunk/3] || Internal server error while writing chunk: File data corrupted", 500
 
 
+    # if last is true, finalize the file so no-one can write to it
+    if last == True:
+        with open(f'storage/chatrooms/{chatroom}/uploads/{fileId}/done', 'w+')as outfile:
+            outfile.write(str(time.time()))
+
+
     # all is well
-    return "OK", 200
+    return current_chunk, 200
 
 
 def read_file_chunk(chatroom, fileId, chunk):

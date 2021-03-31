@@ -562,7 +562,7 @@ def use_invite(chatroomId, inviteId):
 
 
 # save a message in the database (both texts and files)
-def save_in_db(time, messageId, username, chatroomId, message_type, replyId=None, message=None, fileId=None, filename=None ):
+def save_in_db(chatroomId, time, messageId, kId, username, message_type, replyId=None, message=None, fileId=None, filename=None, filesize=None):
     if not time  or not messageId  or not username  or not chatroomId  or not message_type :
         # making sure that all values that are needed exist
         log(level='error', msg='[dbhandler/save_in_db/0] || one or more of the required fields passed to function "save_in_db" are not present ')

@@ -126,11 +126,12 @@ def create_invite(json_data, chatroomId):
 
 
 def message_send(json_data, chatroomId):
-    messageId = str(uuid.uuid1())
-    replyId = json_data.get('replyId')
-    message = json_data.get('message')
-    username = json_data.get('username')
+    messageId    = str(uuid.uuid1())
+    replyId      = json_data.get('replyId')
+    message      = json_data.get('message')
+    username     = json_data.get('username')
     message_type = json_data.get('type')
+    kId          = json_data.get('kId')
 
 
 
@@ -147,11 +148,12 @@ def message_send(json_data, chatroomId):
     # store message that got sent
     #NOTE
     response , status_code = dbhandler.save_in_db(
+                                chatroomId   = chatroomId,
                                 time         = time.time(),
                                 messageId    = messageId,
+                                kId          = kId,
                                 replyId      = replyId,
                                 username     = username,
-                                chatroomId   = chatroomId,
                                 message_type = 'text',
                                 message      = message
                                 )
@@ -277,36 +279,23 @@ def message_delete(json_data, chatroomId):
 def upload_file(json_data, chatroomId):
     username      = json_data.get('username')
     filename      = json_data.get('filename')
-    chunk_id      = json_data.get('chunk-id')
     fileId        = json_data.get('fileId')
     message_type  = json_data.get('type')
     last          = json_data.get('last')
     data          = json_data.get('data')
+    kId           = json_data.get('kId')
     messageId     = str(uuid.uuid1())
 
 
     # make sure client sent all needed data
     if not username or not message_type or not data or not filename:
-        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, filename]  Supplied=[{username}, {message_type}, (type(data)){type(data)}, {filename})]', 400
+        return f'[api/upload_file/0] || one or more of the required arguments are not supplied. Required=[username, type, data, filename]  Supplied=[{username}, {message_type}, (type(data)){type(data)}(len(data)){len(data)}, {filename})]', 400
 
 
 
     # message type has to be file
     if not message_type == "file":
         return "[api/upload_file/1] || posting non-'file' type to /file is forbidden", 400
-
-
-
-    # if there is not chunk_id then assume its the first chunk
-    if not chunk_id:
-        chunk_id = 0
-
-    # if there is a chunk_id then make sure its a positive intiger
-    else:
-        try:
-            chunk_id = abs(int(chunk_id))
-        except:
-            return "[api/upload_file/2] || Invalid chunk-id sent to server. chunk-id must be of type int", 400
 
 
 
@@ -325,26 +314,32 @@ def upload_file(json_data, chatroomId):
         fileId = messageId
 
 
+    # make sure last is bool
+    try: last = bool(last)
+    except: return f"[api/upload_file/2] || 'last' variable must be of type 'bool'."
+
 
     # save file that user sent
-    response, status_code = filehander.save_file_chunk(chatroomId, username, fileId, data, chunk_id)
+    current_section, status_code = filehander.save_file_chunk(chatroomId, username, fileId, data, last)
     if status_code != 200:
         log(level='error', msg=f'[api/upload_file/2] failed to save file: {fileId}')
-        return response, status_code
+        return current_section, status_code
 
 
 
 
     # if the file is small or its the last part: save a reference to the file in the chatroom database
-    if last:
+    if last == True:
         response, status_code = dbhandler.save_in_db(
+                chatroomId    = chatroomId,
                 time          = time.time(),
                 messageId     = messageId,
+                kId           = kId,
                 username      = username,
-                chatroomId    = chatroomId,
-                message_type  = message_type,
+                message_type  = 'file',
                 fileId        = fileId,
-                filename      = filename
+                filename      = filename,
+                filesize      = current_section
                 )
 
 
@@ -362,7 +357,7 @@ def upload_file(json_data, chatroomId):
 
 
     # all is well
-    return fileId, 200
+    return {"fileId": fileId, "filesize": current_section+1}, 200
 
 
 def download_file(headers, chatroomId):
