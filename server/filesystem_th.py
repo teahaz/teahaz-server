@@ -42,7 +42,7 @@ def save_file_chunk(chatroom, username, fileId, data, last):
         try:
             # make sure file hasnt been finalized and can still be written to
             if os.path.exists(f'storage/chatrooms/{chatroom}/uploads/{fileId}/done'):
-                return "[] || This file has already been finalized and cannot be written to", 403
+                return "[filesystem/save_file_chunk/2] || This file has already been finalized and cannot be written to", 403
 
 
             # get file owner
@@ -53,7 +53,7 @@ def save_file_chunk(chatroom, username, fileId, data, last):
 
             #  make sure file isnt being written to by a differnt user
             if owner != security.encode(username):
-                return "Permission denied! This file was not created by you, and you dont have the right to write to it", 403
+                return "[filesystem/save_file_chunk/3] || Permission denied! This file was not created by you, and you dont have the right to write to it", 403
 
 
             # get the id of the current chunk
@@ -68,14 +68,14 @@ def save_file_chunk(chatroom, username, fileId, data, last):
 
         # catch errors
         except Exception as e:
-            log(level='fail', msg=f"[filesystem/save_file_chunk/2] || Failed to write chunk: {e}")
-            return f"[filesystem/save_file_chunk/2] || Internal server error while writing chunk: {current_chunk}", 500
+            log(level='fail', msg=f"[filesystem/save_file_chunk/4] || Failed to write chunk: {e}")
+            return f"[filesystem/save_file_chunk/4] || Internal server error while writing chunk: {current_chunk}", 500
 
 
     # if uploads/fileId exists but its not a folder
     else:
-        log(level='fail', msg=f"[filesystem/save_file_chunk/3] || uploads/{fileId} exists, but is not a directory")
-        return f"[filesystem/save_file_chunk/3] || Internal server error while writing chunk: File data corrupted", 500
+        log(level='fail', msg=f"[filesystem/save_file_chunk/5] || uploads/{fileId} exists, but is not a directory")
+        return f"[filesystem/save_file_chunk/5] || Internal server error while writing chunk: File data corrupted", 500
 
 
     # if last is true, finalize the file so no-one can write to it

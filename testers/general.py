@@ -25,7 +25,6 @@ def sanitize_filename(a):
 
     return filename
 
-
 global s
 global url
 global username
@@ -72,13 +71,12 @@ def send_file():
         fileId = None
 
     last = False
-    fileId = None
     while not last:
         c = f.read(chunk_size)
 
 
         # check if this will be the last part
-        if len(c) < chunk_size or f.tell() >= length :
+        if len(c) < chunk_size or f.tell() >= length:
             last = True
 
 
