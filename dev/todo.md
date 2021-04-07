@@ -36,6 +36,10 @@ features
 - [ ] endpoint to see current members of the chatroom
 
 
+- [ ] inifinate file streaming
+    - system messages for "requested streaming for file" and "started streaming file"
+
+
 - [ ] endpoint where the client can get some server configs that it needs to know
     - max request size
     - max stored filesize
