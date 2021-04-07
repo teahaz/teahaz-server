@@ -3,7 +3,16 @@ todos
 bug fixes
 ---------
 
-upcoming
+
+backend fixes
+-------------
+
+- [ ] STOP ABUSING SQL:
+    - seperate table for cookies, referenced by userID
+    - seperate table for each role
+
+
+features
 --------
 
 - [ ] add kid (Key ID) field to messages
@@ -73,6 +82,8 @@ maybe
 - [ ] server signing cookies (cookies should be signed with (origin, useragnet, secret\_key))
     - downside is that changing IP might log you out
 
+- [ ] mongodb?
+    - probably not
 
 
 
