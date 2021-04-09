@@ -84,7 +84,7 @@ def init_chat(chatroomId, chatroom_name):
 
     # create messages table
     #                          |                    general                  | type | message |          files         |
-    sql = "CREATE TABLE messages ('time', 'messageId', 'replyId', 'username', 'type', 'message', 'fileId', 'filename')"
+    sql = "CREATE TABLE messages ('time', 'messageId', 'replyId', 'username', 'type', 'message', 'fileId', 'filename', filesize)"
     data, status_code = database_execute(chatroomId, sql, ())
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/init_chat/4] || {data}")
@@ -571,7 +571,6 @@ def save_in_db(chatroomId, time, messageId, kId, username, message_type, replyId
 
     # encode cumpolsary values
     try:
-        messageId = messageId
         username = b(username)
         message_type = b(message_type)
 
@@ -602,8 +601,8 @@ def save_in_db(chatroomId, time, messageId, kId, username, message_type, replyId
 
 
 
-    sql = f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    variables = (time, messageId, replyId, username, message_type, message, fileId, filename)
+    sql = f"INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    variables = (time, messageId, replyId, username, message_type, message, fileId, filename, filesize)
     data, status_code = database_execute(chatroomId, sql, variables)
     if status_code != 200:
         log(level='error', msg=f"[dbhandler/save_in_db/2] || Failed to save message: {data}")
@@ -657,12 +656,14 @@ def get_messages_db(chatroomId, last_time=0, messageId=None):
             # get optional but non-encoded data
             fileId    = element[6]
             replyId   = element[2]
+            filesize  = element[8]
 
             # get optional data, they may or may not be present
-            message = element[5]
-            if message: message = d(message)
-            filename = element[7]
+            message    = element[5]
+            if message:  message = d(message)
+            filename   = element[7]
             if filename: filename = d(filename)
+
 
             # make return dict
             a = {
@@ -674,7 +675,8 @@ def get_messages_db(chatroomId, last_time=0, messageId=None):
                 'type': msg_type,
                 'message': message,
                 'fileId': fileId,
-                'filename': filename
+                'filename': filename,
+                'filesize': filesize
                     }
 
             # add to list

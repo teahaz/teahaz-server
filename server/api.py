@@ -339,7 +339,7 @@ def upload_file(json_data, chatroomId):
                 message_type  = 'file',
                 fileId        = fileId,
                 filename      = filename,
-                filesize      = current_section
+                filesize      = current_section + 1
                 )
 
 

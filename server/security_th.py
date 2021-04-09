@@ -31,7 +31,7 @@ def sanitize_uuid(ID):
     # validate uuid:
     try:
         uuid.UUID(ID).version
-    except ValueError as e:
+    except ValueError:
         print('ID: ',ID , type(ID))
         return False
 

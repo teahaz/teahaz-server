@@ -88,7 +88,7 @@ def save_file_chunk(chatroom, username, fileId, data, last):
     return current_chunk, 200
 
 
-def read_file_chunk(chatroom, fileId, chunk):
+def read_file_chunk(chatroom: str, fileId: str, chunk: int):
     """ read one chunk of a file"""
 
     # make sure there arent any illigal chars in the fileId
@@ -113,12 +113,24 @@ def read_file_chunk(chatroom, fileId, chunk):
                 return "[filesystem/read_file_chunk/1] || The requested file is corrupted or has not finished uploading", 500
 
 
+            if not os.path.exists(f"storage/chatrooms/{chatroom}/uploads/{fileId}/{chunk}"):
+                return "[filesystem/read_file_chunk/2] || File doesnt have a chunk with this ID", 404
+
             with open(f"storage/chatrooms/{chatroom}/uploads/{fileId}/{chunk}", 'r')as infile:
                 chunk_data = infile.read()
 
 
+        except Exception as e:
+            log(level='error', msg=f"[filesystem/read_file_chunk/3] || Internal server error while reading chunk: {e}")
+            return '[filesystem/read_file_chunk/3] || Internal server error while reading chunk', 500
+
+
     else:
-        return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
+        return '[filesystem/read_file_chunk/4] || requested file does not exist', 404
+
+
+    return chunk_data, 200
+
 
 
 def remove_file(chatroom, filename):
@@ -238,57 +250,57 @@ def chatroom_exists(chatroom):
 #
 #     # all is well
 #     return "OK", 200
-def read_file_chunk(chatroom, fileId, chunk):
-    """ read one chunk of a file"""
-    if not os.path.isfile(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
-        return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
-
-    # try open file
-    try:
-        f = open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'r')
-    except Exception as e:
-        log(level='error', msg=f"[filesystem/read_file_chunk/1] || could not open file for reading. \n Traceback: {e}")
-        return '[filesystem/read_file_chunk/1] || could not open file for reading.', 500
-
-
-    # try read file
-    # NOTE this might get incredibly slow in large files, and we might want to find a better way
-    try:
-        # prev is the last file location. if this is the sam across 2 loops then we are at the end of the file
-        prev = -1
-        data = ''
-        current_section = 0
-        while 1:
-            #read one byte
-            c = f.read(1)
-
-            # get current location
-            current = f.tell()
-            # check if it changed since the last loop
-            if current == prev:
-                # if not then we have reached the end of the file
-                break
-            else:
-                prev = current
-
-
-            # if byte is a section delimiter then mark new section and continu
-            if c == ';':
-                current_section += 1
-
-            # if in the right section then add it to the return data
-            elif current_section == section:
-                data += c
-
-            # dont waste time by scanning sections we dont need
-            elif current_section > section:
-                break
-
-
-    except Exception as e:
-        log(level='error', msg=f"[filesystem/read_file_chunk/2] || An error occured while reading file \n Traceback: {e}")
-        return '[filesystem/read_file_chunk/2] || An error occured while reading file', 500
-
-
-    return data, 200
+# def read_file_chunk(chatroom, fileId, chunk):
+#     """ read one chunk of a file"""
+#     if not os.path.isfile(f'storage/chatrooms/{chatroom}/uploads/{fileId}'):
+#         return '[filesystem/read_file_chunk/0] || requested file does not exist', 404
+#
+#     # try open file
+#     try:
+#         f = open(f'storage/chatrooms/{chatroom}/uploads/{fileId}', 'r')
+#     except Exception as e:
+#         log(level='error', msg=f"[filesystem/read_file_chunk/1] || could not open file for reading. \n Traceback: {e}")
+#         return '[filesystem/read_file_chunk/1] || could not open file for reading.', 500
+#
+#
+#     # try read file
+#     # NOTE this might get incredibly slow in large files, and we might want to find a better way
+#     try:
+#         # prev is the last file location. if this is the sam across 2 loops then we are at the end of the file
+#         prev = -1
+#         data = ''
+#         current_section = 0
+#         while 1:
+#             #read one byte
+#             c = f.read(1)
+#
+#             # get current location
+#             current = f.tell()
+#             # check if it changed since the last loop
+#             if current == prev:
+#                 # if not then we have reached the end of the file
+#                 break
+#             else:
+#                 prev = current
+#
+#
+#             # if byte is a section delimiter then mark new section and continu
+#             if c == ';':
+#                 current_section += 1
+#
+#             # if in the right section then add it to the return data
+#             elif current_section == section:
+#                 data += c
+#
+#             # dont waste time by scanning sections we dont need
+#             elif current_section > section:
+#                 break
+#
+#
+#     except Exception as e:
+#         log(level='error', msg=f"[filesystem/read_file_chunk/2] || An error occured while reading file \n Traceback: {e}")
+#         return '[filesystem/read_file_chunk/2] || An error occured while reading file', 500
+#
+#
+#     return data, 200
 
