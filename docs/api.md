@@ -190,6 +190,12 @@ print(res.text)
 ]
 ```
 
+
+Sending messages
+----------------
+
+<br />
+<br />
 <br />
 <br />
 
@@ -197,28 +203,109 @@ print(res.text)
 
 
 
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
 
-
-Below this lies the unchecked and potentially harmful land of outdated documentation
-=======================================================================================
 
 
 
 files
 =====
-### endpoints:
-* GET: `http(s)://url:port/api/v0/file/<chatroomId>`<br />
-`<chatroomId>` should be replaced by the ID of the chatroom
+Uploading a file to a chatroom
+------------------------------
+This method allows the user to upload a file to the chatroom.
+
+### Endpoints:
+* POST: `http(s)://url:port/api/v0/file/<chatroomId>`
+    `<chatroomId>` should be replaced by the ID of the chatroom
+
 <br />
+
+
+### Required fields:
+* username
+* filename
+    - this is the original name of the file being sent.
+    - It will be stored for the recieving client to save the file.
+* data
+
+
+<br />
+
+
+### Implementation details:
+The server only accepts requests that are less than 1mb in size. For this reason larger files have to be split into chunks, that will be individually uploaded. On the last chuk the client will have to set the variable `last` to `true` so the server can finalize the upload. A file will only appear in the messages stream when it has been finalized. Finalized files can no longer be written to by anyone.
+**Note**: The chunk size includes the overhead from encoding and/or encryption
+
+
+<br />
+
+### code example
+
+```py
+import os
+
+url = <server url> + "/api/v0/file/" + chatroomId
+filename = "cool_picture.png"
+
+
+# get length of file
+length = os.path.getsize(filename)
+
+# Calculate chunk size, allowing for the overhead of base64 encoding
+chunk_size = int((1048576*3)/4) -1
+
+# open the file
+f = open(filepath, "rb")
+
+
+
+# start a loop of sending file chunks
+# TODO: finish the notes
+last = False
+while not last:
+        c = f.read(chunk_size)
+
+
+        # check if this will be the last part
+        if len(c) < chunk_size or f.tell() >= length:
+            last = True
+
+
+        data = {
+                "username" : globals()['username'],
+                "filename" : filename, 
+                "fileId"   : fileId,
+                "type"     : 'file',
+                "last"     : last,
+                "data"     : encode_binary(c),
+                "kId"      : None
+                }
+
+
+        # make request
+        response = globals()['s'].post(url, json=data)
+        if response.status_code != 200:
+            break
+        else:
+            print("text")
+            print(response.text)
+            fileId = response.json().get('fileId')
+            print("fileID")
+            print(fileId)
+
+    f.close()
+    # return the response if the loop stopped
+    return response.text, response.status_code
+
+```
+
+
+
+
+
+
+<!--  The maximum amount of data in one request is 1 megabyte, so files that are larger than this have to be uploaded in chunks, broken into multiple requests -->
+Below this lies the unchecked and potentially harmful land of outdated documentation
+=======================================================================================
 
 chatrooms
 =========
