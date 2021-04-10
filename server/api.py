@@ -1,8 +1,8 @@
+import os
 import uuid
 import time
 import json
 import base64
-from os.path import isfile as os_isfile
 
 import dbhandler
 import security_th as security
@@ -284,7 +284,9 @@ def upload_file(json_data, chatroomId):
     last          = json_data.get('last')
     data          = json_data.get('data')
     kId           = json_data.get('kId')
-    messageId     = str(uuid.uuid1())
+
+    # if there is no fileID then this is the first chunk of the file upload. In this case we assign a new fileid
+    if not fileId: fileId = str(security.gen_uuid())
 
 
     # make sure client sent all needed data
@@ -309,11 +311,6 @@ def upload_file(json_data, chatroomId):
 
 
 
-    # if a fileId is not sent, then this is the first part of the file, In this case the server assigns a fileId
-    if not fileId:
-        fileId = messageId
-
-
     # make sure last is bool
     try: last = bool(last)
     except: return f"[api/upload_file/2] || 'last' variable must be of type 'bool'."
@@ -333,7 +330,7 @@ def upload_file(json_data, chatroomId):
         response, status_code = dbhandler.save_in_db(
                 chatroomId    = chatroomId,
                 time          = time.time(),
-                messageId     = messageId,
+                messageId     = fileId,
                 kId           = kId,
                 username      = username,
                 message_type  = 'file',
@@ -387,21 +384,21 @@ def download_file(headers, chatroomId):
 
 
     # check for the files existance. os_isfile is an alias to os.path.isfile, i dont really want to import os to minimize security issues
-    if not os_isfile(f'storage/chatrooms/{chatroomId}/uploads/{fileId}'):
-        return "[api/download_file/1] || The requested file doesnt exist", 404
+    if not os.path.isdir(f'storage/chatrooms/{chatroomId}/uploads/{fileId}'):
+        return "[api/download_file/2] || The requested file doesnt exist", 404
 
 
 
     # read file requested by user
     data, status_code = filehander.read_file_chunk(chatroomId, fileId, section)
     if status_code != 200:
-        log(level='error', msg=f'[server/api/download_file/0] error while reading file: {fileId}')
+        log(level='error', msg=f'[server/api/download_file/3] error while reading file: {fileId}')
         return data, status_code
 
 
 
     # all is well
-    return data, 200
+    return {"data": data}, 200
 
 
 

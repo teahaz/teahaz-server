@@ -12,6 +12,11 @@ def encode(a):
 def encode_binary(a):
     return base64.b64encode(a).decode('utf-8')
 
+def decrypt_message(a):
+    return base64.b64decode(str(a).encode('utf-8')).decode('utf-8')
+def decrypt_binary(a):
+    return base64.b64decode(str(a).encode('utf-8'))
+
 
 def sanitize_filename(a):
     allowed = string.ascii_letters + string.digits + '_-.'
@@ -108,14 +113,48 @@ def send_file():
 
 
 def get_file():
-    filename = input(">> ")
-    saved_filename = input("save as: ")
+    url = globals()['url'] + '/api/v0/file/' + globals()['chatroom_id']
+    fileId = input(">> ")
+    save_as = input("save as: ")
+    filesize = input('filesize: ')
+
+    # the file uses append, so It has to remove the file if it already exists
+    if os.path.exists(save_as):
+        os.remove(save_as)
+
+    # loop through sections of the file
+    for i in range(int(filesize)):
+        # set headers
+        headers = {
+                "username": username,
+                "fileId"  : fileId,
+                "section" : str(i)
+                }
 
 
-    # response, status_code = teahaz.download_file_v0(globals()['s'], globals()['url'], globals()['chatroom_id'], globals()['username'], filename, saved_filename)
+        response = globals()['s'].get(url, headers=headers)
+        # let the programmer handle errors
+        if response.status_code != 200:
+            return response.text, response.status_code
 
-    # print(status_code)
-    # return response
+
+        # try decode data
+        try:
+            data = response.json().get('data')
+            print(data[:20])
+            data = decrypt_binary(data)
+            print(data[:20])
+        except Exception as e:
+            return f"ERR: could not decrypt file data. Traceback: {e}"
+
+
+        if len(data) < 1:
+            return f"ERR: unexpectedly reached the end of the file"
+
+
+        with open(save_as, "ab+")as outfile:
+            outfile.write(data)
+    return "OK", 200
 
 
 
