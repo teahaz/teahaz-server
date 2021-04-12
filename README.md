@@ -13,7 +13,9 @@ Check out the [official client](https://github.com/bczsalba/teahaz-client)!
 - [x] Completely free official server ([teahaz.co.uk](https://teahaz.co.uk))
 - [x] Availability to host your own server.
 - [x] Terminal based client.
-- [ ] Api and Libraries to make creating 3rd party clients easy.
+- [x] Api and Libraries to make creating 3rd party clients easy.
+    - python: [teahaz.py](https://github.com/bczsalba/teahaz.py)
+    - Other languages might come later, or you can follow tha api docs
 
 <br />
 <br />
