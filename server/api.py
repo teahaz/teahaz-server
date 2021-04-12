@@ -271,7 +271,24 @@ def message_delete(json_data, chatroomId):
         return f"[api/message_delete/4] || could not delete message: Permission denied", 403
 
 
-    return dbhandler.delete_message(messageId, chatroomId)
+    response, status_code = dbhandler.delete_message(messageId, chatroomId)
+    if status_code != 200:
+        return response, status_code
+
+
+    # save the delete action in the man database
+    response , status_code = dbhandler.save_in_db(
+                                chatroomId   = chatroomId,
+                                time         = time.time(),
+                                messageId    = security.gen_uuid(),
+                                kId          = None,
+                                replyId      = None,
+                                username     = username,
+                                message_type = 'delete',
+                                message      = messageId
+                                )
+
+    return response, status_code
 
 
 

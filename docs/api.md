@@ -16,9 +16,10 @@ docs of /api/v0
 
 messages
 ========
-Messages are stored in on the server in an sql database. You can use the methods below to interface with said database. 
+The messages object representes the man stream of data that the client needs to be aware of. This includes messages, files, system messages, etc.
 The server currently stores 9 values for each message:
- * time
+
+* time
     - the time when the message was sent
 * messageId
     - a unique Id for each message assigned by the server
@@ -31,17 +32,87 @@ The server currently stores 9 values for each message:
     - The nickname/display name of the user who sent the message
 * type
     - The type of the message
-    - Currently this could either be `text` or `file`
+    - supported types:
+        - text
+        - file: file sent by user
+        - system: automatic messages from the server, depending on userconfig these should be displayed because they could have security impacts
+        - system-silent: same as above but not so relevant, probably should not be displayed (tho should be accesible to the user, either by toggle or a sperate screen)
+        - delete: A message has been deleted, It should be removed from the local cache aswell
 * message
     - The text/body of the message
-    - This should be `null` if the `type == file`
+    - This will be encrypted
 * fileId
     - The id of a file sent
     - This id is used as a filename on the server side, and is needed to download any file
-    - This should be `null` if the `type == text`
 * filename
     - The original filename of a file
-    - This should be `null` if the `type == text`
+
+
+### Types of messages
+
+####  text:
+A standard text/message from a user.
+
+example:
+```json
+// following is an example of a message, and a reply to the first message
+[
+    { 
+        "time": 1618262186.309995,
+        "messageId": "5730800e-9bd4-11eb-acec-b42e99435986",
+        "replyId": null,
+        "username": "cool person",
+        "nickname": "cool displayname",
+        "type": "text",
+        "message": "QWNjb3JkaW5nIHRvIGFsbCBrbm93biBsYXdzCm9mIGF2aWF0aW9u",
+        "fileId": null,
+        "filename": null,
+        "filesize": null
+    },
+    {
+        "time": 1618262875.8404057,
+        "messageId": "f22e7b00-9bd5-11eb-a872-b42e99435986",
+        "replyId": "5730800e-9bd4-11eb-acec-b42e99435986",
+        "username": "a",
+        "nickname": "a",
+        "type": "text",
+        "message": "dGhlcmUgaXMgbm8gd2F5IGEgYmVlCnNob3VsZCBiZSBhYmxlIHRvIGZseS4=",
+        "fileId": null,
+        "filename": null,
+        "filesize": null
+    }
+]
+```
+
+<br />
+<br />
+
+#### delete:
+When a message is deleted it gets removed from the database but could still be in a users cache. This message is an indicaton to the clent that it should remove the message.
+(this message probably shouldnt be displayed to the end user)
+
+
+example:
+```json
+[
+    {
+        "time": 1618263099.53122,
+        "messageId": "778300f0-9bd6-11eb-93de-b42e99435986",
+        "replyId": null,
+        "username": "a",
+        "nickname": "a",
+        "type": "delete",
+        "message": "f22e7b00-9bd5-11eb-a872-b42e99435986",
+        "fileId": null,
+        "filename": null,
+        "filesize": null
+    }
+]
+```
+
+other types have not yet been implemented
+
+
 
 <br />
 <br />
