@@ -298,6 +298,14 @@ while not last:
 
 ```
 
+Downoading a file from the server
+---------------------------------
+Method allows you to download a file from the server
+
+
+### Endpoints:
+* POST: `http(s)://url:port/api/v0/file/<chatroomId>`
+    `<chatroomId>` should be replaced by the ID of the chatroom
 
 
 
