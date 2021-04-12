@@ -15,19 +15,12 @@ backend fixes
 features
 --------
 
-- [ ] add kid (Key ID) field to messages
-
-
-- [ ] fix incredibly slow file downloads (server side)
-
+- [ ] system messages for delete, and other similar things
 
 - [ ] endpint where a user can check/change their own configs
 
 
 - [ ] chatroom configs
-
-
-- [ ] system messages for delete, and other similar things
 
 
 - [ ] server configs
@@ -119,3 +112,7 @@ implemented
 
 
 - [x] method to get a message by its id
+
+- [x] fix incredibly slow file downloads (server side)
+
+- [x] add kid (Key ID) field to messages
