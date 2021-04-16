@@ -128,7 +128,7 @@ def create_invite(json_data, chatroomId):
                                     replyId      = None,
                                     username     = username,
                                     message_type = 'system',
-                                    message      = '"' + str(dbhandler.get_nickname(chatroomId, security.encode(username))) + f'" created an invite!\n uses: {uses}, expiration date: ' + str((expr_time if expr_time > 0 else "never"))
+                                    message      = json.dumps({"action": "created chatroom", "uses": uses, "expr_time": str((expr_time if expr_time > 0 else None))})
                                     )
 
 
