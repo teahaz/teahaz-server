@@ -129,7 +129,7 @@ def create_invite(json_data, chatroomId):
                                     username     = username,
                                     message_type = 'system',
                                     message      = json.dumps({
-                                            "action": "created invite",
+                                            "action": "Created invite",
                                             "uses": uses,
                                             "expr_time": expr_time
                                         })
