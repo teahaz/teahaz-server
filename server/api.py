@@ -119,6 +119,19 @@ def create_invite(json_data, chatroomId):
         return response, status_code
 
 
+    # log the creation of an invite
+    response , status_code = dbhandler.save_in_db(
+                                    chatroomId   = chatroomId,
+                                    time         = time.time(),
+                                    messageId    = security.gen_uuid(),
+                                    kId          = None,
+                                    replyId      = None,
+                                    username     = username,
+                                    message_type = 'system',
+                                    message      = '"' + str(dbhandler.get_nickname(chatroomId, security.encode(username))) + f'" created an invite!\n uses: {uses}, expiration date: ' + str((expr_time if expr_time > 0 else "never"))
+                                    )
+
+
     # ok
     return inviteId, 200
 
