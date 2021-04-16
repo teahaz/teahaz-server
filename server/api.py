@@ -129,11 +129,13 @@ def create_invite(json_data, chatroomId):
                                     username     = username,
                                     message_type = 'system',
                                     message      = json.dumps({
-                                            "action": "created chatroom",
+                                            "action": "created invite",
                                             "uses": uses,
                                             "expr_time": expr_time
                                         })
                                     )
+    if status_code != 200:
+        return response, status_code
 
 
     # ok

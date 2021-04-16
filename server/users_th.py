@@ -1,4 +1,8 @@
-#this file should sort out everything related to users
+"this file should sort out everything related to users"
+
+import time
+import json
+
 import dbhandler as database
 import security_th as security
 from logging_th import logger as log
@@ -55,6 +59,7 @@ def set_cookie(json_data, chatroomId):
         return response, status
 
 
+
 def check_cookie(cookie, data, chatroomId):
     username   = data.get('username')
 
@@ -74,6 +79,7 @@ def check_cookie(cookie, data, chatroomId):
         return True
     else:
         return False
+
 
 
 def add_user(username, email, nickname, password, chatroomId):
@@ -121,8 +127,26 @@ def add_user(username, email, nickname, password, chatroomId):
         return response, status_code
 
 
+
+    # log new user
+    response , status_code = database.save_in_db(
+                                    chatroomId   = chatroomId,
+                                    time         = time.time(),
+                                    messageId    = security.gen_uuid(),
+                                    kId          = None,
+                                    replyId      = None,
+                                    username     = username,
+                                    message_type = 'system',
+                                    message      = json.dumps({
+                                            "action": "New user registered!",
+                                        })
+                                    )
+    if status_code != 200:
+        return response, status_code
+
     log(level='log', msg=f'[users/add_user/4] || new user: "{username}", just registered to chatroom: "{chatroomId}"')
     return "succesfully registered", 200
+
 
 
 def process_invite(json_data, chatroomId):
@@ -191,6 +215,22 @@ def process_invite(json_data, chatroomId):
     if status_code != 200:
        return response, status_code
 
+
+    # log new user
+    response , status_code = database.save_in_db(
+                                    chatroomId   = chatroomId,
+                                    time         = time.time(),
+                                    messageId    = security.gen_uuid(),
+                                    kId          = None,
+                                    replyId      = None,
+                                    username     = username,
+                                    message_type = 'system',
+                                    message      = json.dumps({
+                                            "action": "New user registered!",
+                                        })
+                                    )
+    if status_code != 200:
+        return response, status_code
 
 
     # get the name of the chat
