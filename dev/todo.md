@@ -15,7 +15,6 @@ backend fixes
 features
 --------
 
-- [ ] system messages for delete, and other similar things
 
 - [ ] endpint where a user can check/change their own configs
 
@@ -100,6 +99,9 @@ fixed bugs
 
 implemented
 -----------
+- [x] system messages for delete, and other similar things
+
+
 - [x] replace in files: filename --> fileId; extension --> original\_name
 
 
