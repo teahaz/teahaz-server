@@ -46,6 +46,11 @@ body
     color: #d1bf25;
     margin: -2px;
 }
+.prompt-hash
+{
+    color: #d1bf25;
+    padding-left: 1px;
+}
 .prompt-host
 {
     color: #0dcdcd;
@@ -72,6 +77,6 @@ body
 .output-files
 {
     padding: 1%;
-    font-weight: 1000;
+    font-weight: 600;
     color: #0d73cc;
 }
