@@ -3,6 +3,7 @@ from os import environ
 from flask import Flask
 from flask import request
 from flask import redirect
+from flask import send_file
 from flask import make_response
 from flask import render_template
 
@@ -28,13 +29,13 @@ from dbhandler import check_settings
 from dbhandler import check_databses
 
 from security_th import check_uuid
-
 from logging_th import logger as log
-
 from filesystem_th import chatroom_exists
 
-app = Flask(__name__)
+
+app = Flask(__name__, static_folder='../static/', static_url_path='/')
 api = Api(app)
+
 
 # request size limit, not to overload server memory
 #this should never be bigger then the amount of ram the server has
@@ -44,7 +45,7 @@ app.config['MAX_CONTENT_LENGTH'] = 1000000000 # one gb,
 
 class index(Resource):
     def get(self):
-        return redirect('https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server')
+        return app.send_static_file('index.html')
 
 
 
@@ -219,8 +220,6 @@ class api__invites(Resource):
 
 #legend
 api.add_resource(index, '/')
-
-
 
 api.add_resource(login, '/login/<chatroomId>', '/login/<chatroomId>')
 api.add_resource(api__chatroom, '/api/v0/chatroom/', '/api/v0/chatroom/')

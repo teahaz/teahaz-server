@@ -78,7 +78,6 @@ cd teahaz-server/
 * Creating directories for certbot keys
 
 ```
-mkdir static/
 mkdir -p .keys/live/{hostname}
 mkdir -p .keys/archive/{hostname}
 ```
