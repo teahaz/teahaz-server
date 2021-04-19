@@ -36,9 +36,9 @@ global username
 global chatroom_id
 # url = "http://butorhaz.hopto.org:13337"
 # url = "https://butorhaz.hopto.org"
-url = "http://localhost:13337"
+# url = "http://localhost:13337"
 # url = "http://localhost:80"
-# url = "https://teahaz.co.uk"
+url = "https://teahaz.co.uk"
 # url = "http://192.168.1.75"
 
 
@@ -159,12 +159,13 @@ def get_file():
 
 
 def get():
-    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] + '/'
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id']
 
     headers = {
         "username": globals()['username'],
         "time": "1604951915.377928"
     }
+    headers =  {'User-Agent': 'teahaz-client-v0', 'username': 'a', 'time': '0'}
 
 
     res = globals()['s'].get(url=url, headers=headers)
