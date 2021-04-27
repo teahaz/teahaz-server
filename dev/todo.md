@@ -66,6 +66,9 @@ features
 
 maybe
 -----
+- [ ] put nginx config outside of dockerfile
+    - would make it a lot more configurable for the server owner
+
 - [ ] user avatars
 
 - [ ] invites with permissions attached to them

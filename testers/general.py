@@ -366,7 +366,7 @@ def use_invite():
     a = {
 
             "username": globals()['username'],
-            "nickname": "\x0aB\x0a",
+            "nickname": input('nickname: '),
             "email": globals()['email'],
             # "nickname": input('nickname: '),
             "password": input('password: '),
