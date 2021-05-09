@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+    teahaz-main:
+        build: ./teahaz
+        volumes:
+            - ./teahaz/src:/usr/src/app
+            - ./storage/logs:/usr/src/app/storage/logs
+            - ./storage/chatrooms:/usr/src/app/storage/chatrooms
+        ports:
+            - 13337:13337

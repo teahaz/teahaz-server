@@ -1,0 +1,31 @@
+server {
+    listen 80;
+    server_name <REPLACE_SERVER_HOSTNAME>;
+
+    location ~ /.well-known {
+        root /home/teahaz/static;
+    }
+
+    location / {
+        include proxy_params;
+        return 301 https://$host$request_uri;
+    }
+}
+
+
+server {
+    listen 443 ssl;
+    server_name <REPLACE_SERVER_HOSTNAME>;
+    ssl_certificate /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
+    ssl_certificate_key /home/teahaz/.keys/live/<REPLACE_SERVER_HOSTNAME>/privkey.pem;
+    client_max_body_size 1G;
+
+    location ~ /.well-known {
+        root /home/teahaz/static;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://localhost:13337;
+    }
+}

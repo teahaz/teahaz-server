@@ -1,0 +1,8 @@
+[0m[1m[ log ]      1620589523.7481863  ||  running system checks[0m
+[0m[1m[ log ]      1620589523.7483432  ||  checking storage folder[0m
+[0m[1m[92m[4m[ success ]  1620589523.7484174  ||  [health check] System is healthy :)[0m
+[0m[1m[ log ]      1620589523.7484834  ||  [setup]  ||  TEAHAZ_PORT variable was not set, or is set to an invalid port. Defaulting to '13337'[0m
+[0m[1m[ log ]      1620594968.2530103  ||  running system checks[0m
+[0m[1m[ log ]      1620594968.253279   ||  checking storage folder[0m
+[0m[1m[92m[4m[ success ]  1620594968.2533598  ||  [health check] System is healthy :)[0m
+[0m[1m[ log ]      1620594968.2534308  ||  [setup]  ||  TEAHAZ_PORT variable was not set, or is set to an invalid port. Defaulting to '13337'[0m
