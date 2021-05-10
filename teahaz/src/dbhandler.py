@@ -758,35 +758,35 @@ def check_databses():
         if not os.path.exists(f"storage/chatrooms/{chatroom}/main.db"):
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" does not have a database file')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} does not have a database file", 200
+            return f"{chatroom} does not have a database file", 500
 
         sql = "SELECT * FROM users"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
         sql = "SELECT * FROM invites"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatrom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
         sql = "SELECT * FROM messages"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
         sql = "SELECT * FROM settings"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
 
 

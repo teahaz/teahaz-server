@@ -9,3 +9,10 @@ services:
             - ./storage/chatrooms:/usr/src/app/storage/chatrooms
         ports:
             - 13337:13337
+
+    healthcheck:
+        build: ./healthcheck
+        volumes:
+            - ./healthcheck:/usr/src/app
+            - ./teahaz/src:/usr/src/teahaz
+
