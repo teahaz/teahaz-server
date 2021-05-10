@@ -26,7 +26,7 @@ from users_th import set_cookie
 from users_th import check_cookie
 
 from dbhandler import check_settings
-from dbhandler import check_databses
+from dbhandler import check_databases
 
 from security_th import check_uuid
 from logging_th import logger as log
@@ -231,7 +231,7 @@ api.add_resource(api__messages, '/api/v0/message/<chatroomId>', '/api/v0/message
 
 # in dev environment the server is not run as __main__ but this should still run
 def check_health():
-    response, status_code = check_databses()
+    response, status_code = check_databases()
     if status_code != 200:
         log(level='fail', msg=f"[health check] ||  fatal erorr with databasess\nTraceback: {response}")
         import sys

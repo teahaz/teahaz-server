@@ -727,7 +727,7 @@ def delete_message(messageId, chatroomId):
 
 
 
-def check_databses():
+def check_databases():
     log(level='log', msg='running system checks')
 
 

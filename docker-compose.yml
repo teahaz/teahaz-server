@@ -15,4 +15,6 @@ services:
         volumes:
             - ./healthcheck:/usr/src/app
             - ./teahaz/src:/usr/src/teahaz
+            - ./storage/logs:/usr/src/app/storage/logs
+            - ./storage/chatrooms:/usr/src/app/storage/chatrooms
 

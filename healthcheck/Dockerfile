@@ -1,5 +1,9 @@
-FROM python:3-onbuild
+FROM python
 
+ENV PROD=True
+ENV PROD=true
 
-RUN apt install git -y
 COPY . /usr/src/app
+
+
+CMD ["python3", "main.py"]

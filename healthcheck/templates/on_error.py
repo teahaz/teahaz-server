@@ -1,4 +1,4 @@
-def on_error(message):
+def on_error(message, tp):
     """
         Users can add code here that gets executed if the healthcheck fails
 
