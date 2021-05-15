@@ -128,11 +128,11 @@ def create_invite(json_data, chatroomId):
                                     replyId      = None,
                                     username     = username,
                                     message_type = 'system',
-                                    message      = json.dumps({
+                                    message      = security.encode(json.dumps({
                                             "action": "Created invite",
                                             "uses": uses,
                                             "expr_time": expr_time
-                                        })
+                                        }))
                                     )
     if status_code != 200:
         return response, status_code
@@ -304,7 +304,7 @@ def message_delete(json_data, chatroomId):
                                 replyId      = None,
                                 username     = username,
                                 message_type = 'delete',
-                                message      = messageId
+                                message      = security.encode(messageId)
                                 )
 
     return response, status_code

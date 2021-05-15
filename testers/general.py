@@ -4,7 +4,6 @@ import os
 import json
 import string
 import base64
-import teahaz
 
 
 def encode(a):
