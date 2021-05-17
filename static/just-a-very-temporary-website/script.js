@@ -1,6 +1,16 @@
 // declear conv as a global
 var conv;
 
+
+                                                                                        // misc
+const test_save = () =>
+{
+    localStorage.setItem("username", conv.username);
+}
+const test_load = () =>
+{
+    console.log(localStorage.getItem("username"));
+}
 const loader = (filename) =>
 { // loads an html file
     return axios({
@@ -18,8 +28,13 @@ const loader = (filename) =>
         })
 }
 
+
+
+
+
+                                                                                     // main page
 const send_msg = () =>
-{
+{ // function gets run onsubmit for the inut field in main/chatroom
     let messagebox = document.getElementById('messagebox');
     let text = messagebox.value;
     if (text.length < 1)
@@ -47,29 +62,30 @@ const send_msg = () =>
     return true;
 }
 
-const logged_in = (response) =>
+
+
+
+                                                                                    // login page
+const logged_in = (_) =>
 { // gets executed on successful login
-
-
     localStorage.setItem("username", conv.username);
 
-    loader('main.html')
+    loader('/main.html')
     .then((response) =>
         {
             document.open();
             document.write(response);
             document.close();
         })
-    .catch((response) =>
+    .catch((_) =>
         {
             document.open();
             document.write("could not load main page :(")
             document.close();
         })
-
 }
 
-const login_failed = (response) =>
+const login_failed = (_) =>
 { // gets executed on failed login
     document.getElementById('form-label').innerText = "login failed";
     document.getElementById('form-label').style = "color: red";
@@ -119,9 +135,13 @@ const login = () =>
     })
 }
 
-
 const main_loginpage = () =>
-{
+{ // sets things up for the main login page, gets  called by body.onload
+    // stop form from refreshing the page
+    if (!window.location.href.endsWith("?#"))
+        window.location.href += '?#'
+
+
     // try get chatroom from url
     let url = window.location.href;
     let chatroom = url.split('?')[1].split("&")[0].split('=')[1]
@@ -132,31 +152,23 @@ const main_loginpage = () =>
 }
 
 
-const test_save = () =>
-{
-    localStorage.setItem("username", conv.username);
+
+                                                                                    // startup
+const startup = () =>
+{ // first thing to run in the file, loads other thins
+    // load the login screen
+    loader('src/login.html')
+    .then((response) =>
+        {
+            document.open();
+            document.write(response);
+            document.close();
+        })
+    .catch((response) =>
+        {
+            document.open();
+            document.write("could not load login page :(")
+            document.close();
+        })
 }
-const test_load = () =>
-{
-    console.log(localStorage.getItem("username"));
-}
-
-// stop page from refreshing
-if (!window.location.href.endsWith("?#"))
-    window.location.href += '?#'
-
-// load the login screen
-loader('login.html')
-.then((response) =>
-    {
-        document.open();
-        document.write(response);
-        document.close();
-    })
-.catch((response) =>
-    {
-        document.open();
-        document.write("could not load login page :(")
-        document.close();
-    })
-
+startup()
