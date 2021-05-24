@@ -738,7 +738,7 @@ def check_databases():
     if not os.path.isdir("storage/"):
         try:
             log(level='warning', msg='[health check] creating storage folder')
-            os.mkdir("storage")
+            # os.mkdir("storage")
 
         except Exception as e:
             return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500

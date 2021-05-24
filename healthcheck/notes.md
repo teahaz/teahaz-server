@@ -1,3 +1,5 @@
+this healthchek really needs some work, for now its only doing some basic things like checking if all databases are good, but it should do more later
+
 this microservice will handle healthcheks
 
 
