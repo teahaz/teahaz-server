@@ -3,8 +3,8 @@ server {
     server_name th.<REPLACE_SERVER_HOSTNAME>;
     client_max_body_size 1G;
 
-    ssl_certificate /path/to/key/live/th.<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
-    ssl_certificate_key /path/to/key/live/th.<REPLACE_SERVER_HOSTNAME>/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/th.<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/th.<REPLACE_SERVER_HOSTNAME>/privkey.pem;
 
     location ~ /.well-known {
         root /home/teahaz/static;
