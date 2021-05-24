@@ -33,7 +33,7 @@ from logging_th import logger as log
 from filesystem_th import chatroom_exists
 
 
-app = Flask(__name__, static_folder='../static/', static_url_path='/')
+app = Flask(__name__)
 api = Api(app)
 
 
@@ -41,11 +41,6 @@ api = Api(app)
 #this should never be bigger then the amount of ram the server has
 app.config['MAX_CONTENT_LENGTH'] = 1000000000 # one gb,
 
-
-
-class index(Resource):
-    def get(self):
-        return app.send_static_file('index.html')
 
 
 
@@ -93,7 +88,7 @@ class login(Resource):
 
 
 # handles messages
-class api__messages(Resource):
+class messages(Resource):
     def get(self, chatroomId): # gets messages since {time.time()}
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
@@ -129,7 +124,7 @@ class api__messages(Resource):
 
 
 # handles file
-class api__files(Resource):
+class files(Resource):
     def get(self, chatroomId): #gets file
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
@@ -154,7 +149,7 @@ class api__files(Resource):
 
 
 
-class api__chatroom(Resource):
+class chatrooms(Resource):
     def post(self): # create chatroom
         if not request.get_json(): return "no data sent", 401
 
@@ -180,7 +175,7 @@ class api__chatroom(Resource):
 
 
 
-class api__invites(Resource):
+class invites(Resource):
     def get(self, chatroomId):
         if not request.headers: return "no data sent", 400
         if not chatroomId: return "ChatroomId was not part of the path", 400
@@ -218,14 +213,12 @@ class api__invites(Resource):
 
 
 
-#legend
-api.add_resource(index, '/')
+api.add_resource(chatrooms, '/api/v0/chatroom/', '/api/v0/chatroom/')
+api.add_resource(login, '/api/v0/login/<chatroomId>', '/api/v0/login/<chatroomId>')
+api.add_resource(invites, '/api/v0/invite/<chatroomId>', '/api/v0/invite/<chatroomId>/')
 
-api.add_resource(login, '/login/<chatroomId>', '/login/<chatroomId>')
-api.add_resource(api__chatroom, '/api/v0/chatroom/', '/api/v0/chatroom/')
-api.add_resource(api__files, '/api/v0/file/<chatroomId>', '/api/v0/file/<chatroomId>')
-api.add_resource(api__invites, '/api/v0/invite/<chatroomId>', '/api/v0/invite/<chatroomId>/')
-api.add_resource(api__messages, '/api/v0/message/<chatroomId>', '/api/v0/message/<chatroomId>/')
+api.add_resource(files, '/api/v0/file/<chatroomId>', '/api/v0/file/<chatroomId>')
+api.add_resource(messages, '/api/v0/message/<chatroomId>', '/api/v0/message/<chatroomId>/')
 
 
 
