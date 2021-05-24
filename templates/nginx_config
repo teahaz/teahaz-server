@@ -2,14 +2,15 @@ server {
     listen 80;
     server_name <REPLACE_SERVER_HOSTNAME>;
 
-    location ~ /.well-known {
-        root /teahouse/static;
-    }
-
-    location / {
+    location /th/ {
         include proxy_params;
         return 301 https://$host$request_uri;
     }
+
+    location / {
+        root /teahouse/static;
+    }
+
 }
 
 server {
@@ -20,11 +21,11 @@ server {
     ssl_certificate /etc/letsencrypt/live/<REPLACE_SERVER_HOSTNAME>/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/<REPLACE_SERVER_HOSTNAME>/privkey.pem;
 
-    location ~ /.well-known {
+    location / {
         root /teahouse/static;
     }
 
-    location / {
+    location /th/ {
         include proxy_params;
         proxy_pass http://localhost:13337;
     }
