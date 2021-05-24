@@ -3,7 +3,7 @@ server {
     server_name <REPLACE_SERVER_HOSTNAME>;
 
     location ~ /.well-known {
-        root /home/teahaz/static;
+        root /teahouse/static;
     }
 
     location / {
@@ -21,7 +21,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/th.<REPLACE_SERVER_HOSTNAME>/privkey.pem;
 
     location ~ /.well-known {
-        root /home/teahaz/static;
+        root /teahouse/static;
     }
 
     location / {
