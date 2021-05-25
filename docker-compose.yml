@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-    teahaz-main:
-        build: ./teahaz
+    teahouse-api:
+        build: ./teahouse
         volumes:
-            - ./teahaz/src:/usr/src/app
+            - ./teahouse/src:/usr/src/app
             - ./storage/logs:/usr/src/app/storage/logs
             - ./storage/chatrooms:/usr/src/app/storage/chatrooms
         ports:
@@ -14,7 +14,7 @@ services:
         build: ./healthcheck
         volumes:
             - ./healthcheck:/usr/src/app
-            - ./teahaz/src:/usr/src/teahaz
+            - ./teahouse/src:/usr/src/teahouse
             - ./storage/logs:/usr/src/app/storage/logs
             - ./storage/chatrooms:/usr/src/app/storage/chatrooms
 

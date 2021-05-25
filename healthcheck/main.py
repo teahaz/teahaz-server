@@ -18,9 +18,9 @@ from on_error import on_error
 
 # adding teahaz paths so we can import files
 if os.getenv('PROD') == 'true':
-    teahazpath = '/usr/src/teahaz'
+    teahazpath = '/usr/src/teahouse'
 else:
-    teahazpath = '../teahaz/src'
+    teahazpath = '../teahouse/src'
 sys.path.insert(1, teahazpath)
 # os.chdir(teahazpath)
 
