@@ -149,10 +149,14 @@ def add_user(username, email, nickname, password, chatroomId):
 
 def process_invite(json_data, chatroomId):
     username   = json_data.get('username')
+    print('username: ',username , type(username))
     email      = json_data.get('email')
     nickname   = json_data.get('nickname')
+    print('nickname: ',nickname , type(nickname))
     password   = json_data.get('password')
+    print('password: ',password , type(password))
     inviteId   = json_data.get('inviteId')
+    print('inviteId: ',inviteId , type(inviteId))
 
 
 

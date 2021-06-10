@@ -4,6 +4,7 @@ import os
 import json
 import string
 import base64
+import teahaz
 
 
 def encode(a):
@@ -37,7 +38,7 @@ global chatroom_id
 # url = "https://butorhaz.hopto.org"
 # url = "http://localhost:13337"
 # url = "http://localhost:80"
-url = "https://teahaz.co.uk"
+url = "https://teahaz.co.uk/"
 # url = "http://192.168.1.75"
 
 
@@ -219,6 +220,26 @@ def send_message():
 
     return res.text
 
+def send_loop():
+    url = globals()['url'] + "/api/v0/message/" + globals()['chatroom_id'] +'/'
+
+    i = 0
+    while 1:
+        message = str(i)
+
+        a = {
+            "username": globals()['username'],
+            "type": "text",
+            "message": encode(message)
+        }
+
+        res = globals()['s'].post(url, json=a)
+        print("status_code: ", res.status_code)
+        
+        i +=1
+
+    return res.text
+
 
 def send_n():
     url = globals()['url'] + "/api/v0/message/"
@@ -367,7 +388,7 @@ def use_invite():
             "username": globals()['username'],
             "nickname": input('nickname: '),
             "email": globals()['email'],
-            # "nickname": input('nickname: '),
+            "nickname": input('nickname: '),
             "password": input('password: '),
             "inviteId": input("invite: ")
             }
@@ -390,6 +411,8 @@ while 1:
         print(get_file())
     elif choice == 'send':
         print(send_message())
+    elif choice == 'sendl':
+        print(send_loop())
     elif choice == 'get':
         print(get())
     elif choice == 'gid':
