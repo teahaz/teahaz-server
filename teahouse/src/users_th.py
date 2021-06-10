@@ -137,7 +137,9 @@ def add_user(username, email, nickname, password, chatroomId):
                                     replyId      = None,
                                     username     = username,
                                     message_type = 'system',
-                                    message      = security.encode(json.dumps({ "action": "New user registered!", }))
+                                    message      = json.dumps({
+                                            "action": "New user registered!",
+                                        })
                                     )
     if status_code != 200:
         return response, status_code
@@ -227,7 +229,9 @@ def process_invite(json_data, chatroomId):
                                     replyId      = None,
                                     username     = username,
                                     message_type = 'system',
-                                    message      = security.encode(json.dumps({ "action": "New user registered!", }))
+                                    message      = json.dumps({
+                                            "action": "New user registered!",
+                                        })
                                     )
     if status_code != 200:
         return response, status_code

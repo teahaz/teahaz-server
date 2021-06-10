@@ -13,6 +13,7 @@ from logging_th import logger as log
 
 
 
+#
 
 def create_chatroom(json_data):
     username      = json_data.get('username')
@@ -128,11 +129,11 @@ def create_invite(json_data, chatroomId):
                                     replyId      = None,
                                     username     = username,
                                     message_type = 'system',
-                                    message      = security.encode(json.dumps({
+                                    message      = json.dumps({
                                             "action": "Created invite",
                                             "uses": uses,
                                             "expr_time": expr_time
-                                        }))
+                                        })
                                     )
     if status_code != 200:
         return response, status_code
@@ -304,7 +305,7 @@ def message_delete(json_data, chatroomId):
                                 replyId      = None,
                                 username     = username,
                                 message_type = 'delete',
-                                message      = security.encode(messageId)
+                                message      = messageId
                                 )
 
     return response, status_code

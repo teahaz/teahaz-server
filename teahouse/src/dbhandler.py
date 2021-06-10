@@ -727,7 +727,7 @@ def delete_message(messageId, chatroomId):
 
 
 
-def check_databses():
+def check_databases():
     log(level='log', msg='running system checks')
 
 
@@ -738,7 +738,7 @@ def check_databses():
     if not os.path.isdir("storage/"):
         try:
             log(level='warning', msg='[health check] creating storage folder')
-            os.mkdir("storage")
+            # os.mkdir("storage")
 
         except Exception as e:
             return f"could not create storage folder: {e}\n Please make sure you have to correct permissions", 500
@@ -758,35 +758,35 @@ def check_databses():
         if not os.path.exists(f"storage/chatrooms/{chatroom}/main.db"):
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" does not have a database file')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} does not have a database file", 200
+            return f"{chatroom} does not have a database file", 500
 
         sql = "SELECT * FROM users"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
         sql = "SELECT * FROM invites"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatrom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
         sql = "SELECT * FROM messages"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
         sql = "SELECT * FROM settings"
         data, status_code = database_execute(chatroom, sql, ())
         if status_code != 200:
             log(level="error", msg=f'[healthcheck/1] || chatroom: "{chatroom}" database is corrupted: {data}')
             # returning 200 bc this is not bad enough to kill the server
-            return f"{chatroom} database is corrupted: {data}", 200
+            return f"{chatroom} database is corrupted: {data}", 500
 
 
 
