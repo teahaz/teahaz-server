@@ -169,7 +169,6 @@ class chatrooms(Resource):
             else:
                 return cookie, status_code
 
-
         return chat_obj, status_code
 
 
@@ -213,8 +212,8 @@ class invites(Resource):
 
 
 
-api.add_resource(chatrooms, '/api/v0/chatroom/', '/api/v0/chatroom/')
-api.add_resource(login, '/api/v0/login/<chatroomId>', '/api/v0/login/<chatroomId>')
+api.add_resource(chatrooms, '/api/v0/chatroom', '/api/v0/chatroom/')
+api.add_resource(login, '/api/v0/login/<chatroomId>', '/api/v0/login/<chatroomId>/')
 api.add_resource(invites, '/api/v0/invite/<chatroomId>', '/api/v0/invite/<chatroomId>/')
 
 api.add_resource(files, '/api/v0/file/<chatroomId>', '/api/v0/file/<chatroomId>')

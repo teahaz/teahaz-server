@@ -45,7 +45,7 @@ def set_cookie(json_data, chatroomId):
     cookie = security.gen_uuid()
 
 
-    # store the cookies in teh database
+    # store the cookies in the database
     response, status = database.store_cookie(chatroomId, username=username, email=email_ad, new_cookie=cookie)
 
 

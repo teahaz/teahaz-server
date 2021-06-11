@@ -21,7 +21,7 @@ def create_chatroom(json_data):
     nickname      = json_data.get('nickname')
     password      = json_data.get('password')
     chatroom_name = json_data.get('chatroom_name')
-    chatroomId    = str(uuid.uuid1())
+    chatroomId    = security.gen_uuid()
 
 
     # make sure client sent all needed data
