@@ -2,45 +2,44 @@ import os
 import sys
 import time
 
-# the class stays here so we can easily add new templates if needed
-class colours:
-    PURPLE = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    RESET = '\033[0m'
+
+class logger:
+    def __init__(self):
+        self._PURPLE = '\033[95m'
+        self._BLUE = '\033[94m'
+        self._CYAN = '\033[96m'
+        self._GREEN = '\033[92m'
+        self._YELLOW = '\033[93m'
+        self._RED = '\033[91m'
+        self._BOLD = '\033[1m'
+        self._UNDERLINE = '\033[4m'
+        self._RESET = '\033[0m'
+
+    def printf(self, function_name, prefix, message):
+        msg = prefix
+        msg += "[ success ]".ljust(12, " ")
+        msg += f" {time.time()}".ljust(21, " ")
+        msg += f"  ||  [{function_name.__module__}/{function_name.__name__}]  ||  "
+        msg += message
+        msg += self._RESET
+
+        print(msg, file=sys.stderr)
 
 
-# templates should be put on the begining of a line that is printed
-## print(colour_templates['warning'] + "string")
-colour_templates = {
-        # increasing level of severity
-        "success": colours.RESET + colours.BOLD + colours.GREEN +colours.UNDERLINE,
-        "log": colours.RESET + colours.BOLD,
-        "warning": colours.RESET + colours.YELLOW,
-        "error": colours.RESET + colours.RED + colours.UNDERLINE,
-        "fail": colours.RESET + colours.BOLD + colours.RED,
-        }
+    def succ(self, function_name, message: str):
+        prefix = self._RESET + self._BOLD + self._GREEN + self._UNDERLINE
+        self.printf(function_name=function_name, prefix=prefix, message=message)
+
+    def log(self, function_name, message: str):
+        prefix = self._RESET
+        self.printf(function_name=function_name, prefix=prefix, message=message)
+
+    def warn(self, function_name, message: str):
+        prefix = self._RESET + self._YELLOW
+        self.printf(function_name=function_name, prefix=prefix, message=message)
 
 
-
-
-# main logger function
-def logger(level='log', msg=""):
-
-    if not os.path.exists('./logs'):
-        os.mkdir('./logs')
-
-    # level = the type of log [colours, etc]
-    level = level.lower()
-    msg_log = colour_templates[level] + f"[ {level} ]".ljust(12, " ") + f" {time.time()}".ljust(21, " ") + f"||  {msg}" + colours.RESET
-    print(msg_log, file=sys.stderr)
-
-    # keep all logs in a file for later
-    with open("logs/logfile", "a+")as outfile:
-        outfile.write(msg_log+'\n')
+    def error(self, function_name, message: str):
+        prefix = self._RESET + self._BOLD + self._RED
+        self.printf(function_name=function_name, prefix=prefix, message=message)
 
