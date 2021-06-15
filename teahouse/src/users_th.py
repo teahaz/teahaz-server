@@ -32,6 +32,19 @@ def add_user(username: str, password: str, chatroomID: str):
 
 
 
+def auth_user(chatroomID: str, userID: str, password: str):
+    """ Authenticate user """
+
+    info, status = database.fetch_user(chatroomID, userID)
+    if status != 200:
+        return info, status
+
+    if not security.checkpw(password, info['password']):
+        return "Password is incorrect", 401
+
+    return "Logged in!", 200
+
+
 
 def set_cookie(chatroomID: str, userID: str):
     """ Generate and store a cookie for a user """
@@ -44,17 +57,24 @@ def set_cookie(chatroomID: str, userID: str):
     return cookie, 200
 
 
+def check_cookie(chatroomID: str, cookie: str, userID: str):
 
+    print("its time")
+    if not userID or not cookie:
+        print('cookie: ',cookie , type(cookie))
+        print('userID: ',userID , type(userID))
+        return False
 
-def auth_user(chatroomID: str, userID: str, password: str):
-    """ Authenticate user """
-
-    info, status = database.fetch_user(chatroomID, userID)
+    cookies, status = database.get_cookies(chatroomID, userID, cookie)
     if status != 200:
-        return info, status
+        return False
 
-    if not security.checkpw(password, info['password']):
-        return "Password is incorrect", 401
 
-    return "Logged in!", 200
+    for i in cookies:
+        print(i)
+        if i == cookie:
+            return True
+
+    return False
+
 

@@ -21,9 +21,7 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.login({
-        cookie: '#'
-    })
+    await conv1.login({ })
     .then((res) =>
         {
             console.log(res.headers)

@@ -241,6 +241,10 @@ def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, mt
     return messageID, 200
 
 
+
+
+
+
 def store_cookie(chatroomID: str, userID: str, cookie: str):
     """ Writes a cookie to the database """
 
@@ -254,4 +258,20 @@ def store_cookie(chatroomID: str, userID: str, cookie: str):
     db.commit()
     db.close()
     return "OK", 200
+
+
+def get_cookies(chatroomID: str, userID: str, cookie: str):
+    """ Get all cookies associated with a user. """
+
+    db = database(chatroomID)
+
+    cookies, status = db.select("cookie", "cookies", "userID=?", (userID,))
+    if status != 200:
+        return "Internal database error while getting cookies.", 500
+
+    # get rid of useless tuple
+    cookies = cookies[0]
+
+    return cookies, 200
+
 

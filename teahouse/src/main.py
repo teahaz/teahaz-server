@@ -72,6 +72,15 @@ class chatrooms(Resource):
         return res
 
 
+class invites(Resource):
+    def get(self, chatroomID):
+        if not request.get_json(): return "no data sent", 401
+        if not chatroomID: return "ChatroomId was not part of the path", 400
+        if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.headers.get('userID')):
+            return "Client not logged in. (cookie or userID was not sent)", 401
+
+        return "OK", 200
 
 
 
