@@ -1,4 +1,5 @@
 import os
+import time
 import sqlite3
 
 import security_th as security
@@ -14,7 +15,11 @@ log = logger()
 class database():
     """ Abstraction over database functions """
     def __init__(self, chatroomID: str):
-        if not os.path.exists('storage/chatrooms/{chatroomID}'):
+
+        # cant return in __init__ but make sure that invalid uuid's are not being used
+        assert(security.is_uuid(chatroomID))
+
+        if not os.path.exists(f'storage/chatrooms/{chatroomID}'):
             self.exists = False
         else:
             self.exists = True
@@ -30,7 +35,7 @@ class database():
             return cursor, 200
 
         except Exception as e:
-            log.error(self, "Database operation failed: {e}")
+            log.error(self._run, f"Database operation failed: {e}")
             return f"Database operation failed: {e}", 500
 
 
@@ -42,6 +47,10 @@ class database():
         """
         self.db.close()
 
+    def commit(self):
+        """ Saves changes to a database """
+        self.db.commit()
+
 
     def create(self, table: str, values: list):
         """ Wrapper around creating tables """
@@ -49,7 +58,7 @@ class database():
         values = str(values).strip('[').strip(']')
         statement = f"CREATE TABLE {table} ({values})"
 
-        cursor, status= self._run(statement)
+        status= self._run(statement)[1]
 
         if status != 200:
             # we can raise here because this will only ever be called internally with internal arguments
@@ -69,7 +78,7 @@ class database():
         return data, 200
 
 
-    def insert(self, table: str, values: list):
+    def insert(self, table: str, values: tuple):
         """ Wrapper around adding data to the database """
 
         # Get (?, ?, ?) like syntax
@@ -78,12 +87,7 @@ class database():
 
         # run
         statement = f"INSERT INTO {table} VALUES {row}"
-        return self._run(statement, encoded_values)
-
-
-
-
-
+        return self._run(statement, values)
 
 
 
@@ -93,7 +97,7 @@ class database():
 
 def init_chat(chatroomID: str, chat_name: str):
     """ Create chatroom database and add tables """
-    log.log(init_chat, "Creating chatroom {chatroomID}")
+    log.log(init_chat, f"Creating chatroom {chatroomID}")
 
     # Get db object
     db = database(chatroomID)
@@ -102,7 +106,7 @@ def init_chat(chatroomID: str, chat_name: str):
 
 
     # add tables
-    db.create('settings',    ['sname',   'svalue'])
+    db.create('settings',    ['sname',   'svalue', 'stype'])
     db.create('invites',     ['inviteID', 'userID', 'classID', 'bestbefore', 'uses'])
 
     db.create('users',       ['userID',  'username', 'password'])
@@ -115,36 +119,139 @@ def init_chat(chatroomID: str, chat_name: str):
     db.create('channels',    ['channelID', 'channelname',  'public'])
     db.create('permissions', ['channelID', 'classID', 'r', 'w', 'x'])
 
-    db.create('messages',    ['messageID', 'channelID', 'userID', 'replyID', 'type', 'data'])
+    db.create('messages',    ['messageID', 'channelID', 'userID', 'replyID', 'mtime', 'mtype', 'data'])
     db.create('files',       ['fileID', 'filename', 'size'])
 
 
-    # Add chat_name to settings
-    status = db.insert('settings', ['chat_name', chat_name])[1]
-    if status != 200:
-        return "Failed to crete chatroom. Error while setting chat_name.", 500
-
-
     # Add 'default' to channels
-    status = db.insert('channels', [security.gen_uuid(), 'default', True])
+    channelID = security.gen_uuid()
+    assert(db.insert('channels', (channelID, 'default', True))[1] == 200)
+
+    # Add default settings
+    assert(db.insert('settings', ('chat_name', chat_name, "str"))[1] == 200)
+    assert(db.insert('settings', ('min_password_length', 10, "int"))[1] == 200)
+
+    db.commit()
+    db.close()
+    return channelID, 200
+
+
+
+def check_settings(chatroomID: str, setting_name: str):
+    """ From settings table fetch setting value corresponding to supplied setting name """
+
+    db = database(chatroomID)
+
+    data, status = db.select('svalue', 'settings', 'sname=?', (setting_name,))
     if status != 200:
-        return "Failed to crete chatroom. Error while creating default chatroom.", 500
+        return data, status
+
+    if len(data) < 1:
+        return f"Setting '{setting_name}' does not exist!", 404
 
 
-    # Add 'admin' class
-    status = db.insert('classes', [security.gen_uuid(), 'admin'])
+    db.close()
+    return data[0][0], 200
+
+
+
+def fetch_user(chatroomID, userID):
+    """ Fetch all stored data on a specific user """
+
+    # get db
+    db = database(chatroomID)
+
+    # get info on user
+    info, status = db.select("*", "users", "True")
     if status != 200:
-        return "Failed to crete chatroom. Error while creating 'admin' class.", 500
+        return "Internal database error, failed to stat user.", 500
+
+    # db responds with a tuple
+    info = info[0]
+
+    retobj = {
+            "userID": info[0],
+            "username": info[1],
+            "password": info[2]
+            }
+
+    return retobj, 200
 
 
+
+
+def write_user(chatroomID: str, username: str, password: str):
+    """ write user to database """
+
+    # hash password
+    password = security.hashpw(password)
+
+
+    # get db
+    db = database(chatroomID)
+
+
+    # Check if there are any other users already in the chatroom.
+    # If this is the first user then they get uid 0,
+    # else they get a randomly generated uuid
+    users, status = db.select("*", "users", "True")
+    if status != 200:
+        log.error(write_user, f"Internal database error while checking users: {users}")
+        return "Internal database error while checking users", status
+
+
+    # assign userID
+    if len(users) < 1:
+        userID = "0"
+    else:
+        userID = security.gen_uuid()
+
+
+    # save details of user
+    res, status = db.insert('users', (userID, username, password))
+    if status != 200:
+        log.warn(write_user, f"Failed to add user to database:\n {res}\n\n{userID=}\n{username=}\n{password=}")
+        return f"Internal database error while saving user credientials.", status
+
+
+    db.commit()
+    db.close()
+    return userID, 200
+
+
+
+def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, mtype: str, data: str):
+    """ Write message into the messages table """
+
+    # get db
+    db = database(chatroomID)
+
+    # get id and time
+    mtime = time.time()
+    messageID = security.gen_uuid()
+
+
+    # write message
+    status = db.insert("messages", (messageID, channelID, userID, replyID, mtime, mtype, data))[1]
+    if status != 200:
+        return "Failed to write message.", 500
+
+    db.commit()
+    db.close()
+    return messageID, 200
+
+
+def store_cookie(chatroomID: str, userID: str, cookie: str):
+    """ Writes a cookie to the database """
+
+    db = database(chatroomID)
+
+    status = db.insert('cookies', (userID, cookie))[1]
+    if status != 200:
+        return "Internal database error while setting cookie.", 500
+
+
+    db.commit()
+    db.close()
     return "OK", 200
-
-
-
-
-
-
-
-
-
 

@@ -1,3 +1,5 @@
+""" Functions almost directly exposed to users """
+
 import users_th as users
 import dbhandler as database
 import security_th as security
@@ -11,6 +13,33 @@ log = logger()
 
 
 
+def login(chatroomID: str, json_data: dict):
+    """ Login to chatroom """
+
+    # get arguments
+    userID   = json_data.get('userID')
+    password = json_data.get('password')
+
+    # Make sure all arguments are given
+    required = ['userID', 'password']
+    for i, a in enumerate([userID, password]):
+        if a == None:
+            return f"No value supplied for required field: {required[i]}", 400
+
+    # authenticate user
+    res, status = users.auth_user(chatroomID, userID, password)
+    if status != 200:
+        return res, status
+
+    # These need to be returned for set_cookie.
+    toret = {
+            "chatroomID": chatroomID,
+            "userID": userID
+            }
+    return toret, 200
+
+
+
 def create_chatroom(json_data):
     """ Create a chatroom """
 
@@ -18,6 +47,9 @@ def create_chatroom(json_data):
     username      = json_data.get('username')
     password      = json_data.get('password')
     chatroom_name = json_data.get('chatroom_name')
+
+
+    # generate ID for chatroom
     chatroomID    = security.gen_uuid()
 
 
@@ -36,14 +68,35 @@ def create_chatroom(json_data):
 
 
     # Create and set up main.db in the chatroom folder
-    res, status = database.init_chat(chatroomID, chatroom_name)
+    channelID, status = database.init_chat(chatroomID, chatroom_name)
     if status != 200:
-        log.error(create_chatroom, "Failed to create chatroom database.\n Traceback: {res}")
+        log.error(create_chatroom, f"Failed to create chatroom database.\n Traceback: {res}")
 
         # remove the chatroom folders
         filesystem.remove_chatroom(chatroomID)
-        return res, status
+        return channelID, status
 
 
     # add user to chatroom
+    userID, status = users.add_user(username, password, chatroomID)
+    if status != 200:
+        return userID, status
+
+
+    # add initial message
+    messageID, status = database.write_message(chatroomID, channelID, userID, None, "system", f"Wellcome {username}!")
+    if status != 200:
+        return messageID, status
+
+
+    toret = {
+            "chatroom_name": chatroom_name,
+            "chatroomID": chatroomID,
+            "channelID": channelID,
+            "userID": userID
+            }
+    return toret, 200
+
+
+
 

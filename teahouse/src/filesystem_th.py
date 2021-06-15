@@ -13,17 +13,39 @@ from logging_th import logger
 global log
 log = logger()
 
+def _create_folders():
+    try:
+        if not os.path.exists('storage'):
+            os.mkdir('storage')
+
+        if not os.path.exists('storage/chatrooms'):
+            os.mkdir('storage/chatrooms')
+
+        return "OK", 200
+
+    except Exception as e:
+        log.error(_create_folders, "Failed to create storage folders!")
+        return "Internal server error while setting up storage folders.", 500
+
 
 def create_chatroom_folders(chatroomID):
     """ Create chatroom folders on disc """
-    if os.path.exists(f"storage/{chatroomID}"):
-        return "Internal server error: tried to assing existing chatroom ID", 400
+    if not security.is_uuid(chatroomID):
+        return "Invalid uuid", 400
+
+    # make sure storage folders exist
+    res, status = _create_folders()
+    if status != 200:
+        return res, status
+
+
+    if os.path.exists(f"storage/chatrooms/{chatroomID}"):
+        return "Internal server error: cannot recreate existing chatroom", 400
 
     try:
         os.mkdir(f'storage/chatrooms/{chatroomID}')
         os.mkdir(f'storage/chatrooms/{chatroomID}/uploads')
-        a = open(f"storage/chatrooms/{chatroomID}/main.db", "w+")
-        a.close()
+        open(f"storage/chatrooms/{chatroomID}/main.db", "w+").close()
 
     except Exception as e:
         log.error(create_chatroom_folders, f"Failed to create chatroom folders! Traceback: {e}")
@@ -36,6 +58,9 @@ def create_chatroom_folders(chatroomID):
 
 def remove_chatroom(chatroomID):
     """ Remove chatroom folders from disc """
+    if not security.is_uuid(chatroomID):
+        return "Invalid uuid", 400
+
     try:
         shutil.rmtree(f'storage/chatrooms/{chatroomID}', ignore_errors=True)
 
@@ -44,3 +69,13 @@ def remove_chatroom(chatroomID):
         return "Failed to remove chatroom folders", 500
 
     return "OK", 200
+
+
+
+
+def chatroom_exists(chatroomID):
+    """ Check if chatroomID is valid, and that it exists on disc """
+
+    if not security.is_uuid(chatroomID): return False
+    if not os.path.exists(f'storage/chatrooms/{chatroomID}'): return False
+    return True

@@ -17,7 +17,6 @@ class logger:
 
     def printf(self, function_name, prefix, message):
         msg = prefix
-        msg += "[ success ]".ljust(12, " ")
         msg += f" {time.time()}".ljust(21, " ")
         msg += f"  ||  [{function_name.__module__}/{function_name.__name__}]  ||  "
         msg += message
@@ -27,19 +26,19 @@ class logger:
 
 
     def succ(self, function_name, message: str):
-        prefix = self._RESET + self._BOLD + self._GREEN + self._UNDERLINE
+        prefix = self._RESET + self._BOLD + self._GREEN + self._UNDERLINE + "[ success ]".ljust(12, " ")
         self.printf(function_name=function_name, prefix=prefix, message=message)
 
     def log(self, function_name, message: str):
-        prefix = self._RESET
+        prefix = self._RESET + "[   log   ]".ljust(12, " ")
         self.printf(function_name=function_name, prefix=prefix, message=message)
 
     def warn(self, function_name, message: str):
-        prefix = self._RESET + self._YELLOW
+        prefix = self._RESET + self._YELLOW + "[ warning ]".ljust(12, " ")
         self.printf(function_name=function_name, prefix=prefix, message=message)
 
 
     def error(self, function_name, message: str):
-        prefix = self._RESET + self._BOLD + self._RED
+        prefix = self._RESET + self._BOLD + self._RED + "[  error  ]".ljust(12, " ")
         self.printf(function_name=function_name, prefix=prefix, message=message)
 
