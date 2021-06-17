@@ -10,6 +10,9 @@ services:
         ports:
             - 13337:13337
 
+    storageServer:
+        build: ./storageServer
+
     healthcheck:
         build: ./healthcheck
         volumes:
