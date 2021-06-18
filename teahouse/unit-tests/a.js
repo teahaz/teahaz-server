@@ -1,4 +1,4 @@
-const chatroom = require('./teahaz.js')
+const chatroom = require('./teahaz.js').chatroom
 
 
 
@@ -10,13 +10,13 @@ const main = async(conv1) =>
     })
     .then((res) =>
         {
-            console.log(res.headers)
+            // console.log(res.headers)
             console.log(conv1)
             console.log("✅ Creating chatroom successful!");
         })
     .catch((res) =>
         {
-            console.log(res);
+            // console.log(res);
             console.error("❌ Creating chatroom failed!");
         });
 
@@ -24,7 +24,7 @@ const main = async(conv1) =>
     await conv1.login({ })
     .then((res) =>
         {
-            console.log(res.headers)
+            // console.log(res.headers)
             console.log(conv1)
             console.log("✅ Successfully logged in!");
         })
@@ -32,6 +32,19 @@ const main = async(conv1) =>
         {
             console.log(res);
             console.error("❌ Login in failed!");
+        });
+
+    await conv1.check_login()
+    .then((res) =>
+        {
+            // console.log(res.headers)
+            console.log(conv1)
+            console.log("✅ Checked login!");
+        })
+    .catch((res) =>
+        {
+            // console.log(res);
+            console.error("❌ Checking login failed!");
         });
 }
 

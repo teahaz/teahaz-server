@@ -119,7 +119,7 @@ def init_chat(chatroomID: str, chat_name: str):
     db.create('channels',    ['channelID', 'channelname',  'public'])
     db.create('permissions', ['channelID', 'classID', 'r', 'w', 'x'])
 
-    db.create('messages',    ['messageID', 'channelID', 'userID', 'replyID', 'mtime', 'mtype', 'data'])
+    db.create('messages',    ['messageID', 'channelID', 'userID', 'replyID', 'keyID', 'mtime', 'mtype', 'data'])
     db.create('files',       ['fileID', 'filename', 'size'])
 
 
@@ -155,29 +155,28 @@ def check_settings(chatroomID: str, setting_name: str):
 
 
 
-def fetch_user(chatroomID, userID):
-    """ Fetch all stored data on a specific user """
+
+
+
+def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, keyID: str, mtype: str, data: str):
+    """ Write message into the messages table """
 
     # get db
     db = database(chatroomID)
 
-    # get info on user
-    info, status = db.select("*", "users", "True")
+    # get id and time
+    mtime = time.time()
+    messageID = security.gen_uuid()
+
+
+    # write message
+    status = db.insert("messages", (messageID, channelID, userID, replyID, keyID, mtime, mtype, data))[1]
     if status != 200:
-        return "Internal database error, failed to stat user.", 500
+        return "Failed to write message.", 500
 
-    # db responds with a tuple
-    info = info[0]
-
-    retobj = {
-            "userID": info[0],
-            "username": info[1],
-            "password": info[2]
-            }
-
-    return retobj, 200
-
-
+    db.commit()
+    db.close()
+    return messageID, 200
 
 
 def write_user(chatroomID: str, username: str, password: str):
@@ -220,27 +219,56 @@ def write_user(chatroomID: str, username: str, password: str):
 
 
 
-def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, mtype: str, data: str):
-    """ Write message into the messages table """
+def fetch_channel(chatroomID: str, channelID: str, userID: str):
+    """
+        Checks if channel exists, and gets the name and access information from the users perspective.
+
+        If access information is not needed then set the userID to 0 to avoid wasting time on finding it out.
+    """
+
 
     # get db
     db = database(chatroomID)
 
-    # get id and time
-    mtime = time.time()
-    messageID = security.gen_uuid()
-
-
-    # write message
-    status = db.insert("messages", (messageID, channelID, userID, replyID, mtime, mtype, data))[1]
+    # get info on chatroom
+    info, status = db.select("*", "channels", "channelID=?", (channelID,))
     if status != 200:
-        return "Failed to write message.", 500
-
-    db.commit()
-    db.close()
-    return messageID, 200
+        return "Internal database error, failed to stat channel.", 500
 
 
+    # check if channel exists
+    if len(info) < 1:
+        return "Channel does not exist", 404
+
+
+def fetch_user(chatroomID: str, userID: str):
+    """ Check if user exists, and get all information about them"""
+
+    # get db
+    db = database(chatroomID)
+
+    # get info on user
+    info, status = db.select("*", "users", "userID=?", (userID,))
+    if status != 200:
+        return "Internal database error, failed to stat user.", 500
+
+
+    # check if user exists
+    if len(info) < 1:
+        return "User does not exist", 404
+
+
+    # db responds with a tuple
+    info = info[0]
+
+
+    retobj = {
+            "userID": info[0],
+            "username": info[1],
+            "password": info[2]
+            }
+
+    return retobj, 200
 
 
 
@@ -270,8 +298,12 @@ def get_cookies(chatroomID: str, userID: str, cookie: str):
         return "Internal database error while getting cookies.", 500
 
     # get rid of useless tuple
-    cookies = cookies[0]
+    no_tuple_cookies = []
+    for i in cookies:
+        no_tuple_cookies.append(i[0])
 
-    return cookies, 200
+    return no_tuple_cookies, 200
+
+
 
 

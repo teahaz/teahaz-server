@@ -61,8 +61,8 @@ def check_cookie(chatroomID: str, cookie: str, userID: str):
 
     print("its time")
     if not userID or not cookie:
-        print('cookie: ',cookie , type(cookie))
         print('userID: ',userID , type(userID))
+        print('cookie: ',cookie , type(cookie))
         return False
 
     cookies, status = database.get_cookies(chatroomID, userID, cookie)
