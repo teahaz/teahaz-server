@@ -12,6 +12,11 @@ services:
 
     storageServer:
         build: ./storageServer
+        volumes:
+            - ./storageServer/src:/usr/src/app
+            - ./storage/userdata:/usr/src/app/storage/userdata
+        ports:
+            - 13337:13337
 
     healthcheck:
         build: ./healthcheck
