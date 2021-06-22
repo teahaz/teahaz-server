@@ -54,7 +54,7 @@ class login(Resource):
         if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
 
         if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.headers.get('userID')):
-            return "Client not logged in. (cookie or userID was not sent, or was invalid)", 401
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
 
         return "Already logged in", 200
 
@@ -82,6 +82,30 @@ class chatrooms(Resource):
         return res
 
 
+class channels(Resource):
+    def get(self, chatroomID):
+        """ Get details about all channels that the user can read """
+        if not request.headers: return "no data sent", 401
+        if not chatroomID: return "ChatroomId was not part of the path", 400
+        if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.headers.get('userID')):
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
+
+        return api.get_channels(chatroomID, request.headers)
+
+    def post(self, chatroomID):
+        """ Creating a new channel """
+        if not request.get_json(): return "no data sent", 401
+        if not chatroomID: return "ChatroomId was not part of the path", 400
+        if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.get_json().get('userID')):
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
+
+        return api.create_channel(chatroomID, request.get_json())
+
+
 
 class messages(Resource):
     def post(self, chatroomID):
@@ -90,16 +114,28 @@ class messages(Resource):
         if not chatroomID: return "ChatroomId was not part of the path", 400
         if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
 
-        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.headers.get('userID')):
-            return "Client not logged in. (cookie or userID was not sent, or was invalid)", 401
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.get_json().get('userID')):
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
 
         return api.send_message(chatroomID, request.get_json())
 
+    def get(self, chatroomID):
+        """ Get a message """
+        if not request.headers: return "no data sent", 401
+        if not chatroomID: return "ChatroomId was not part of the path", 400
+        if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.headers.get('userID')):
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
+
+        return api.get_messages(chatroomID, request.headers)
 
 
-restful.add_resource(chatrooms, '/api/v0/chatroom',              '/api/v0/chatroom/')
-restful.add_resource(login,     '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')
-restful.add_resource(messages,  '/api/v0/messages/<chatroomID>', '/api/v0/messages/<chatroomID>/')
+
+restful.add_resource(chatrooms,'/api/v0/chatroom',              '/api/v0/chatroom/')
+restful.add_resource(login,    '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')
+restful.add_resource(channels, '/api/v0/channels/<chatroomID>', '/api/v0/channels/<chatroomID>/')
+restful.add_resource(messages, '/api/v0/messages/<chatroomID>', '/api/v0/messages/<chatroomID>/')
 
 
 if __name__ == "__main__":

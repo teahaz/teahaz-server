@@ -1,5 +1,7 @@
 """ Functions almost directly exposed to users """
 
+import time
+
 import users_th as users
 import dbhandler as database
 import security_th as security
@@ -10,6 +12,9 @@ import filesystem_th as filesystem
 from logging_th import logger
 global log
 log = logger()
+
+
+
 
 
 def create_chatroom(json_data):
@@ -40,13 +45,21 @@ def create_chatroom(json_data):
 
 
     # Create and set up main.db in the chatroom folder
-    channelID, status = database.init_chat(chatroomID, chatroom_name)
+    channel_obj, status = database.init_chat(chatroomID, chatroom_name)
     if status != 200:
         log.error(create_chatroom, f"Failed to create chatroom database.\n Traceback: {res}")
 
         # remove the chatroom folders
         filesystem.remove_chatroom(chatroomID)
-        return channelID, status
+        return channel_obj, status
+
+
+    # channel_obj is structured like:
+    # {
+    #         chatroom_name: "default",
+    #         channelID: "id"
+    #         }
+    channelID = channel_obj['channelID']
 
 
     # add user to chatroom
@@ -64,11 +77,17 @@ def create_chatroom(json_data):
     toret = {
             "chatroom_name": chatroom_name,
             "chatroomID": chatroomID,
-            "channelID": channelID,
+            "channels": [
+                {
+                    "channel_name": 'default',
+                    "channelID": channelID,
+                    "public": True,
+                    "permissions": { "r": True, "w": True, "x": True }
+                    }
+                ],
             "userID": userID
             }
     return toret, 200
-
 
 def login(chatroomID: str, json_data: dict):
     """ Login to chatroom """
@@ -96,6 +115,78 @@ def login(chatroomID: str, json_data: dict):
     return toret, 200
 
 
+
+
+def get_channels(chatroomID: str, json_data: dict):
+    """ Get all chatrooms, and their permissions """
+
+    # get arguments
+    # Dont have to check userID as its needed for authentication,
+    #   and it will have already been checked
+    userID = json_data.get('userID')
+
+
+    # get all channels that the user can read
+    channels, status = database.get_readable_channels(chatroomID, userID)
+    if status != 200: return channels, status
+
+
+    # Get permissions for channels.
+    # This is not strictly needed as all channels
+    #   in this list can be read, but I think it
+    #   provides the user with some useful information.
+    channels_list_with_perms = []
+    for channel in channels:
+        channel, status = database.get_channel_permissions(chatroomID, channel['channelID'], userID)
+        if status != 200: return channels, status
+
+        channels_list_with_perms.append(channel)
+
+
+    return channels_list_with_perms, 200
+
+def create_channel(chatroomID: str, json_data: dict):
+    """ Create a channel """
+
+    # get arguments
+    # Dont have to check userID as its needed for authentication,
+    #   and it will have already been checked
+    userID = json_data.get('userID')
+
+    channel_name = json_data.get('channel_name')
+    is_public = json_data.get('public')
+
+    # check some data
+    if not channel_name:
+        return "You must specify a channel_name!", 400
+    if type(is_public) != bool:
+        return "Value for 'public_channel' has to be boolian!", 400
+
+
+    # NOTE currently only the chatroom constructor can add channels,
+    #   we should probably change this, and add modifyable classes like discord has.
+    if userID != '0':
+        return "You do not have permission to perform this action.\
+                    Currently only the chatroom constructor can modify settings.\
+                    (this will probably change in the future)", 403
+
+
+    # save channel in db
+    channelID, status = database.add_channel(chatroomID, channel_name, is_public)
+    if status != 200:
+        return channelID, status
+
+
+    return {
+            "channelID": channelID,
+            "channel_name": channel_name,
+            "public": is_public,
+            "permissions": { "r": True, "w": True, "x": True }
+            }, 200
+
+
+
+
 def send_message(chatroomID: str, json_data: dict):
     """ Save message sent from user """
 
@@ -119,16 +210,78 @@ def send_message(chatroomID: str, json_data: dict):
 
     # Validate user input
     values = ["replyID", "channelID" ,"userID"] # , "keyID" ]
-    for i, a in enumerate([replyID, channelID, userID]):
-        if not security.is_uuid(a):
+                                                # If uid is 0 then you dont need to check it.
+    for i, a in enumerate([replyID, channelID, (userID if userID != '0' else None)]):
+        if a != None and not security.is_uuid(a):
             return f"Value for {values[i]} is not a valid ID!", 400
 
 
     # Make sure message is of allowed type
-    if mtext != 'text':
-        return "Only messages with type 'text' are permitted for this method!"
+    if mtype != 'text':
+        return "Only messages with type 'text' are permitted for this method!", 400
+
+
+    # users should not be able to send empty messages
+    if len(mtext) < 1:
+        return "Cannot send empty message", 400
 
 
     # Check if channel exists and that the user has access to it
-    # NOTE kinda need to finish this
-    return database.fetch_channel(chatroomID, channelID, userID)
+    channel_obj, status = database.get_channel_permissions(chatroomID, channelID, userID)
+    if status != 200:
+        return channel_obj, status
+
+
+    # NOTE maybe someone writing should have read permission as well
+    if channel_obj['permissions']['w'] == False:
+        return "You do not have permission to write in this channel!", 403
+
+
+    return database.write_message(chatroomID, channelID, userID, replyID, keyID, 'text', mtext)
+
+def get_messages(chatroomID: str, json_data: dict):
+    """ Get the last x messages since <time> """
+
+    # get data
+    count = json_data.get('count')
+    userID = json_data.get('userID')
+    timebefore = json_data.get('time')
+    channelID = json_data.get('channelID')
+
+
+    # set default values
+    count = (count if count != None else 10)
+    timebefore = (timebefore if timebefore != None else time.time())
+
+
+    # make sure variables have the right type
+    try:
+        count = int(count)
+    except Exception as e:
+        return f"{e}, Could not convert variable 'count' to an integer!"
+
+    try:
+        timebefore = float(count)
+    except Exception as e:
+        return f"{e}, Could not convert variable 'timebefore' to float!"
+
+
+    # if a user specified a channel to get from, then add that into a 1 element list
+    if channelID != None and security.is_uuid(channelID):
+        channels = [channelID]
+
+    # if user did not specify any channel then get a list of readable channels
+    else:
+        channels, status = database.get_readable_channels(chatroomID, userID)
+        if status != 200: return channels, status
+
+
+    # get only the id of each channel
+    channel_ids = []
+    for i in channels:
+        channel_ids.append(i['channelID'])
+
+
+    return database.get_messages(chatroomID, count, timebefore, channel_ids)
+
+

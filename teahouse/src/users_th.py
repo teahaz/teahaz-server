@@ -58,8 +58,6 @@ def set_cookie(chatroomID: str, userID: str):
 
 
 def check_cookie(chatroomID: str, cookie: str, userID: str):
-
-    print("its time")
     if not userID or not cookie:
         print('userID: ',userID , type(userID))
         print('cookie: ',cookie , type(cookie))
@@ -71,7 +69,6 @@ def check_cookie(chatroomID: str, cookie: str, userID: str):
 
 
     for i in cookies:
-        print(i)
         if i == cookie:
             return True
 
