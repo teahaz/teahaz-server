@@ -106,7 +106,6 @@ class channels(Resource):
         return api.create_channel(chatroomID, request.get_json())
 
 
-
 class messages(Resource):
     def post(self, chatroomID):
         """ send message to server """

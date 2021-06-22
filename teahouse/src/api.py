@@ -69,7 +69,7 @@ def create_chatroom(json_data):
 
 
     # add initial message
-    messageID, status = database.write_message(chatroomID, channelID, userID, None, None, "system", f"Wellcome {username}!")
+    messageID, status = database.write_message(chatroomID, channelID, userID, None, None, "system", f"Welcome {username}!")
     if status != 200:
         return messageID, status
 
@@ -256,22 +256,25 @@ def get_messages(chatroomID: str, json_data: dict):
 
     # make sure variables have the right type
     try:
+        # IMPORTANT count has to be checked because it can lead to sqli
         count = int(count)
     except Exception as e:
-        return f"{e}, Could not convert variable 'count' to an integer!"
+        return f"Could not convert variable 'count' to an integer: {e}", 400
 
     try:
-        timebefore = float(count)
+        timebefore = float(timebefore)
     except Exception as e:
-        return f"{e}, Could not convert variable 'timebefore' to float!"
+        return f"Could not convert variable 'timebefore' to float: {e}", 400
 
 
     # if a user specified a channel to get from, then add that into a 1 element list
+    print('channelID: ',channelID , type(channelID))
     if channelID != None and security.is_uuid(channelID):
         channels = [channelID]
 
     # if user did not specify any channel then get a list of readable channels
     else:
+        print("getting all")
         channels, status = database.get_readable_channels(chatroomID, userID)
         if status != 200: return channels, status
 

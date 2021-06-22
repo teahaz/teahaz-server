@@ -184,22 +184,26 @@ def get_messages(chatroomID: str, count: int, timebefore: float, channels_to_loo
     db = database(chatroomID)
 
 
-    conditions = "channelID = ?" * len(channels_to_look_in)
+    # conditions = "channelID = ?" * len(channels_to_look_in)
+
+    conditions = []
+    for i in channels_to_look_in:
+        conditions.append("channelID = ?")
+    conditions = " OR ".join(conditions)
+    print('conditions: ',conditions , type(conditions))
+
 
     # add all variables to a tuple
     variables = (timebefore,)
     for i in channels_to_look_in:
         variables += (i,)
-    variables += count
+    variables += (count,)
 
 
-    # db._run(f"SELECT * FROM messages WHERE time >= ? AND ({conditions}) ORDER BY time DESC LIMIT ?", variables)
-    print(f"SELECT * FROM messages WHERE time >= ? AND ({conditions}) ORDER BY time DESC LIMIT ?", variables)
+    res, status = db._run(f"SELECT * FROM messages WHERE mtime <= ? AND ({conditions}) ORDER BY mtime DESC LIMIT ?", variables)
+    if status != 200: return res, status
 
-    # this has not yet been tested, going to leave that for the morning. Goodnight
-    return "OK", 200
-
-
+    return helpers.db_format_message(res.fetchall())
 
 
 

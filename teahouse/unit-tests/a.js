@@ -68,6 +68,7 @@ const main = async(conv1) =>
         });
 
 
+
     await conv1.create_channel({
         channel_name: "memes channel",
         public_channel: true
@@ -84,6 +85,7 @@ const main = async(conv1) =>
         });
 
 
+
     await conv1.get_channels()
     .then((res) =>
         {
@@ -96,6 +98,20 @@ const main = async(conv1) =>
             console.log(res, { depth: null });
             console.error("❌ Failed to get channels!");
         });
+
+
+    await conv1.get_messages()
+    .then((res) =>
+        {
+            console.log(res)
+            console.log("✅ Got messages");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to get messages!");
+        });
+
 
     console.log("\n------------------------------------------------------\n")
     console.dir(conv1, { depth: null });
