@@ -97,6 +97,13 @@ class data(Resource):
     def get(self, username):
         """ Download stored file """
 
+        # check data
+        if not username:
+            return "Username was not part of the url", 400
+        if request.headers.get == None:
+            return "No value supplied for required field 'password'"
+
+
         # get data, and cut to max lengths
         username = encode(cut(username, 100))
         password = encode(cut(request.headers.get('password'), 100))
@@ -150,15 +157,16 @@ class checksum(Resource):
     def get(self, username):
         """ Get checksum of file on server """
 
-        # get data
+        # check data
+        if not username:
+            return "Username was not part of the url", 400
+        if request.headers.get == None:
+            return "No value supplied for required field 'password'"
+
+
+        # format, encode data
         username = encode(cut(username, 100))
         password = encode(cut(request.headers.get('password'), 100))
-
-        req = ['username', 'password']
-        for i,a in [username, password]:
-            if a == None:
-                return f"Data for required field '{req[i]} was not supplied'", 400
-
 
 
         # check if file exists
