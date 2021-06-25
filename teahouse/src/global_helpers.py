@@ -30,7 +30,7 @@ def db_format_channel(channel_info: list):
                 "public": channel_info[2]
                 }
     except Exception as e:
-        log.error(db_format_channel, f"Corrupted information in channels table. {e = }")
+        log.error(db_format_channel, f"Corrupted information in channels table. {e}")
         return "Internal database error while fetching channel information", 500
 
 
