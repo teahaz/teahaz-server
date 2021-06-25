@@ -295,3 +295,15 @@ def get_messages(chatroomID: str, json_data: dict):
     return database.get_messages(chatroomID, count, timebefore, channel_ids)
 
 
+
+def get_users(chatroomID: str, json_data: dict):
+    """ Get all users of a chatroom """
+
+    # NOTE maybe later add option to filter by channel, where it only gets users that have permission to view a channel.
+    # ofc that would only be available to users that can already view that channel.
+
+    # NOTE this only gets a single user rn, but as there are no invites yet its not a huge problem.
+    user_data, status = database.fetch_user(chatroomID, '0')
+    return [user_data], 200
+
+

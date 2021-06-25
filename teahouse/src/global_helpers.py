@@ -37,25 +37,29 @@ def db_format_channel(channel_info: list):
     return channel_obj, 200
 
 
-
 def db_format_message(messages: list):
     """ Formats the output of the db response of the messages table """
 
 
-    messages_list = []
-    for message in messages:
+    try:
+        messages_list = []
+        for message in messages:
 
-        message_obj = {
-                "messageID": message[0],
-                "channelID": message[1],
-                "userID"   : message[2],
-                "replyID"  : message[3],
-                "keyID"    : message[4],
-                "send_time": message[5],
-                "type"     : message[6],
-                "data"     : message[7],
-                }
+            message_obj = {
+                    "messageID": message[0],
+                    "channelID": message[1],
+                    "userID"   : message[2],
+                    "replyID"  : message[3],
+                    "keyID"    : message[4],
+                    "send_time": message[5],
+                    "type"     : message[6],
+                    "data"     : message[7],
+                    }
 
-        messages_list.append(message_obj)
+            messages_list.append(message_obj)
+
+    except Exception as e:
+        log.error(db_format_message, f"An error occured while formatting message: {e}.")
+        return f"Internal database error wile formatting messages.", 500
 
     return messages_list, 200

@@ -35,7 +35,7 @@ def add_user(username: str, password: str, chatroomID: str):
 def auth_user(chatroomID: str, userID: str, password: str):
     """ Authenticate user """
 
-    info, status = database.fetch_user(chatroomID, userID)
+    info, status = database.fetch_user_creds(chatroomID, userID)
     if status != 200:
         return info, status
 

@@ -313,36 +313,6 @@ def get_channel_permissions(chatroomID: str, channelID: str, userID: str):
 
     return toret, 200
 
-def fetch_user(chatroomID: str, userID: str):
-    """ Check if user exists, and get all information about them"""
-
-    # get db
-    db = database(chatroomID)
-
-    # get info on user
-    info, status = db.select("*", "users", "userID=?", (userID,))
-    if status != 200:
-        return "Internal database error, failed to stat user.", 500
-
-
-    # check if user exists
-    if len(info) < 1:
-        return "User does not exist", 404
-
-
-    # db responds with a tuple
-    info = info[0]
-
-
-    retobj = {
-            "userID": info[0],
-            "username": info[1],
-            "password": info[2]
-            }
-
-    db.close()
-    return retobj, 200
-
 def can_read(chatroomID: str, channelID: str, userID: str):
     """
         This function implements a small speed boost for public channels in contrast with get_channel_permissions when checking if a user can read
@@ -456,13 +426,111 @@ def write_user(chatroomID: str, username: str, password: str):
     # save details of user
     res, status = db.insert('users', (userID, username, password))
     if status != 200:
-        log.warn(write_user, f"Failed to add user to database:\n {res}\n\n{userID=}\n{username=}\n{password=}")
-        return f"Internal database error while saving user credientials.", status
+        return f"internal database error while saving user credientials.", status
 
+
+    # set user colour
+    res, status = db.insert('colours', (userID, None,None,None))
+    if status != 200:
+        return f"internal database error while setting user colour.", status
 
     db.commit()
     db.close()
     return userID, 200
+
+def fetch_user_creds(chatroomID: str, userID: str):
+    """
+        If user exists, fetch all their username and password.
+
+    return:
+        {
+                "userID": "0 || UUID",
+                "username": "string",
+                "password": "hash"
+                }
+    """
+
+    # get db
+    db = database(chatroomID)
+
+    # get info on user
+    info, status = db.select("*", "users", "userID=?", (userID,))
+    if status != 200:
+        return "Internal database error, failed to stat user.", 500
+
+
+    # check if user exists
+    if len(info) < 1:
+        return "User does not exist", 404
+
+
+    # db responds with a tuple
+    info = info[0]
+
+
+    retobj = {
+            "userID": info[0],
+            "username": info[1],
+            "password": info[2]
+            }
+
+    db.close()
+    return retobj, 200
+
+def fetch_user(chatroomID: str, userID: str):
+    """
+        Fetch all 'public' data about a user.
+        Public data includes all information other than the password or cookies.
+
+        return:
+            {
+                userID: '0' || 'UUID',
+                username: "string",
+                colour: {
+                    r: 0,
+                    g: 0,
+                    b: 0
+                    }
+            }
+    """
+
+    # Re-using functions is neat. :)
+    usercreds, status = fetch_user_creds(chatroomID, userID)
+    if status != 200: usercreds, status
+
+
+    db = database(chatroomID)
+
+    colours, status = db.select("*", "colours", "userID=?", (userID,))
+    if status != 200:
+        return "Internal database error while getting user colours", 500
+
+
+    try:
+        colour = colours[0]
+
+        colour = {
+                "r": colour[1],
+                "g": colour[2],
+                "b": colour[3]
+                }
+
+    except Exception as e:
+        log.error(fetch_user, f"Error occured while formatting colours: {e}")
+        return "Internal server error while formatting colours", 500
+
+
+
+    toret = {
+            "userID": userID,
+            "username": usercreds['username'],
+            "colour": colour
+            }
+
+
+    db.close()
+    return toret, 200
+
 
 
 

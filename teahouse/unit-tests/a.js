@@ -6,21 +6,21 @@ const chatroom = require('./teahaz.js').chatroom
 const main = async(conv1) =>
 {
     // create chatroom
-    // await conv1.create_chatroom({
-    //     chat_name: 'conv1'
-    // })
-    // .then((res) =>
-    //     {
-    //         // console.log(res.headers)
-    //         console.dir(conv1, {depth: null})
-    //         console.log("\n------------------------------------------------------\n")
-    //         console.log("✅ Creating chatroom successful!");
-    //     })
-    // .catch((res) =>
-    //     {
-    //         console.log(res);
-    //         console.error("❌ Creating chatroom failed!");
-    //     });
+    await conv1.create_chatroom({
+        chat_name: 'conv1'
+    })
+    .then((res) =>
+        {
+            // console.log(res.headers)
+            console.dir(conv1, {depth: null})
+            console.log("\n------------------------------------------------------\n")
+            console.log("✅ Creating chatroom successful!");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Creating chatroom failed!");
+        });
 
 
     console.dir(conv1, {depth: null})
@@ -60,7 +60,7 @@ const main = async(conv1) =>
     // {
     //     await conv1.send_message({
     //         message: `ssssssssssss [${i}]`,
-    //         channelID: conv1.channels[5].channelID
+    //         channelID: conv1.channels[0].channelID
     //     })
     //     .then((res) =>
     //         {
@@ -113,17 +113,29 @@ const main = async(conv1) =>
     await conv1.get_messages({
         count: 5,
         // start_time: 1624611669.907108,
-        channelID: conv1.channels[5].channelID
+        channelID: conv1.channels[0].channelID
     })
     .then((res) =>
         {
-            console.log(res)
+            // console.log(res)
             console.log("✅ Got messages");
         })
     .catch((res) =>
         {
             console.log(res);
             console.error("❌ Failed to get messages!");
+        });
+
+    await conv1.get_users()
+    .then((res) =>
+        {
+            console.log(res)
+            console.log("✅ Got users");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to get users!");
         });
 
 
@@ -140,10 +152,10 @@ let conv1 = new chatroom({
     server: 'http://localhost:13337',
 
 
-    // use the same chatroom
-    chatroomID: '9a9acf74-d591-11eb-b454-b42e99435986',
-    userID: '0',
-
+    // // use the same chatroom
+    // chatroomID: '9a9acf74-d591-11eb-b454-b42e99435986',
+    // userID: '0',
+    //
     proxy: {
         host: 'localhost',
         port: 8080
