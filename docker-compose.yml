@@ -16,7 +16,7 @@ services:
             - ./storageServer/src:/usr/src/app
             - ./storage/userdata:/usr/src/app/storage/userdata
         ports:
-            - 13337:13337
+            - 13338:13338
 
     healthcheck:
         build: ./healthcheck
