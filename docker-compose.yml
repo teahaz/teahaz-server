@@ -18,11 +18,11 @@ services:
         ports:
             - 13338:13338
 
-    healthcheck:
-        build: ./healthcheck
-        volumes:
-            - ./healthcheck:/usr/src/app
-            - ./teahouse/src:/usr/src/teahouse
-            - ./storage/logs:/usr/src/app/storage/logs
-            - ./storage/chatrooms:/usr/src/app/storage/chatrooms
-
+    # healthcheck:
+    #     build: ./healthcheck
+    #     volumes:
+    #         - ./healthcheck:/usr/src/app
+    #         - ./teahouse/src:/usr/src/teahouse
+    #         - ./storage/logs:/usr/src/app/storage/logs
+    #         - ./storage/chatrooms:/usr/src/app/storage/chatrooms
+    #
