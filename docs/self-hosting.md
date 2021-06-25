@@ -36,7 +36,7 @@ git clone https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/ /teahouse
 
     * replace `<REPLACE_SERVER_HOSTNAME>` with your hostname
     ```
-    sed -i 's/<REPLACE_SERVER_HOSTNAME>/teahaz.co.uk/g' nginx_config
+    sed -i 's/<REPLACE_SERVER_HOSTNAME>/teahaz.co.uk/g' nginx.conf
     ```
        Where teahaz.co.uk is replaced by your domain name.
 
