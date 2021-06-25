@@ -104,13 +104,19 @@ def login(chatroomID: str, json_data: dict):
 
     # authenticate user
     res, status = users.auth_user(chatroomID, userID, password)
-    if status != 200:
-        return res, status
+    if status != 200: return res, status
+
+
+    # get all channels for the client
+    channels, status = database.get_readable_channels(chatroomID, userID)
+    if status != 200: return channels, status
+
 
     # These need to be returned for set_cookie.
     toret = {
             "chatroomID": chatroomID,
-            "userID": userID
+            "userID": userID,
+            "channels": channels
             }
     return toret, 200
 
@@ -268,13 +274,14 @@ def get_messages(chatroomID: str, json_data: dict):
 
 
     # if a user specified a channel to get from, then add that into a 1 element list
-    print('channelID: ',channelID , type(channelID))
     if channelID != None and security.is_uuid(channelID):
-        channels = [channelID]
+        channels = [{
+                "channelID": channelID
+                }]
+
 
     # if user did not specify any channel then get a list of readable channels
     else:
-        print("getting all")
         channels, status = database.get_readable_channels(chatroomID, userID)
         if status != 200: return channels, status
 

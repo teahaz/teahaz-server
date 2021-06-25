@@ -190,7 +190,6 @@ def get_messages(chatroomID: str, count: int, timebefore: float, channels_to_loo
     for i in channels_to_look_in:
         conditions.append("channelID = ?")
     conditions = " OR ".join(conditions)
-    print('conditions: ',conditions , type(conditions))
 
 
     # add all variables to a tuple
@@ -378,6 +377,16 @@ def can_read(chatroomID: str, channelID: str, userID: str):
 def get_readable_channels(chatroomID: str, userID: str):
     """
         Gets a list of all channels that are readable
+
+        return:
+            [
+                {
+                    channelID: "UUID",
+                    channel_name: "default || something else",
+                    public: True/False || 1/0
+                }
+            ]
+
     """
 
     channels, status = fetch_all_channels(chatroomID)
@@ -389,7 +398,6 @@ def get_readable_channels(chatroomID: str, userID: str):
             new_channels.append(channel)
 
     return new_channels, 200
-
 
 def add_channel(chatroomID: str, channel_name: str, is_public: bool):
     """

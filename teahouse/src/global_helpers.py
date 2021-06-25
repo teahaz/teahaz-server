@@ -44,7 +44,6 @@ def db_format_message(messages: list):
 
     messages_list = []
     for message in messages:
-        print('message: ',message , type(message))
 
         message_obj = {
                 "messageID": message[0],
