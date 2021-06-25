@@ -10,7 +10,7 @@ services:
         ports:
             - 13337:13337
 
-    storageServer:
+    storageserver:
         build: ./storageServer
         volumes:
             - ./storageServer/src:/usr/src/app
