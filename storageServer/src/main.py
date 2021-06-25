@@ -100,7 +100,7 @@ class data(Resource):
         # check data
         if not username:
             return "Username was not part of the url", 400
-        if request.headers.get == None:
+        if request.headers.get('password') == None:
             return "No value supplied for required field 'password'"
 
 
