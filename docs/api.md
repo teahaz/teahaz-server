@@ -1,3 +1,308 @@
+API documentation v0
+====================
+***NOTE:*** This is not proper documentation, but a very basic description of the api.
+**NOTE2:** Typed this on the bus so idk how good quality this all is. :)
+
+
+
+Available methods:
+-----------------
+
+* chatroom
+url: `/api/v0/chatroom`
+
+* login
+url: `/api/v0/login/<chatroomID>`
+
+* users
+url: `/api/v0/users/<chatroomID>`
+
+* channles
+url: `/api/v0/channels/<chatroomID>`
+
+* messages
+url: `/api/v0/messages/<chatroomID>`
+
+
+<br />
+<br />
+
+More detail on some variables.
+-----------------------------
+
+### username:
+type: str
+This used to be the `nickname` of the user, it can be freely changed, and has no meaning on the server-side. However this is the name that should be displayed to other users.
+When talking to the server, a user should be refered to by their `userID`
+
+### password:
+type: str
+The users password.
+
+
+### chatroomID:
+type: UUID (str)
+A unique ID assigned to each chatroom at creation. These are assigned by the server, and returned when the chatroom is created.
+The server does not understand chatroom names and chatrooms should be refered to by their `chatroomID`.
+
+
+### chatroom\_name:
+type: str
+The name of a chatroom. Similar to `username` this is a sort of "nickname" and when talking to the server, the chtroom should be refered to by its `chatroomID`.
+
+
+### channels:
+type: Array of objects (list of dicts) 
+
+A list of channels and all their details.
+Channels on teahaz are similar to channels on discord as in they are sperate streams of messages, athat can have independant permissions for different groups of people.
+
+
+Example of a channel object:
+
+```js
+{
+    {
+        channel_name": "default",
+        channelID": "UUID (str)",
+        public: Bool,
+        permissions: {
+            r: Bool,
+            w: Bool,
+            x: Bool
+            }
+    }
+}
+```
+
+#### channel\_name:
+type: str
+This is the name of the channel. Similarly to all other names this doesnt have a meaning on the server, and the channel should be refered to by its `channelID`.
+
+#### channelID
+type: UUID (str)
+Unique identifier of a channel.
+
+
+#### permissions
+type: object (dict)
+
+This object represents the permissions your user has over a channel. This uses a slightly unix like syntax of useing `r w x` for read write and admin (execute).
+
+* r (read)
+type: Bool
+Permission to read messages.
+This permission also sets whether the user has the ability to see the chatroom, and to interact with it in any way.
+
+* w (write)
+type: Bool
+Permission to write messages.
+
+
+* x (admin)
+type: Bool
+Executive or admin permission.
+This permission allows you to manage other users messages in the channel, as well as some other admin features.
+    (none of this has been implemented yet)
+
+
+#### public
+type: Bool
+Shorthand for rw and x being true.
+**NOTE:** This is only temporary fix for some backend stuff, and will be removed when classes work. Dont really rely on / use it
+
+
+
+
+
+
+
+<br />
+
+other information
+-----------------
+
+
+### headers vs json\_data
+On all `GET` requests json has to be embedded in the request header because the http spec does not allow sending data in those requests. In all other reqests, variables has to be sent in the http data field (or `json=` with python requests)
+
+### \<chatoomID\> at the end of url
+When you see \<chatroomID\> at the end of a url, its because the ID of a chatroom has to be part of the path. (without the \< \> symbols)
+
+eg: ` /api/v0/login/847e5380-d656-11eb-8c72-69e0783d7026 `
+
+
+### Login / register operations taking long
+This is an unfortunate feature of using strong hashing for passwords. Whenever passwords are sent, it takes a couple seconds to save/verify them because of the hashing used. (`bcrypt`)
+
+
+<br />
+<br />
+<br />
+
+
+# More detail on methods
+
+## chatroom
+url: `/api/v0/chatroom`
+
+### post
+action: Create a new chatroom.
+
+needed data: 
+```js
+{
+    username: "string",
+    password: "string",
+    chatroom_name: "string"
+}
+```
+
+example data returned:
+```js
+{
+    chatroom_name: "string",
+    chatroomID: "UUID (str)",
+    channels: [
+            {
+                channel_name: "default",
+                channelID": "UUID (str)",
+                public: Bool,
+                permissions: {
+                    r: Bool,
+                    w: Bool,
+                    x: Bool
+                    }
+            }
+        ],
+    "userID": userID
+    }
+}
+```
+
+
+<br />
+
+
+## login
+url: `/api/v0/login/<chatroomID>`
+
+### post
+action: Login to a chatroom.
+
+***NOTE***: This requires you to already have an account.
+
+needed data:
+```js
+{
+    userID: "UUID (str)",
+    password: "string"
+}
+```
+
+example data returned:
+```js
+{
+    chatroomID: "UUID (str)",
+    userID:  "UUID (str)",
+    channels: [
+        {
+            channel_name": "default",
+            channelID": "UUID (str)",
+            public: Bool,
+            permissions: {
+                r: Bool,
+                w: Bool,
+                x: Bool
+                }
+        },
+        {
+            channel_name": "string",
+            channelID": "UUID (str)",
+            public: Bool,
+            permissions: {
+                r: Bool,
+                w: Bool,
+                x: Bool
+                }
+        }
+    ]
+}
+```
+
+### get
+action: Check if you are logged in.
+
+no data and no useful response, other than the status code :)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
 docs of /api/v0
 ==============
 
@@ -548,3 +853,4 @@ returns a json object with the chatroom name and ID
     "chatroom": "47aec55e-7c27-11eb-87af-b5145ad18bcb"
 }
 ```
+-->
