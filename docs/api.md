@@ -30,6 +30,11 @@ url: `/api/v0/messages/<chatroomID>`
 More detail on some variables.
 -----------------------------
 
+### userID
+type: uuid (str) || '0'
+This is a unique identifier of each user, assigned by the server. In a normal case this is a uuid similar to all other identifiers, however in the case of the classroom constructor this ID will always be `"0" (str)`
+
+
 ### username:
 type: str
 This used to be the `nickname` of the user, it can be freely changed, and has no meaning on the server-side. However this is the name that should be displayed to other users.
@@ -106,6 +111,7 @@ This permission allows you to manage other users messages in the channel, as wel
     (none of this has been implemented yet)
 
 
+
 #### public
 type: Bool
 Shorthand for rw and x being true.
@@ -113,7 +119,38 @@ Shorthand for rw and x being true.
 
 
 
+### colour:
+type: obj (dict)
+The colour object represents a user settable colour.
+The colour is broken down into rgb values, each value can have an integer from 0-255 or `null` for unset.
 
+```js
+        colour: {
+            r: int || null,
+            g: int || null,
+            b: int || null
+            }
+```
+
+These colours cannot be changed **yet**.
+
+### messageID:
+type: UUID (str)
+Unique Identifier of each message
+
+
+### replyID:
+type: UUID (str)
+This is an optional field in the message obj. If set the message is considered as a reply. The replyID has to be set to the `messageID` of another message.
+
+
+### data:
+type: str
+This is the body of a message. It can hold multiple values, including:
+
+* encoded (later encrypted) string in the case of a message sent from one user to another.
+* un-encoded string in the case of a system message from the server
+* UUID in the case of a file, this UUID would be a fileID for a file that got sent to the server.
 
 
 
@@ -126,15 +163,42 @@ other information
 ### headers vs json\_data
 On all `GET` requests json has to be embedded in the request header because the http spec does not allow sending data in those requests. In all other reqests, variables has to be sent in the http data field (or `json=` with python requests)
 
+<br />
+
 ### \<chatoomID\> at the end of url
 When you see \<chatroomID\> at the end of a url, its because the ID of a chatroom has to be part of the path. (without the \< \> symbols)
 
 eg: ` /api/v0/login/847e5380-d656-11eb-8c72-69e0783d7026 `
 
+<br />
 
 ### Login / register operations taking long
 This is an unfortunate feature of using strong hashing for passwords. Whenever passwords are sent, it takes a couple seconds to save/verify them because of the hashing used. (`bcrypt`)
 
+
+<br />
+
+### Cookies.
+All methods that dont set a cookie for the user (ie: different forms of login and register) require a cookie header to be set.
+
+Cookie format: 
+```
+<chatroomID>=<cookie>
+// <cookie> is a UUID assigned by the server
+```
+Most http libraries (like python reqests) should handle cookies automatically.
+
+
+### status codes
+A list of status codes used by the server:
+
+200: OK
+400: user error
+401: not logged in
+403: Permission denied (usually trying to access something your user does not have permission to)
+500: Server error (you did nothing wrong, please report it to me! )
+
+Hopefully I didnt miss anything.
 
 <br />
 <br />
@@ -180,6 +244,7 @@ example data returned:
 }
 ```
 
+**This method sets a cookie**.
 
 <br />
 
@@ -229,11 +294,20 @@ example data returned:
     ]
 }
 ```
+**This method sets a cookie**.
 
 ### get
 action: Check if you are logged in.
 
-no data and no useful response, other than the status code :)
+needed data:
+```js
+    userID: "UUID (str)"
+```
+
+There is no useful data returned by this, other than a status code to indicate whether or not you are logged in.
+
+status code 200 == logged in
+status code 401 == not logged in
 
 
 
@@ -241,15 +315,152 @@ no data and no useful response, other than the status code :)
 
 
 
+## users
+url: `/api/v0/users/<chatroomID>`
+
+### get
+action: Get all users of a chatroom
+
+This method returns all the users of the chatroom. In the future I will add an option to filter this to users with read access to a specific channel. (kinda discord like)
 
 
+needed data:
+```js
+    userID: "UUID (str)"
+```
 
 
+example return:
+```
+[
+    {
+        userID: '0' || 'UUID (str)',
+        username: "string",
+        colour: {
+            r: 0,
+            g: 0,
+            b: 0
+            }
+    }
+]
+```
+
+## channles
+url: `/api/v0/channels/<chatroomID>`
+
+### post
+action: Create a new channel
+
+needed data:
+```js
+    userID: "UUID (str) || '0'",
+    channel_name: "string",
+```
 
 
+example return:
+```js
+{
+    channelID: "UUID (str)",
+    channel_name: "string",
+    public: True,
+    permissions:
+        {
+            r: Bool,
+            w: Bool,
+            x: Bool
+        }
+}
+```
+
+### get
+action: Get all channels the user has read access to
+
+needed data:
+```js
+    userID: "UUID (str) || '0'"
+```
+
+example return:
+```js
+[
+    {
+        channelID: "UUID (str)",
+        channel_name: "string",
+        public: True,
+        permissions:
+            {
+                r: Bool,
+                w: Bool,
+                x: Bool
+            }
+    },
+    {
+        channelID: "UUID (str)",
+        channel_name: "string",
+        public: True,
+        permissions:
+            {
+                r: Bool,
+                w: Bool,
+                x: Bool
+            }
+    },
+]
+
+```
+
+## messages
+url: `/api/v0/messages/<chatroomID>`
+
+### post
+action: send message to chatroom/channel
+
+needed data:
+```js
+    userID: "UUID (str) || '0'",
+    channelID: "UUID (str)",
+
+    replyID: "UUID (str)" (optional)
+
+    data: "String (your message)"
+```
 
 
+example response:
+```js
+{
+    messageID: "UUID (str)"
+}
+```
 
+### get
+action: Get message
+
+needed data:
+```
+    userID: "UUID (str) || '0'",
+
+    count: int <100           (optional),
+    time: float (time.time()) (optional),
+    channelID: "UUID (str)"   (optional)
+```
+
+By default this method returns the 10 latest messages, looking in all channels that are available to the user.
+
+optional arguments:
+* count:
+type: int
+The number of messages to be returned. The current maximum is 100
+
+* time:
+type: float
+If this is set then the server only looks for messages that got sent before the `time` varibale. (epoch time format)
+
+
+* channelID
+type: "UUID (str)"
+If this is set then the server will only look in the specified channel for messages.
 
 
 

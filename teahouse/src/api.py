@@ -160,7 +160,7 @@ def create_channel(chatroomID: str, json_data: dict):
     userID = json_data.get('userID')
 
     channel_name = json_data.get('channel_name')
-    is_public = json_data.get('public')
+    is_public = True
 
     # check some data
     if not channel_name:
@@ -197,7 +197,7 @@ def send_message(chatroomID: str, json_data: dict):
     """ Save message sent from user """
 
     replyID   = json_data.get('replyID')
-    mtype     = json_data.get('mtype')
+    mtype     = 'text'
 
     channelID = json_data.get('channelID')
     userID    = json_data.get('userID')

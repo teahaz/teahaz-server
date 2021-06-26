@@ -175,7 +175,7 @@ def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, ke
 
     db.commit()
     db.close()
-    return messageID, 200
+    return {"messageID": messageID}, 200
 
 def get_messages(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
     """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
