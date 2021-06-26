@@ -192,11 +192,16 @@ Most http libraries (like python reqests) should handle cookies automatically.
 ### status codes
 A list of status codes used by the server:
 
-200: OK
-400: user error
-401: not logged in
-403: Permission denied (usually trying to access something your user does not have permission to)
-500: Server error (you did nothing wrong, please report it to me! )
+* 200:
+OK
+* 400:
+user error
+* 401:
+not logged in
+* 403:
+Permission denied (usually trying to access something your user does not have permission to)
+* 500:
+Server error (you did nothing wrong, please report it to me! )
 
 Hopefully I didnt miss anything.
 

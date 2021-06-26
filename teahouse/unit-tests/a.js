@@ -23,8 +23,6 @@ const main = async(conv1) =>
         });
 
 
-    console.dir(conv1, {depth: null})
-    console.log("\n------------------------------------------------------\n")
 
 
     await conv1.login()
@@ -58,41 +56,41 @@ const main = async(conv1) =>
     // let i = 0;
     // while (i < 1000)
     // {
-    //     await conv1.send_message({
-    //         message: `ssssssssssss [${i}]`,
-    //         channelID: conv1.channels[0].channelID
-    //     })
-    //     .then((res) =>
-    //         {
-    //             // console.log(conv1)
-    //             // console.log(res)
-    //             console.log("✅ Message sent!");
-    //         })
-    //     .catch((res) =>
-    //         {
-    //             console.log(res);
-    //             console.error("❌ Failed to send message!");
-    //         });
-    //     i += 1
+        await conv1.send_message({
+            message: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
+            channelID: conv1.channels[0].channelID
+        })
+        .then((res) =>
+            {
+                // console.log(conv1)
+                // console.log(res)
+                console.log("✅ Message sent!");
+            })
+        .catch((res) =>
+            {
+                console.log(res);
+                console.error("❌ Failed to send message!");
+            });
+        // i += 1
     // }
 
 
 
     //
-    // await conv1.create_channel({
-    //     channel_name: "memes channel",
-    //     public_channel: true
-    // })
-    // .then((res) =>
-    //     {
-    //         // console.log(res)
-    //         console.log("✅ Created new channel");
-    //     })
-    // .catch((res) =>
-    //     {
-    //         console.log(res);
-    //         console.error("❌ Failed to create channel!");
-    //     });
+    await conv1.create_channel({
+        channel_name: "memes channel",
+        public_channel: true
+    })
+    .then((res) =>
+        {
+            // console.log(res)
+            console.log("✅ Created new channel");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to create channel!");
+        });
     //
     //
 
@@ -108,6 +106,7 @@ const main = async(conv1) =>
             console.log(res, { depth: null });
             console.error("❌ Failed to get channels!");
         });
+
 
 
     await conv1.get_messages({
@@ -129,13 +128,28 @@ const main = async(conv1) =>
     await conv1.get_users()
     .then((res) =>
         {
-            console.log(res)
+            // console.log(res)
             console.log("✅ Got users");
         })
     .catch((res) =>
         {
             console.log(res);
             console.error("❌ Failed to get users!");
+        });
+
+    await conv1.create_invite({
+        uses: 10,
+        bestbefore: 3939393
+    })
+    .then((res) =>
+        {
+            console.log(res)
+            console.log("✅ Created invite!");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to create invite!");
         });
 
 

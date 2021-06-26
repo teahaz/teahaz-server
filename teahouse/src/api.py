@@ -260,6 +260,11 @@ def get_messages(chatroomID: str, json_data: dict):
     timebefore = (timebefore if timebefore != None else time.time())
 
 
+    # validate if channelID is of a proper UUID format
+    if channelID != None and not security.is_uuid(channelID):
+        return "ChannelID is not a valid UUID", 400
+
+
     # make sure variables have the right type
     try:
         # IMPORTANT count has to be checked because it can lead to sqli
@@ -296,6 +301,53 @@ def get_messages(chatroomID: str, json_data: dict):
 
 
 
+def create_invite(chatroomID: str, json_data: dict):
+    """ Create an invite for a chatroom """
+
+    uses       = json_data.get('uses')
+    userID     = json_data.get('userID')
+    bestbefore = json_data.get('bestbefore')
+
+    # placeholder for when classes work
+    classID    = None
+
+
+
+    # if not set assing default variable, if set then try convert values to their correct types
+    try:
+        uses = (int(uses) if uses != None else 1)
+    except Exception as e:
+        return f"Could not convert variable 'uses' to integer: {e}", 400
+
+    try:
+        bestbefore = (float(bestbefore) if bestbefore != None else time.time() + 60*60*24*7) 
+    except Exception as e:
+        return f"Could not convert variable 'bestbefore' to float: {e}", 400
+
+
+    # NOTE this should be updated when classes and chatroom settings work
+    if userID != '0':
+        return "Permission denied: you do not have permission to create an invite", 403
+
+
+    # save invite
+    inviteID, status = database.write_invite(chatroomID, userID, classID, bestbefore, uses)
+    if status != 200: return inviteID, status
+
+
+    # create a sharable invite code
+    invite_code = f"teahaz:{chatroomID}/{inviteID}"
+
+
+    return {
+            "invite": invite_code,
+            "uses": uses,
+            "bestbefore": bestbefore,
+            "inviteID": inviteID
+            }, 200
+
+
+
 def get_users(chatroomID: str, json_data: dict):
     """ Get all users of a chatroom """
 
@@ -305,5 +357,7 @@ def get_users(chatroomID: str, json_data: dict):
     # NOTE this only gets a single user rn, but as there are no invites yet its not a huge problem.
     user_data, status = database.fetch_user(chatroomID, '0')
     return [user_data], 200
+
+
 
 

@@ -144,9 +144,25 @@ class Users(Resource):
         return api.get_users(chatroomID, request.headers)
 
 
+class invites(Resource):
+    def get(self, chatroomID):
+        """ Create a new invite to a chatroom """
+        if not request.headers: return "no data sent", 401
+        if not chatroomID: return "ChatroomId was not part of the path", 400
+        if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), request.headers.get('userID')):
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
+
+        return api.create_invite(chatroomID, request.headers)
+
+
+
+
 restful.add_resource(Chatrooms,'/api/v0/chatroom',              '/api/v0/chatroom/')
 restful.add_resource(Login,    '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')
 restful.add_resource(Users,    '/api/v0/users/<chatroomID>',    '/api/v0/users/<chatroomID>/')
+restful.add_resource(invites,  '/api/v0/invites/<chatroomID>',  '/api/v0/invites/<chatroomID>/')
 restful.add_resource(Channels, '/api/v0/channels/<chatroomID>', '/api/v0/channels/<chatroomID>/')
 restful.add_resource(Messages, '/api/v0/messages/<chatroomID>', '/api/v0/messages/<chatroomID>/')
 

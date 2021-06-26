@@ -568,3 +568,18 @@ def get_cookies(chatroomID: str, userID: str, cookie: str):
 
 
 
+#-------------------------------------------------------------- Invites -----------------------
+def write_invite(chatroomID: str, userID: str, classID: str, bestbefore: float, uses: int):
+    """ Generates invite and saves it in the invites databased """
+
+    inviteID = security.gen_uuid()
+
+    db = database(chatroomID)
+
+    status = db.insert('invites', (inviteID, userID, classID, bestbefore, uses))[1]
+    if status != 200:
+        return "Internal database error while saving invite", 500
+
+    return inviteID, 200
+
+
