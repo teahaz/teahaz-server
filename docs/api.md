@@ -66,7 +66,7 @@ Channels on teahaz are similar to channels on discord as in they are sperate str
 Example of a channel object:
 
 ```js
-{
+[
     {
         channel_name": "default",
         channelID": "UUID (str)",
@@ -77,7 +77,7 @@ Example of a channel object:
             x: Bool
             }
     }
-}
+]
 ```
 
 #### channel\_name:
