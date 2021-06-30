@@ -71,6 +71,11 @@ class database():
 
         statement = f"SELECT {what} FROM {table} WHERE {conditions}"
 
+        # if no conditions were set, get all
+        if len(conditions) == 0:
+            statement = f"SELECT {what} FROM {table}"
+
+
         cursor, status= self._run(statement, variables)
         if status != 200:
             return cursor, status
@@ -244,7 +249,7 @@ def fetch_all_channels(chatroomID: str):
     # get db
     db = database(chatroomID)
 
-    db_response, status = db.select("*", "channels", "1=1")
+    db_response, status = db.select("*", "channels")
     if status != 200:
         return "Internal database error while fetching channels", 500
 
@@ -410,7 +415,7 @@ def write_user(chatroomID: str, username: str, password: str):
     # Check if there are any other users already in the chatroom.
     # If this is the first user then they get uid 0,
     # else they get a randomly generated uuid
-    users, status = db.select("*", "users", "1=1")
+    users, status = db.select("*", "users")
     if status != 200:
         return "Internal database error while checking users", status
 
