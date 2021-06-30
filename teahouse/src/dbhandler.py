@@ -244,7 +244,7 @@ def fetch_all_channels(chatroomID: str):
     # get db
     db = database(chatroomID)
 
-    db_response, status = db.select("*", "channels", "true")
+    db_response, status = db.select("*", "channels", "1=1")
     if status != 200:
         return "Internal database error while fetching channels", 500
 
@@ -410,9 +410,8 @@ def write_user(chatroomID: str, username: str, password: str):
     # Check if there are any other users already in the chatroom.
     # If this is the first user then they get uid 0,
     # else they get a randomly generated uuid
-    users, status = db.select("*", "users", "True")
+    users, status = db.select("*", "users", "1=1")
     if status != 200:
-        log.error(write_user, f"Internal database error while checking users: {users}")
         return "Internal database error while checking users", status
 
 
