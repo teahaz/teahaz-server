@@ -1,12 +1,54 @@
 """
     A few functions that need to be called many times, often in different files.
 """
+
+import users_th as users
+import filesystem_th as filesystem
+
 # setup logging
 from logging_th import logger
 global log
 log = logger()
 
 
+
+#################################################### main ########################################
+def check_default(method: str, chatroomID: str, request: object, need_login: bool):
+    """
+        A series of checks that need to be performed in every method
+
+        need_login:
+            option should be true or false depending on wether cookies have to be checked
+    """
+
+    # If method is get then data has to be sent in headers
+    data = (request.get_json() if method != 'get' else request.headers)
+
+
+    # Make sure there was anything sent to the server
+    if not data: return "no data sent", 401
+
+
+    # ChatroomId is only none in the create chatroom method,
+    #   in which case its enough to just check the data
+    if chatroomID == None:
+        return "Ok", 200
+
+
+    # Check if chatroom exists
+    if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+
+
+    if need_login == True:
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), data.get('userID')):
+            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
+
+
+    return "OK", 200
+
+
+
+#################################################### dbhandler ###################################
 def db_format_channel(channel_info: list):
     """
         Format the list of tuples that the channels db returns into a dict
@@ -35,7 +77,6 @@ def db_format_channel(channel_info: list):
 
 
     return channel_obj, 200
-
 
 def db_format_message(messages: list):
     """ Formats the output of the db response of the messages table """
