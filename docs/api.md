@@ -210,13 +210,17 @@ Hopefully I didnt miss anything.
 <br />
 
 
-# More detail on methods
+More detail on methods
+======================
 
 ## chatroom
 url: `/api/v0/chatroom`
 
 ### post
 action: Create a new chatroom.
+- [x] Method is functional.
+- [x] Method is finished.
+- [x] Sets cookie 
 
 needed data: 
 ```js
@@ -249,13 +253,21 @@ example data returned:
 }
 ```
 
-**This method sets a cookie**.
 
 <br />
 
-## get
-action: Get information about a chatroom
-[ ] finished
+### get
+action: Get information about a chatroom.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+### delete
+action: Delete a chatroom.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
 
 
 ## login
@@ -263,6 +275,9 @@ url: `/api/v0/login/<chatroomID>`
 
 ### post
 action: Login to a chatroom.
+- [x] Method is functional.
+- [x] Method is finished.
+- [x] Sets cookie 
 
 ***NOTE***: This requires you to already have an account.
 
@@ -303,10 +318,15 @@ example data returned:
     ]
 }
 ```
-**This method sets a cookie**.
+
 
 ### get
 action: Check if you are logged in.
+- [x] Method is functional.
+- [x] Method is finished.
+- [ ] Sets cookie 
+
+
 
 needed data:
 ```js
@@ -318,7 +338,11 @@ There is no useful data returned by this, other than a status code to indicate w
 status code 200 == logged in
 status code 401 == not logged in
 
-
+### delete
+action: Delete user account.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
 
 
 
@@ -329,6 +353,9 @@ url: `/api/v0/users/<chatroomID>`
 
 ### get
 action: Get all users of a chatroom
+- [x] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
 
 This method returns all the users of the chatroom. In the future I will add an option to filter this to users with read access to a specific channel. (kinda discord like)
 
@@ -353,12 +380,36 @@ example return:
     }
 ]
 ```
+### post
+action: Update personal information
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+
+### put
+action: Update some other users information.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+
+### delete
+action: Kick user.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
 
 ## channles
 url: `/api/v0/channels/<chatroomID>`
 
 ### post
 action: Create a new channel
+- [x] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
 
 needed data:
 ```js
@@ -384,6 +435,10 @@ example return:
 
 ### get
 action: Get all channels the user has read access to
+- [x] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
 
 needed data:
 ```js
@@ -419,11 +474,21 @@ example return:
 
 ```
 
+# delete
+action: Delete a channel.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+
 ## messages
 url: `/api/v0/messages/<chatroomID>`
 
 ### post
 action: send message to chatroom/channel
+- [x] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
 
 needed data:
 ```js
@@ -445,6 +510,9 @@ example response:
 
 ### get
 action: Get message
+- [x] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
 
 needed data:
 ```
@@ -471,6 +539,33 @@ If this is set then the server only looks for messages that got sent before the 
 type: "UUID (str)"
 If this is set then the server will only look in the specified channel for messages.
 
+
+### delete
+action: Delete a message.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+
+### put
+action: Update (edit) a message.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+
+## files
+### get
+action: Download a file.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+### post
+action: Upload a file.
+- [ ] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
 
 
 <br />
