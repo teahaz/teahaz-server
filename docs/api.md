@@ -253,6 +253,10 @@ example data returned:
 
 <br />
 
+## get
+action: Get information about a chatroom
+[ ] finished
+
 
 ## login
 url: `/api/v0/login/<chatroomID>`
