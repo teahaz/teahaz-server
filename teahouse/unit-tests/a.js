@@ -139,17 +139,35 @@ const main = async(conv1) =>
 
     await conv1.create_invite({
         uses: 10,
-        bestbefore: 3939393
+        bestbefore: 1625462441.6239355
     })
     .then((res) =>
         {
-            console.log(res)
+            conv1.invite = res.inviteID;
             console.log("✅ Created invite!");
         })
     .catch((res) =>
         {
             console.log(res);
             console.error("❌ Failed to create invite!");
+        });
+
+    console.log("invite: ", conv1.invite);
+
+    await conv1.use_invite({
+        inviteID: conv1.invite,
+        username: 'hehehehehe',
+        password: 'newpw, very cool!'
+    })
+    .then((res) =>
+        {
+            console.log(res)
+            console.log("✅ Used invite to join chatroom");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to use invite");
         });
 
 

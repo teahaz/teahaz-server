@@ -105,6 +105,22 @@ class Chatrooms(Resource):
 
 class Invites(Resource):
     """ /api/v0/invites/ """
+
+    def post(self, chatroomID):
+        """ Join a chatroom by invite """
+
+        # check data
+        res, status = helpers.check_default(
+                'post',
+                chatroomID,
+                request,
+                False
+            )
+        if status != 200: return res, status
+
+        return api.use_invite(chatroomID, request.get_json())
+
+
     def get(self, chatroomID):
         """ Create a new invite to a chatroom """
 
@@ -116,6 +132,7 @@ class Invites(Resource):
                 True
             )
         if status != 200: return res, status
+
 
         return api.create_invite(chatroomID, request.headers)
 
@@ -205,6 +222,9 @@ class Users(Resource):
 
 
 
+# NOTE could add to invites a /api/v0/invite/chatroomID/inviteID,
+#   which could just return data about an invite without needing
+#   for auth or anything
 
 restful.add_resource(Chatrooms,'/api/v0/chatroom',              '/api/v0/chatroom/')
 restful.add_resource(Login,    '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')

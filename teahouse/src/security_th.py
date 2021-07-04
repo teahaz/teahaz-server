@@ -42,7 +42,7 @@ def checkpw(password: str, hashedpw: str):
 
 
 
-def is_uuid(uid: str):
+def is_uuid(uid: str) -> bool:
     uid = str(uid)
 
     for i in uid:

@@ -33,7 +33,7 @@ def create_chatroom(json_data):
     # Make sure all arguments are given
     required = ['username', 'password', 'chatroom_name']
     for i, a in enumerate([username, password, chatroom_name]):
-        if a == None:
+        if a == None or len(a) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
 
@@ -99,7 +99,7 @@ def login(chatroomID: str, json_data: dict):
     # Make sure all arguments are given
     required = ['userID', 'password']
     for i, a in enumerate([userID, password]):
-        if a == None:
+        if a == None or len(a) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
     # authenticate user
@@ -346,6 +346,41 @@ def create_invite(chatroomID: str, json_data: dict):
             "bestbefore": bestbefore,
             "inviteID": inviteID
             }, 200
+
+
+
+def use_invite(chatroomID: str, json_data: dict):
+    """ Process an invite """
+
+    userID = security.gen_uuid()
+    username = json_data.get('username')
+    password = json_data.get('password')
+    inviteID = json_data.get('inviteID')
+
+
+    if not security.is_uuid(inviteID):
+        return "Invalid invite ID sent to server. Must be uuid!", 400
+
+
+    required = ['username', 'password', 'inviteID']
+    for i, a in enumerate([username, password, inviteID]):
+        if a == None or len(a) < 1:
+            return f"No value supplied for required field: {required[i]}", 400
+
+
+    inviteInfo, status = database.get_invite(chatroomID, inviteID)
+
+    if inviteInfo['uses'] < 1:
+        return "There are no more uses left on this invite", 403
+
+    if time.time() > inviteInfo['bestbefore']:
+        return "Invite has expired", 403
+
+    res, status = database.update_invite(chatroomID, inviteInfo)
+    return res, status
+
+
+
 
 
 

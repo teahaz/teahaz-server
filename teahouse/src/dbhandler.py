@@ -538,6 +538,7 @@ def fetch_user(chatroomID: str, userID: str):
 
 
 
+
 #-------------------------------------------------------------- Cookies -----------------------
 def store_cookie(chatroomID: str, userID: str, cookie: str):
     """ Writes a cookie to the database """
@@ -584,6 +585,44 @@ def write_invite(chatroomID: str, userID: str, classID: str, bestbefore: float, 
     if status != 200:
         return "Internal database error while saving invite", 500
 
+    db.commit()
+    db.close()
     return inviteID, 200
+
+
+def get_invite(chatroomID: str, inviteID: str) -> dict:
+    """ Get all stored information about an invite """
+
+    db = database(chatroomID)
+
+    inviteData, status = db.select('*', 'invites', 'inviteID=?', (inviteID,))
+    if status != 200:
+        return "Internal database error while reading invites", 500
+
+    print(inviteData)
+
+    if len(inviteData) < 1:
+        return "Invite not found", 404
+
+    # format invite data
+    try:
+        inviteData = inviteData[0]
+
+        inviteData = {
+                "inviteID":   inviteData[0],
+                "userID":     inviteData[1],
+                "classID":    inviteData[2],
+                "bestbefore": inviteData[3],
+                "uses":       inviteData[4]
+                }
+
+    except Exception as e:
+        return "Internal server error while formatting getting invite information.", 500
+
+
+    return inviteData, 200
+
+def update_invite(chatroomID: str, inviteID: str, newData: dict):
+    """ Update information stored on invite """
 
 
