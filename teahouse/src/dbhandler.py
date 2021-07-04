@@ -15,6 +15,16 @@ log = logger()
 
 class database():
     """ Abstraction over database functions """
+
+
+    # NOTE possible security improvement.
+    # We could have all the tables and their values defined
+    #   in a dict as an instance variable of this object.
+
+    # This would both make it simpler to init_chat and
+    #   it would mean that we can valiedate some data before executing it.
+
+
     def __init__(self, chatroomID: str):
 
         # cant return in __init__ but make sure that invalid uuid's are not being used
@@ -96,6 +106,20 @@ class database():
         return self._run(statement, values)
 
 
+    def update(self, table: str, what: list, values: tuple, conditions: str):
+        """ Wrapper around sql update statement """
+
+        # user can add conditions that need to be updated in a list of strings.
+        values_to_update = ''
+        for i in what:
+            values_to_update += i + "=?, "
+        # get rid of last comma
+        values_to_update = values_to_update.strip(', ')
+
+
+        statement = f"UPDATE {table} SET {values_to_update} WHERE {conditions}"
+        return self._run(statement, values)
+
 
 
 
@@ -143,6 +167,7 @@ def init_chat(chatroomID: str, chat_name: str):
     db.close()
     return {"channelID": channelID, "channel_name": 'default'}, 200
 
+
 def check_settings(chatroomID: str, setting_name: str):
     """ From settings table fetch setting value corresponding to supplied setting name """
 
@@ -150,7 +175,7 @@ def check_settings(chatroomID: str, setting_name: str):
 
     data, status = db.select('svalue', 'settings', 'sname=?', (setting_name,))
     if status != 200:
-        return data, status
+        return "Internal database error while checking settings", status
 
     if len(data) < 1:
         return f"Setting '{setting_name}' does not exist!", 404
@@ -158,6 +183,29 @@ def check_settings(chatroomID: str, setting_name: str):
 
     db.close()
     return data[0][0], 200
+
+
+def fetch_all_settings(chatroomID: str):
+    """ Get all settings of a chatroom """
+
+    db = database(chatroomID)
+
+    data, status = db.select('*', 'settings')
+    if status != 200:
+        return "Internal database error while getting settings", status
+
+
+    formatted_setttings = []
+    for setting in data:
+        formatted = {
+                "sname":  setting[0],
+                "svalue": setting[1],
+                "stype":  setting[2]
+                }
+
+        formatted_setttings.append(formatted)
+
+    return formatted_setttings, 200
 
 
 
@@ -599,8 +647,6 @@ def get_invite(chatroomID: str, inviteID: str) -> dict:
     if status != 200:
         return "Internal database error while reading invites", 500
 
-    print(inviteData)
-
     if len(inviteData) < 1:
         return "Invite not found", 404
 
@@ -620,9 +666,32 @@ def get_invite(chatroomID: str, inviteID: str) -> dict:
         return "Internal server error while formatting getting invite information.", 500
 
 
+    db.close()
     return inviteData, 200
 
-def update_invite(chatroomID: str, inviteID: str, newData: dict):
+
+def update_invite(chatroomID: str, inviteID: str, classID: str, bestbefore: float, uses: int):
     """ Update information stored on invite """
+
+    # Force variables to be the right type
+    #  this is just a check for myself,
+    #  the server should check user input before dbhandler.
+    uses = int(uses)
+    bestbefore = float(bestbefore)
+
+    db = database(chatroomID)
+
+    res, status = db.update(
+            'invites',
+            ["classID", "bestbefore", "uses"],
+            (classID, bestbefore, uses, inviteID),
+            "inviteID=?"
+            )
+    if status != 200:
+        return "Internal database error while updateing invite", 500
+
+    db.commit()
+    db.close()
+    return "OK", 200
 
 

@@ -3,6 +3,7 @@
 """
 
 import users_th as users
+import dbhandler as database
 import filesystem_th as filesystem
 
 # setup logging
@@ -104,3 +105,33 @@ def db_format_message(messages: list):
         return f"Internal database error wile formatting messages.", 500
 
     return messages_list, 200
+
+
+
+
+
+#################################################### other ###################################
+def get_chat_info(chatroomID: str, userID: str):
+    """ Get all information about a chatroom """
+
+
+    settings, status = database.fetch_all_settings(chatroomID)
+    if status != 200: return settings, status
+
+
+    chatname, status = database.check_settings(chatroomID, 'chat_name')
+    if status != 200: return chatname, status
+
+
+    channels, status = database.get_readable_channels(chatroomID, userID)
+    if status != 200: return channels, status
+
+
+    # NOTE maye add all users as well
+    return {
+            "userID"       : userID,
+            "chatroomID"   : chatroomID,
+            "chatroom_name": chatname,
+            "channels"     : channels,
+            "settings"     : settings
+            }, 200

@@ -5,6 +5,7 @@ import time
 import users_th as users
 import dbhandler as database
 import security_th as security
+import global_helpers as helpers
 import filesystem_th as filesystem
 
 
@@ -125,6 +126,9 @@ def login(chatroomID: str, json_data: dict):
 
 def get_channels(chatroomID: str, json_data: dict):
     """ Get all chatrooms, and their permissions """
+
+    # NOTE replace with global_helpers.get_chat_info
+
 
     # get arguments
     # Dont have to check userID as its needed for authentication,
@@ -347,8 +351,6 @@ def create_invite(chatroomID: str, json_data: dict):
             "inviteID": inviteID
             }, 200
 
-
-
 def use_invite(chatroomID: str, json_data: dict):
     """ Process an invite """
 
@@ -376,8 +378,20 @@ def use_invite(chatroomID: str, json_data: dict):
     if time.time() > inviteInfo['bestbefore']:
         return "Invite has expired", 403
 
-    res, status = database.update_invite(chatroomID, inviteInfo)
-    return res, status
+
+    # decrement uses
+    uses = inviteInfo['uses']
+    uses = int(uses) - 1
+
+    res, status = database.update_invite(chatroomID, inviteID, inviteInfo['classID'], inviteInfo['bestbefore'],  uses)
+    if status != 200: return res, status
+
+
+    userID, status = users.add_user(username, password, chatroomID)
+    if status != 200: return userID, status
+
+
+    return helpers.get_chat_info(chatroomID, userID)
 
 
 

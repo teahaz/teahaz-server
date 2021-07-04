@@ -152,7 +152,6 @@ const main = async(conv1) =>
             console.error("❌ Failed to create invite!");
         });
 
-    console.log("invite: ", conv1.invite);
 
     await conv1.use_invite({
         inviteID: conv1.invite,
@@ -170,6 +169,7 @@ const main = async(conv1) =>
             console.error("❌ Failed to use invite");
         });
 
+    console.log(conv1)
 
     console.log("\n------------------------------------------------------\n")
     // console.dir(conv1, { depth: null });
@@ -181,17 +181,17 @@ const main = async(conv1) =>
 let conv1 = new chatroom({
     username: 'consumer of semen',
     password: 'slkdjflksdjfkl;sdjklfsdjlkfj',
-    server: 'http://localhost:13337/',
+    server: 'http://localhost:13338/',
 
 
     // // use the same chatroom
     // chatroomID: '9a9acf74-d591-11eb-b454-b42e99435986',
     // userID: '0',
     //
-    proxy: {
-        host: 'localhost',
-        port: 8080
-    },
+    // proxy: {
+    //     host: 'localhost',
+    //     port: 8080
+    // },
     raw_response: false
 });
 main(conv1)
