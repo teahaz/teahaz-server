@@ -181,7 +181,7 @@ const main = async(conv1) =>
 let conv1 = new chatroom({
     username: 'consumer of semen',
     password: 'slkdjflksdjfkl;sdjklfsdjlkfj',
-    server: 'http://localhost:13338/',
+    server: 'http://localhost:13337/',
 
 
     // // use the same chatroom
