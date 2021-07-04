@@ -1,3 +1,10 @@
+Urgent fix for bazsi
+====================
+- [ ] Add back old method of get\_since\_time. In this case the method should exists along side the other types of get somehow, and should have some sort of rate limit of a few minutes or something similar. This function is obviously not fully thought out yet.
+
+
+
+
 Unify chatroom information
 ==========================
 login/register returns
