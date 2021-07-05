@@ -1,6 +1,6 @@
 Teahaz
 =====
-Teahaz (or teahouse) aims to be a private and secure group messaging platform. The idea behind the project is to have an end-to-end encrypted, managed (discord-like) group chat service where your privacy and security is the most important concern. This means that in teahaz even server has zero knowledge of who you are, what you send, or even what chatrooms you are in. Furthermore you can join chatrooms from various different servers (including self-hosted) and have them seamlessly integrate on your client. Furthermore you are not even stuck with our first party clients, as a variety of APIs and libraries make it very easy for developers to create their own clients.
+Teahaz (or teahouse) aims to be a private and secure group messaging platform. The idea behind the project is to have an end-to-end encrypted, managed (discord-like) group chat service where your privacy and security is the most important concern. This means that in teahaz even server has zero knowledge of who you are, what you send, or even what chatrooms you are in. Furthermore you can join chatrooms from various different servers (including self-hosted) and have them seamlessly integrate on your client. You aren't even stuck with our first party clients, as a variety of APIs and libraries make it very easy for developers to create their own clients.
 <br />
 Check out the [official client](https://github.com/bczsalba/teahaz-client)!
 <br />
