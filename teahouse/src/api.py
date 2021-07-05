@@ -372,7 +372,7 @@ def create_invite(chatroomID: str, json_data: dict):
 
     uses       = json_data.get('uses')
     userID     = json_data.get('userID')
-    bestbefore = json_data.get('bestbefore')
+    expiration_time = json_data.get('expiration-time')
 
     # placeholder for when classes work
     classID    = None
@@ -386,9 +386,9 @@ def create_invite(chatroomID: str, json_data: dict):
         return f"Could not convert variable 'uses' to integer: {e}", 400
 
     try:
-        bestbefore = (float(bestbefore) if bestbefore != None else time.time() + 60*60*24*7) 
+        expiration_time = (float(expiration_time) if expiration_time != None else time.time() + 60*60*24*7) 
     except Exception as e:
-        return f"Could not convert variable 'bestbefore' to float: {e}", 400
+        return f"Could not convert variable 'expiration-time' to float: {e}", 400
 
 
     # NOTE this should be updated when classes and chatroom settings work
@@ -397,7 +397,7 @@ def create_invite(chatroomID: str, json_data: dict):
 
 
     # save invite
-    inviteID, status = database.write_invite(chatroomID, userID, classID, bestbefore, uses)
+    inviteID, status = database.write_invite(chatroomID, userID, classID, expiration_time, uses)
     if status != 200: return inviteID, status
 
 
@@ -408,7 +408,7 @@ def create_invite(chatroomID: str, json_data: dict):
     return {
             "invite": invite_code,
             "uses": uses,
-            "bestbefore": bestbefore,
+            "expiration-time": expiration_time,
             "inviteID": inviteID
             }, 200
 
@@ -436,7 +436,7 @@ def use_invite(chatroomID: str, json_data: dict):
     if inviteInfo['uses'] < 1:
         return "There are no more uses left on this invite", 403
 
-    if time.time() > inviteInfo['bestbefore']:
+    if time.time() > inviteInfo['expiration-time']:
         return "Invite has expired", 403
 
 
@@ -444,7 +444,7 @@ def use_invite(chatroomID: str, json_data: dict):
     uses = inviteInfo['uses']
     uses = int(uses) - 1
 
-    res, status = database.update_invite(chatroomID, inviteID, inviteInfo['classID'], inviteInfo['bestbefore'],  uses)
+    res, status = database.update_invite(chatroomID, inviteID, inviteInfo['classID'], inviteInfo['expiration-time'],  uses)
     if status != 200: return res, status
 
 

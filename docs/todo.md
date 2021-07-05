@@ -19,3 +19,8 @@ channels
 - [ ] Sorting out a bunch of other channels mess.
 - [ ] Replace `public` property of channels with `rw` and have that apply by default with all classes overriding it.
 
+
+
+Probably but not urgent
+=======================
+- [ ] Remove all instances of `*.ID` to make the namespacing more consistent. (probably replace with snake_case `*._id`.

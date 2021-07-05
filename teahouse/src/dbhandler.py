@@ -118,6 +118,7 @@ class database():
 
 
         statement = f"UPDATE {table} SET {values_to_update} WHERE {conditions}"
+        print('statement: ',statement , type(statement))
         return self._run(statement, values)
 
 
@@ -139,7 +140,7 @@ def init_chat(chatroomID: str, chat_name: str):
 
     # add tables
     db.create('settings',    ['sname',   'svalue', 'stype'])
-    db.create('invites',     ['inviteID', 'userID', 'classID', 'bestbefore', 'uses'])
+    db.create('invites',     ['inviteID', 'userID', 'classID', 'expiration_time', 'uses'])
 
     db.create('users',       ['userID',  'username', 'password'])
     db.create('colours',     ['userID',  'r', 'g', 'b'])
@@ -641,14 +642,14 @@ def get_cookies(chatroomID: str, userID: str, cookie: str):
 
 
 #-------------------------------------------------------------- Invites -----------------------
-def write_invite(chatroomID: str, userID: str, classID: str, bestbefore: float, uses: int):
+def write_invite(chatroomID: str, userID: str, classID: str, expiration_time: float, uses: int):
     """ Generates invite and saves it in the invites databased """
 
     inviteID = security.gen_uuid()
 
     db = database(chatroomID)
 
-    status = db.insert('invites', (inviteID, userID, classID, bestbefore, uses))[1]
+    status = db.insert('invites', (inviteID, userID, classID, expiration_time, uses))[1]
     if status != 200:
         return "Internal database error while saving invite", 500
 
@@ -674,11 +675,11 @@ def get_invite(chatroomID: str, inviteID: str) -> dict:
         inviteData = inviteData[0]
 
         inviteData = {
-                "inviteID":   inviteData[0],
-                "userID":     inviteData[1],
-                "classID":    inviteData[2],
-                "bestbefore": inviteData[3],
-                "uses":       inviteData[4]
+                "inviteID":        inviteData[0],
+                "userID":          inviteData[1],
+                "classID":         inviteData[2],
+                "expiration-time": inviteData[3],
+                "uses":            inviteData[4]
                 }
 
     except Exception as e:
@@ -689,21 +690,21 @@ def get_invite(chatroomID: str, inviteID: str) -> dict:
     return inviteData, 200
 
 
-def update_invite(chatroomID: str, inviteID: str, classID: str, bestbefore: float, uses: int):
+def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time: float, uses: int):
     """ Update information stored on invite """
 
     # Force variables to be the right type
     #  this is just a check for myself,
     #  the server should check user input before dbhandler.
     uses = int(uses)
-    bestbefore = float(bestbefore)
+    expiration_time = float(expiration_time)
 
     db = database(chatroomID)
 
     res, status = db.update(
             'invites',
-            ["classID", "bestbefore", "uses"],
-            (classID, bestbefore, uses, inviteID),
+            ["classID", "expiration_time", "uses"],
+            (classID, expiration_time, uses, inviteID),
             "inviteID=?"
             )
     if status != 200:

@@ -272,11 +272,12 @@ const main = async(conv1) =>
 
     await conv1.create_invite({
         uses: 10,
-        bestbefore: (new Date().getTime() / 1000) + 1000
+        expiration_time: (new Date().getTime() / 1000) + 1000
     })
     .then((res) =>
         {
             conv1.invite = res.inviteID;
+            // console.log(res)
             console.log("✅ Created invite!");
         })
     .catch((res) =>
@@ -294,7 +295,7 @@ const main = async(conv1) =>
     })
     .then((res) =>
         {
-            // console.log(res)
+            console.log(res)
             console.log("✅ Used invite to join chatroom");
         })
     .catch((res) =>
