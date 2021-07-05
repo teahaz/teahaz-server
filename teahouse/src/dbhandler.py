@@ -229,7 +229,10 @@ def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, ke
 
     db.commit()
     db.close()
-    return {"messageID": messageID}, 200
+
+    # Client guy asked for the same message formatting as get returns,
+    #  might as well use the same function.
+    return helpers.db_format_message([(messageID, channelID, userID, replyID, keyID, mtime, mtype, data)]), 200
 
 def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
     """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """

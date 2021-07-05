@@ -350,23 +350,6 @@ def get_messages(chatroomID: str, json_data: dict):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def create_invite(chatroomID: str, json_data: dict):
     """ Create an invite for a chatroom """
 
@@ -453,9 +436,6 @@ def use_invite(chatroomID: str, json_data: dict):
 
 
     return helpers.get_chat_info(chatroomID, userID)
-
-
-
 
 
 

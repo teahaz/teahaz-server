@@ -123,14 +123,23 @@ const main = async(conv1) =>
 
 
     await conv1.monitor_messages({
-        count: 5,
-        since: middle_message_time
+        since: 0
     })
     .then((res) =>
         {
-            // console.log(res)
-            assert(res.length == 50, "Got wrong amount of messages");
+            console.log(res);
+            // console.log('got:', res.length);
+
+
+            let seen = []
+            for (const message of res)
+            {
+                assert(!seen.includes(message.messageID), "wtf");
+                seen.push(message.messageID);
+            }
+            // assert(res.length == 50, "Got wrong amount of messages");
             console.log("✅ Got messages since <time>");
+            // process.exit(1);
         })
     .catch((res) =>
         {
@@ -141,14 +150,14 @@ const main = async(conv1) =>
 
 
     await conv1.get_messages({
-        count: 5,
+        count: 100,
         // start_time: 1624611669.907108,
         // channelID: conv1.channels[0].channelID
     })
     .then((res) =>
         {
-            // console.log(res);
-            assert(res.length == 5, "Got wrong amount of messages!");
+            // console.log(res.length);
+            // assert(res.length == 5, "Got wrong amount of messages!");
             console.log("✅ Got <count> messages!");
         })
     .catch((res) =>
@@ -295,7 +304,7 @@ const main = async(conv1) =>
     })
     .then((res) =>
         {
-            console.log(res)
+            // console.log(res)
             console.log("✅ Used invite to join chatroom");
         })
     .catch((res) =>
