@@ -230,7 +230,7 @@ def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, ke
     db.close()
     return {"messageID": messageID}, 200
 
-def get_messages(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
+def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
     """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
 
     # get db
@@ -238,7 +238,6 @@ def get_messages(chatroomID: str, count: int, timebefore: float, channels_to_loo
 
 
     # conditions = "channelID = ?" * len(channels_to_look_in)
-
     conditions = []
     for i in channels_to_look_in:
         conditions.append("channelID = ?")
@@ -258,8 +257,28 @@ def get_messages(chatroomID: str, count: int, timebefore: float, channels_to_loo
     return helpers.db_format_message(res.fetchall())
 
 
+def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list):
+    """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
+
+    db = database(chatroomID)
+
+    # conditions = "channelID = ?" * len(channels_to_look_in)
+    conditions = []
+    for i in channels_to_look_in:
+        conditions.append("channelID = ?")
+    conditions = " OR ".join(conditions)
 
 
+    # add all variables to a tuple
+    variables = (timesince,)
+    for i in channels_to_look_in:
+        variables += (i,)
+
+
+    cursor, status = db._run(f"SELECT * FROM messages WHERE mtime >= ? AND ({conditions}) ORDER BY mtime DESC LIMIT 100", variables)
+    if status != 200: return cursor, status
+
+    return helpers.db_format_message(cursor.fetchall())
 
 #-------------------------------------------------------------- Channels -----------------------
 def fetch_channel(chatroomID: str, channelID: str):

@@ -252,56 +252,117 @@ def send_message(chatroomID: str, json_data: dict):
 def get_messages(chatroomID: str, json_data: dict):
     """ Get the last x messages since <time> """
 
-    # get data
-    count = json_data.get('count')
+    # needed/optional data:
+    # Im adding this comment because most other methods
+    #   have all the information at the top, but that
+    #   doesnt make as much sense here.
+
+    # data:
+        # userID
+        # get-method
+        # channelID (optional)
+        # count (optional)
+        # time (optional)
+
     userID = json_data.get('userID')
-    timebefore = json_data.get('time')
+
+
+    # If channelID is set then get messages from just that one channel,
+    #  else get from all readable channels.
     channelID = json_data.get('channelID')
-
-
-    # set default values
-    count = (count if count != None else 10)
-    timebefore = (timebefore if timebefore != None else time.time())
-
 
     # validate if channelID is of a proper UUID format
     if channelID != None and not security.is_uuid(channelID):
         return "ChannelID is not a valid UUID", 400
 
-
-    # make sure variables have the right type
-    try:
-        # IMPORTANT count has to be checked because it can lead to sqli
-        count = int(count)
-    except Exception as e:
-        return f"Could not convert variable 'count' to an integer: {e}", 400
-
-    try:
-        timebefore = float(timebefore)
-    except Exception as e:
-        return f"Could not convert variable 'timebefore' to float: {e}", 400
-
-
-    # if a user specified a channel to get from, then add that into a 1 element list
+    # ChannelID is set, get list of 1 element
     if channelID != None and security.is_uuid(channelID):
-        channels = [{
-                "channelID": channelID
-                }]
+        channels = [{ "channelID": channelID }]
 
-
-    # if user did not specify any channel then get a list of readable channels
+    # ChannelID is not set, get all readable
     else:
         channels, status = database.get_readable_channels(chatroomID, userID)
         if status != 200: return channels, status
 
-
-    # get only the id of each channel
+    # Get a list of **only** the channelIDs of needed channels.
     channel_ids = []
     for i in channels:
         channel_ids.append(i['channelID'])
 
 
-    return database.get_messages(chatroomID, count, timebefore, channel_ids)
+
+
+    # Get method specifies how you want to get information from the server.
+    #   Options for this variable are:
+    #       - since  || 0
+    #        get all messages since <time>
+    #       - count  || 1
+    #        Get <count> number of messages.
+    #        This method also supports the time argument to specify a starting time.
+    get_method = json_data.get('get-method')
+
+
+    if get_method in ['since', 0]:
+        # get since <time>
+
+        timesince = json_data.get('time')
+
+        # make sure variables have the right type
+        try:
+            timesince = float(timesince)
+        except Exception as e:
+            return f"Could not convert variable 'time' to float: {e}", 400
+
+        return database.get_messages_since(chatroomID, timesince, channel_ids)
+
+
+    elif get_method in ['count', 1]:
+        # get <count> messages (optionally starting from <time>)
+
+        count = json_data.get('count')
+        timebefore = json_data.get('time')
+
+        # set default values
+        count = (count if count != None else 10)
+            # timebefore defaults to now if we want messages starting from now.
+        timebefore = (timebefore if timebefore != None else time.time())
+
+
+        # make sure variables have the right type
+        try:
+            count = int(count)
+        except Exception as e:
+            return f"Could not convert variable 'count' to an integer: {e}", 400
+
+        try:
+            timebefore = float(timebefore)
+        except Exception as e:
+            return f"Could not convert variable 'time' to float: {e}", 400
+
+
+        return database.get_messages_count(chatroomID, count, timebefore, channel_ids)
+
+
+    else:
+        print('get_method: ',get_method , type(get_method))
+        return "Invalid or unset 'get-method'", 400
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
