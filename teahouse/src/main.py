@@ -22,6 +22,38 @@ app = Flask(__name__)
 restful = Api(app)
 
 
+class Chatrooms(Resource):
+    """ /api/v0/chatrooms """
+    def post(self): # create chatroom
+
+        # check data
+        res, status = helpers.check_default(
+                'post',
+                None,
+                request,
+                False
+            )
+        if status != 200: return res, status
+
+
+        # create chatroom
+        chat_obj, status = api.create_chatroom(request.get_json())
+
+        # creating chatroom failed
+        if status != 200:
+            return chat_obj, status
+
+        cookie, status = users.set_cookie(chat_obj.get('chatroomID'), chat_obj.get('userID'))
+
+        # storing cookie failed
+        if status != 200:
+            return cookie, status
+
+        # set cookie for user and return
+        res = make_response(chat_obj)
+        res.set_cookie(chat_obj.get('chatroomID'), cookie)
+        return res
+
 
 class Login(Resource):
     """ /api/v0/login/ """
@@ -70,39 +102,6 @@ class Login(Resource):
         return "Already logged in", 200
 
 
-class Chatrooms(Resource):
-    """ /api/v0/chatrooms """
-    def post(self): # create chatroom
-
-        # check data
-        res, status = helpers.check_default(
-                'post',
-                None,
-                request,
-                False
-            )
-        if status != 200: return res, status
-
-
-        # create chatroom
-        chat_obj, status = api.create_chatroom(request.get_json())
-
-        # creating chatroom failed
-        if status != 200:
-            return chat_obj, status
-
-        cookie, status = users.set_cookie(chat_obj.get('chatroomID'), chat_obj.get('userID'))
-
-        # storing cookie failed
-        if status != 200:
-            return cookie, status
-
-        # set cookie for user and return
-        res = make_response(chat_obj)
-        res.set_cookie(chat_obj.get('chatroomID'), cookie)
-        return res
-
-
 class Invites(Resource):
     """ /api/v0/invites/ """
 
@@ -118,7 +117,17 @@ class Invites(Resource):
             )
         if status != 200: return res, status
 
-        return api.use_invite(chatroomID, request.get_json())
+        chatroom_info, status = api.use_invite(chatroomID, request.get_json())
+        if status != 200: return chatroom_info, status
+
+        cookie, status = users.set_cookie(chatroomID, chatroom_info.get('userID'))
+        if status != 200: return cookie, status
+
+        # set cookie
+        res = make_response(chatroom_info)
+        res.set_cookie(chatroomID, cookie)
+        return res
+
 
 
     def get(self, chatroomID):
