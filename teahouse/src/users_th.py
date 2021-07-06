@@ -9,7 +9,7 @@ global log
 log = logger()
 
 
-def add_user(username: str, password: str, chatroomID: str):
+def add_user(chatroomID: str, username: str, nickname: str, password: str):
     """ Add user to chatroom. """
 
 
@@ -23,19 +23,19 @@ def add_user(username: str, password: str, chatroomID: str):
 
 
     # save user creds
-    userID, status = database.write_user(chatroomID, username, password)
+    res, status = database.write_user(chatroomID, username, nickname, password)
     if status != 200:
-        return userID, status
+        return res, status
 
 
-    return userID, 200
+    return username, 200
 
 
 
-def auth_user(chatroomID: str, userID: str, password: str):
+def auth_user(chatroomID: str, username: str, password: str):
     """ Authenticate user """
 
-    info, status = database.fetch_user_creds(chatroomID, userID)
+    info, status = database.fetch_user_creds(chatroomID, username)
     if status != 200:
         return info, status
 
@@ -46,24 +46,24 @@ def auth_user(chatroomID: str, userID: str, password: str):
 
 
 
-def set_cookie(chatroomID: str, userID: str):
+def set_cookie(chatroomID: str, username: str):
     """ Generate and store a cookie for a user """
     cookie = security.gen_uuid()
 
-    res, status = database.store_cookie(chatroomID, userID, cookie)
+    res, status = database.store_cookie(chatroomID, username, cookie)
     if status != 200:
         return res, status
 
     return cookie, 200
 
 
-def check_cookie(chatroomID: str, cookie: str, userID: str):
-    if not userID or not cookie:
-        print('userID: ',userID , type(userID))
+def check_cookie(chatroomID: str, cookie: str, username: str):
+    if not username or not cookie:
+        print('username: ',username , type(username))
         print('cookie: ',cookie , type(cookie))
         return False
 
-    cookies, status = database.get_cookies(chatroomID, userID, cookie)
+    cookies, status = database.get_cookies(chatroomID, username, cookie)
     if status != 200:
         return False
 

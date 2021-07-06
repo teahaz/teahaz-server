@@ -41,8 +41,8 @@ def check_default(method: str, chatroomID: str, request: object, need_login: boo
 
 
     if need_login == True:
-        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), data.get('userID')):
-            return "Client not logged in. (Cookie or userID was invalid, or not sent)", 401
+        if not users.check_cookie(chatroomID, request.cookies.get(chatroomID), data.get('username')):
+            return "Client not logged in. (Cookie or username was invalid, or not sent)", 401
 
 
     return "OK", 200
@@ -90,7 +90,7 @@ def db_format_message(messages: list):
             message_obj = {
                     "messageID": message[0],
                     "channelID": message[1],
-                    "userID"   : message[2],
+                    "username"   : message[2],
                     "replyID"  : message[3],
                     "keyID"    : message[4],
                     "send_time": message[5],
@@ -111,7 +111,7 @@ def db_format_message(messages: list):
 
 
 #################################################### other ###################################
-def get_chat_info(chatroomID: str, userID: str):
+def get_chat_info(chatroomID: str, username: str):
     """ Get all information about a chatroom """
 
 
@@ -123,13 +123,12 @@ def get_chat_info(chatroomID: str, userID: str):
     if status != 200: return chatname, status
 
 
-    channels, status = database.get_readable_channels(chatroomID, userID)
+    channels, status = database.get_readable_channels(chatroomID, username)
     if status != 200: return channels, status
 
 
-    # NOTE maye add all users as well
+    # NOTE maye add all users as well and classes aswell
     return {
-            "userID"       : userID,
             "chatroomID"   : chatroomID,
             "chatroom_name": chatname,
             "channels"     : channels,

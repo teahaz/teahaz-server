@@ -20,6 +20,10 @@ channels
 - [ ] Replace `public` property of channels with `rw` and have that apply by default with all classes overriding it.
 
 
+Speed increase and clarity
+==========================
+- [ ] Try use slightly smarter sql to check if a user can read from chatroom in one sql query.
+
 
 Probably but not urgent
 =======================

@@ -140,19 +140,19 @@ def init_chat(chatroomID: str, chat_name: str):
 
     # add tables
     db.create('settings',    ['sname',   'svalue', 'stype'])
-    db.create('invites',     ['inviteID', 'userID', 'classID', 'expiration_time', 'uses'])
+    db.create('invites',     ['inviteID', 'username', 'classID', 'expiration_time', 'uses'])
 
-    db.create('users',       ['userID',  'username', 'password'])
-    db.create('colours',     ['userID',  'r', 'g', 'b'])
-    db.create('cookies',     ['userID',  'cookie'])
+    db.create('users',       ['username',  'nickname', 'password'])
+    db.create('colours',     ['username',  'r', 'g', 'b'])
+    db.create('cookies',     ['username',  'cookie'])
 
     db.create('classes',     ['classID', 'classname'])
-    db.create('userclasses', ['classID', 'userID'])
+    db.create('userclasses', ['classID', 'username'])
 
     db.create('channels',    ['channelID', 'channelname',  'public'])
     db.create('permissions', ['channelID', 'classID', 'r', 'w', 'x'])
 
-    db.create('messages',    ['messageID', 'channelID', 'userID', 'replyID', 'keyID', 'mtime', 'mtype', 'data'])
+    db.create('messages',    ['messageID', 'channelID', 'username', 'replyID', 'keyID', 'mtime', 'mtype', 'data'])
     db.create('files',       ['fileID', 'filename', 'size'])
 
 
@@ -163,6 +163,9 @@ def init_chat(chatroomID: str, chat_name: str):
     # Add default settings
     assert(db.insert('settings', ('chat_name', chat_name, "str"))[1] == 200)
     assert(db.insert('settings', ('min_password_length', 10, "int"))[1] == 200)
+
+    # Add constructor class
+    assert(db.insert('classes', ('0', "constructor"))[1] == 200)
 
     db.commit()
     db.close()
@@ -211,7 +214,7 @@ def fetch_all_settings(chatroomID: str):
 
 
 #-------------------------------------------------------------- Messages -----------------------
-def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, keyID: str, mtype: str, data: str):
+def write_message(chatroomID: str, channelID: str, username: str, replyID: str, keyID: str, mtype: str, data: str):
     """ Write message into the messages table """
 
     # get db
@@ -223,7 +226,7 @@ def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, ke
 
 
     # write message
-    status = db.insert("messages", (messageID, channelID, userID, replyID, keyID, mtime, mtype, data))[1]
+    status = db.insert("messages", (messageID, channelID, username, replyID, keyID, mtime, mtype, data))[1]
     if status != 200:
         return "Failed to write message.", 500
 
@@ -232,7 +235,7 @@ def write_message(chatroomID: str, channelID: str, userID: str, replyID: str, ke
 
     # Client guy asked for the same message formatting as get returns,
     #  might as well use the same function.
-    return helpers.db_format_message([(messageID, channelID, userID, replyID, keyID, mtime, mtype, data)]), 200
+    return helpers.db_format_message([(messageID, channelID, username, replyID, keyID, mtime, mtype, data)]), 200
 
 def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
     """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
@@ -333,7 +336,7 @@ def fetch_all_channels(chatroomID: str):
 
     return channels_list, 200
 
-def get_channel_permissions(chatroomID: str, channelID: str, userID: str):
+def get_channel_permissions(chatroomID: str, channelID: str, username: str):
     """
         Attempts to get permission information on a channel from the perspective of a specified user.
 
@@ -351,7 +354,7 @@ def get_channel_permissions(chatroomID: str, channelID: str, userID: str):
         }, status
     """
     # get db
-    # db = database(chatroomID)
+    db = database(chatroomID)
 
     # get channel info
     channel_obj, status = fetch_channel(chatroomID, channelID)
@@ -372,8 +375,11 @@ def get_channel_permissions(chatroomID: str, channelID: str, userID: str):
             }
     }
 
-    # Return all permissions if uid==0 to not compute stuff uselessly.
-    if userID == "0":
+    # check if user is the constructor of the chatroom, because he can then read everything
+    cursor, status = db.select('username', 'userclasses', 'classID=?', ('0',))
+    if status != 200: return cursor, status
+    constructor = cursor.fetchall()[0][0]
+    if constructor == username:
         toret['permissions']['x'] = True
         return toret, 200
 
@@ -389,7 +395,7 @@ def get_channel_permissions(chatroomID: str, channelID: str, userID: str):
 
     return toret, 200
 
-def can_read(chatroomID: str, channelID: str, userID: str):
+def can_read(chatroomID: str, channelID: str, username: str):
     """
         This function implements a small speed boost for public channels in contrast with get_channel_permissions when checking if a user can read
 
@@ -408,19 +414,16 @@ def can_read(chatroomID: str, channelID: str, userID: str):
         return True, 200
 
 
-    # constructor can always read
-    if userID == "0":
-        return True, 200
-
 
     # if above doesnt match then just return whatever the slower function returns
-    permissions, status = get_channel_permissions(chatroomID, channelID, userID)
+    permissions, status = get_channel_permissions(chatroomID, channelID, username)
     if status != 200:
         return permissions, status
 
     return permissions['permissions']['r'], 200
 
-def get_readable_channels(chatroomID: str, userID: str):
+
+def get_readable_channels(chatroomID: str, username: str):
     """
         Gets a list of all channels that are readable
 
@@ -440,7 +443,7 @@ def get_readable_channels(chatroomID: str, userID: str):
 
     new_channels = []
     for channel in channels:
-        if can_read(chatroomID, channel['channelID'], userID)[0]:
+        if can_read(chatroomID, channel['channelID'], username)[0]:
             new_channels.append(channel)
 
     return new_channels, 200
@@ -472,7 +475,7 @@ def add_channel(chatroomID: str, channel_name: str, is_public: bool):
 
 
 #-------------------------------------------------------------- Users -----------------------
-def write_user(chatroomID: str, username: str, password: str):
+def write_user(chatroomID: str, username: str, nickname: str, password: str):
     """ write user to database """
 
     # hash password
@@ -483,44 +486,38 @@ def write_user(chatroomID: str, username: str, password: str):
     db = database(chatroomID)
 
 
-    # Check if there are any other users already in the chatroom.
-    # If this is the first user then they get uid 0,
-    # else they get a randomly generated uuid
+    # Check if this is the first user in the chatrtoom.
+    # If this is the case then assign the constructor rank to the user
     users, status = db.select("*", "users")
     if status != 200:
         return "Internal database error while checking users", status
-
-
-    # assign userID
     if len(users) < 1:
-        userID = "0"
-    else:
-        userID = security.gen_uuid()
+        db.insert('userclasses', ('0', username))
 
 
     # save details of user
-    res, status = db.insert('users', (userID, username, password))
+    res, status = db.insert('users', (username, nickname, password))
     if status != 200:
         return f"internal database error while saving user credientials.", status
 
 
     # set user colour
-    res, status = db.insert('colours', (userID, None,None,None))
+    res, status = db.insert('colours', (username, None,None,None))
     if status != 200:
         return f"internal database error while setting user colour.", status
 
     db.commit()
     db.close()
-    return userID, 200
+    return "OK", 200
 
-def fetch_user_creds(chatroomID: str, userID: str):
+def fetch_user_creds(chatroomID: str, username: str):
     """
-        If user exists, fetch all their username and password.
+        If user exists, fetch all their nickname and password.
 
     return:
         {
-                "userID": "0 || UUID",
-                "username": "string",
+                "username": "0 || UUID",
+                "nickname": "string",
                 "password": "hash"
                 }
     """
@@ -529,7 +526,7 @@ def fetch_user_creds(chatroomID: str, userID: str):
     db = database(chatroomID)
 
     # get info on user
-    info, status = db.select("*", "users", "userID=?", (userID,))
+    info, status = db.select("*", "users", "username=?", (username,))
     if status != 200:
         return "Internal database error, failed to stat user.", 500
 
@@ -544,23 +541,23 @@ def fetch_user_creds(chatroomID: str, userID: str):
 
 
     retobj = {
-            "userID": info[0],
-            "username": info[1],
+            "username": info[0],
+            "nickname": info[1],
             "password": info[2]
             }
 
     db.close()
     return retobj, 200
 
-def fetch_user(chatroomID: str, userID: str):
+def fetch_user(chatroomID: str, username: str):
     """
         Fetch all 'public' data about a user.
         Public data includes all information other than the password or cookies.
 
         return:
             {
-                userID: '0' || 'UUID',
-                username: "string",
+                username: '0' || 'UUID',
+                nickname: "string",
                 colour: {
                     r: 0,
                     g: 0,
@@ -570,13 +567,13 @@ def fetch_user(chatroomID: str, userID: str):
     """
 
     # Re-using functions is neat. :)
-    usercreds, status = fetch_user_creds(chatroomID, userID)
+    usercreds, status = fetch_user_creds(chatroomID, username)
     if status != 200: usercreds, status
 
 
     db = database(chatroomID)
 
-    colours, status = db.select("*", "colours", "userID=?", (userID,))
+    colours, status = db.select("*", "colours", "username=?", (username,))
     if status != 200:
         return "Internal database error while getting user colours", 500
 
@@ -597,8 +594,8 @@ def fetch_user(chatroomID: str, userID: str):
 
 
     toret = {
-            "userID": userID,
-            "username": usercreds['username'],
+            "username": username,
+            "nickname": usercreds['nickname'],
             "colour": colour
             }
 
@@ -611,12 +608,12 @@ def fetch_user(chatroomID: str, userID: str):
 
 
 #-------------------------------------------------------------- Cookies -----------------------
-def store_cookie(chatroomID: str, userID: str, cookie: str):
+def store_cookie(chatroomID: str, username: str, cookie: str):
     """ Writes a cookie to the database """
 
     db = database(chatroomID)
 
-    status = db.insert('cookies', (userID, cookie))[1]
+    status = db.insert('cookies', (username, cookie))[1]
     if status != 200:
         return "Internal database error while setting cookie.", 500
 
@@ -625,12 +622,12 @@ def store_cookie(chatroomID: str, userID: str, cookie: str):
     db.close()
     return "OK", 200
 
-def get_cookies(chatroomID: str, userID: str, cookie: str):
+def get_cookies(chatroomID: str, username: str, cookie: str):
     """ Get all cookies associated with a user. """
 
     db = database(chatroomID)
 
-    cookies, status = db.select("cookie", "cookies", "userID=?", (userID,))
+    cookies, status = db.select("cookie", "cookies", "username=?", (username,))
     if status != 200:
         return "Internal database error while getting cookies.", 500
 
@@ -645,14 +642,14 @@ def get_cookies(chatroomID: str, userID: str, cookie: str):
 
 
 #-------------------------------------------------------------- Invites -----------------------
-def write_invite(chatroomID: str, userID: str, classID: str, expiration_time: float, uses: int):
+def write_invite(chatroomID: str, username: str, classID: str, expiration_time: float, uses: int):
     """ Generates invite and saves it in the invites databased """
 
     inviteID = security.gen_uuid()
 
     db = database(chatroomID)
 
-    status = db.insert('invites', (inviteID, userID, classID, expiration_time, uses))[1]
+    status = db.insert('invites', (inviteID, username, classID, expiration_time, uses))[1]
     if status != 200:
         return "Internal database error while saving invite", 500
 
@@ -679,7 +676,7 @@ def get_invite(chatroomID: str, inviteID: str) -> dict:
 
         inviteData = {
                 "inviteID":        inviteData[0],
-                "userID":          inviteData[1],
+                "username":          inviteData[1],
                 "classID":         inviteData[2],
                 "expiration-time": inviteData[3],
                 "uses":            inviteData[4]
