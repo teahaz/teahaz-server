@@ -124,6 +124,7 @@ type: obj (dict)
 The colour object represents a user settable colour.
 The colour is broken down into rgb values, each value can have an integer from 0-255 or `null` for unset.
 
+
 ```js
         colour: {
             r: int || null,
@@ -153,7 +154,32 @@ This is the body of a message. It can hold multiple values, including:
 * UUID in the case of a file, this UUID would be a fileID for a file that got sent to the server.
 
 
+### uses
+type: int
+A variable used with invites. This specifies how many times an invite can be used. If it is equal to 0 then the invite is expired.
+It is also decremented by one every time someone uses the invite.
 
+
+### expiration-time
+type: float (epoch time)
+This date represents when an invite expires. Invites cannot be used after their expiration time has passed.
+
+
+## settings
+type: array of objects (list of dicts)
+Chatroom settings are stored as a list of objects because they will often change and this way a client can dynamically display them instead of issueing updates all the time.
+
+#### sname
+Represents the name (title) of a setting.
+
+#### svalue
+Value that the setting is set to.
+
+#### stype
+Data type of the setting, this can help clients automatically validate inputs. Also allows clients to automatically use toggles for boolian values.
+
+
+<br />
 <br />
 
 other information
@@ -213,10 +239,12 @@ Hopefully I didnt miss anything.
 More detail on methods
 ======================
 
+<br />
+
 ## chatroom
 url: `/api/v0/chatroom`
 
-### post
+### - post
 action: Create a new chatroom.
 - [x] Method is functional.
 - [x] Method is finished.
@@ -256,24 +284,26 @@ example data returned:
 
 <br />
 
-### get
+### - get
 action: Get information about a chatroom.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
-### delete
+### - delete
 action: Delete a chatroom.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
 
+<br />
+<br />
 
 ## login
 url: `/api/v0/login/<chatroomID>`
 
-### post
+### - post
 action: Login to a chatroom.
 - [x] Method is functional.
 - [x] Method is finished.
@@ -320,7 +350,7 @@ example data returned:
 ```
 
 
-### get
+### - get
 action: Check if you are logged in.
 - [x] Method is functional.
 - [x] Method is finished.
@@ -338,7 +368,7 @@ There is no useful data returned by this, other than a status code to indicate w
 status code 200 == logged in
 status code 401 == not logged in
 
-### delete
+### - delete
 action: Delete user account.
 - [ ] Method is functional.
 - [ ] Method is finished.
@@ -346,12 +376,14 @@ action: Delete user account.
 
 
 
+<br />
+<br />
 
 
 ## users
 url: `/api/v0/users/<chatroomID>`
 
-### get
+### - get
 action: Get all users of a chatroom
 - [x] Method is functional.
 - [ ] Method is finished.
@@ -380,31 +412,34 @@ example return:
     }
 ]
 ```
-### post
+### - post
 action: Update personal information
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
 
-### put
+### - put
 action: Update some other users information.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
 
-### delete
+### - delete
 action: Kick user.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
 
+<br />
+<br />
+
 ## channles
 url: `/api/v0/channels/<chatroomID>`
 
-### post
+### - post
 action: Create a new channel
 - [x] Method is functional.
 - [ ] Method is finished.
@@ -433,7 +468,7 @@ example return:
 }
 ```
 
-### get
+### - get
 action: Get all channels the user has read access to
 - [x] Method is functional.
 - [ ] Method is finished.
@@ -474,17 +509,19 @@ example return:
 
 ```
 
-# delete
+### - delete
 action: Delete a channel.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
+<br />
+<br />
 
 ## messages
 url: `/api/v0/messages/<chatroomID>`
 
-### post
+### - post
 action: send message to chatroom/channel
 - [x] Method is functional.
 - [ ] Method is finished.
@@ -508,664 +545,181 @@ example response:
 }
 ```
 
-### get
+### - get
 action: Get message
 - [x] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
+
+
+There are 2 main ways to get messages:
+- you can get all messages since \<time\>
+- You can get \<count\> number of messages. (optionally with a starting time).
+
+<br/>
+
+1. get since
+
+
+
 needed data:
 ```
     userID: "UUID (str) || '0'",
+    get-method: 'since',
 
-    count: int <100           (optional),
-    time: float (time.time()) (optional),
+    time: float (time.time())
+
     channelID: "UUID (str)"   (optional)
 ```
 
-By default this method returns the 10 latest messages, looking in all channels that are available to the user.
+
+<br/>
+<br/>
+
+2. get count
+```
+    userID: "UUID (str) || '0'",
+    get-method: 'count',
+
+    count: int (optional, defaults to 10)
+    time: float (time.time()) (optional, defaults to now)
+
+    channelID: "UUID (str)"   (optional)
+```
 
 optional arguments:
-* count:
-type: int
-The number of messages to be returned. The current maximum is 100
-
-* time:
-type: float
-If this is set then the server only looks for messages that got sent before the `time` varibale. (epoch time format)
-
 
 * channelID
 type: "UUID (str)"
 If this is set then the server will only look in the specified channel for messages.
 
 
-### delete
+### - delete
 action: Delete a message.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
 
-### put
+### - put
 action: Update (edit) a message.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
+<br />
+<br />
 
 ## files
-### get
+### - get
 action: Download a file.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
-### post
+### - post
 action: Upload a file.
 - [ ] Method is functional.
 - [ ] Method is finished.
 - [ ] Sets cookie 
 
 
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--
-docs of /api/v0
-==============
-
-## Table of Contents
-1. [/message/](#messages)
-2. [/file/](#files)
-3. [/chatroom/](#chatrooms)
-    - [Creating a new chatroom](#Creating-a-new-chatroom)
-5. [/invites/](#invites)
-    - [Creating an invite](#Creating-an-invite)
-    - [Using an invite](#Using-an-invite)
-
-
-
-
-
-messages
-========
-The messages object representes the man stream of data that the client needs to be aware of. This includes messages, files, system messages, etc.
-The server currently stores 9 values for each message:
-
-* time
-    - the time when the message was sent
-* messageId
-    - a unique Id for each message assigned by the server
-* replyId
-    - An Id that can be set by the user to any other message's Id
-    - The value should be `null` if the message is not a reply to another message
-* username
-    - The username of the person who sent the message
-* nickname
-    - The nickname/display name of the user who sent the message
-* type
-    - The type of the message
-    - supported types:
-        - text
-        - file: file sent by user
-        - system: automatic messages from the server, depending on userconfig these should be displayed because they could have security impacts
-        - system-silent: same as above but not so relevant, probably should not be displayed (tho should be accesible to the user, either by toggle or a sperate screen)
-        - delete: A message has been deleted, It should be removed from the local cache aswell
-* message
-    - The text/body of the message
-    - This will be encrypted
-* fileId
-    - The id of a file sent
-    - This id is used as a filename on the server side, and is needed to download any file
-* filename
-    - The original filename of a file
-
-
-### Types of messages
-
-####  text:
-A standard text/message from a user.
-
-example:
-```json
-// following is an example of a message, and a reply to the first message
-[
-    { 
-        "time": 1618262186.309995,
-        "messageId": "5730800e-9bd4-11eb-acec-b42e99435986",
-        "replyId": null,
-        "username": "cool person",
-        "nickname": "cool displayname",
-        "type": "text",
-        "message": "QWNjb3JkaW5nIHRvIGFsbCBrbm93biBsYXdzCm9mIGF2aWF0aW9u",
-        "fileId": null,
-        "filename": null,
-        "filesize": null
-    },
-    {
-        "time": 1618262875.8404057,
-        "messageId": "f22e7b00-9bd5-11eb-a872-b42e99435986",
-        "replyId": "5730800e-9bd4-11eb-acec-b42e99435986",
-        "username": "a",
-        "nickname": "a",
-        "type": "text",
-        "message": "dGhlcmUgaXMgbm8gd2F5IGEgYmVlCnNob3VsZCBiZSBhYmxlIHRvIGZseS4=",
-        "fileId": null,
-        "filename": null,
-        "filesize": null
-    }
-]
-```
-
-<br />
-<br />
-
-#### delete:
-When a message is deleted it gets removed from the database but could still be in a users cache. This message is an indicaton to the clent that it should remove the message.
-(this message probably shouldnt be displayed to the end user)
-
-
-example:
-```json
-[
-    {
-        "time": 1618263099.53122,
-        "messageId": "778300f0-9bd6-11eb-93de-b42e99435986",
-        "replyId": null,
-        "username": "a",
-        "nickname": "a",
-        "type": "delete",
-        "message": "f22e7b00-9bd5-11eb-a872-b42e99435986",
-        "fileId": null,
-        "filename": null,
-        "filesize": null
-    }
-]
-```
-
-other types have not yet been implemented
-
-
-
-<br />
-<br />
-
-Getting all messages since \<time\>
----------------------------------
-This method should return all messages in a chatroom that were sent since the time variable. This method serves as the primary way to get messages back form the api, as it allows users to get many messages at once.
-
-
-### Endpoints:
-* GET: `http(s)://url:port/api/v0/messasge/<chatroomId>`
-`<chatroomId>` should be replaced by the ID of the chatroom
-<br />
-
-
-### Required fields:
-* username
-* chatroomId
-* time
-    - The time variable should be in epoch/unix time.
-
-<br />
-
-### Code example:
-
-```py
-
-url = http:/<server url>/api/v0/message/" + chatroomId
-
-headers = {
-    "username": "best_user",
-    "time": "946681200.23243"
-}
-
-
-#NOTE get methods need to have data in the header field and not json
-res = session.get(url=url, headers=headers)
-
-print("status_code: ", res.status_code)
-print(res.text)
-```
-
-<br />
-
-
-### Example output:
-
-```json
-[
-    {
-        "time": 1617028913.9485404,
-        "messageId": "e7944966-909c-11eb-a14c-b42e99435986",
-        "replyId": null,
-        "username": "a",
-        "nickname": "a",
-        "type": "text",
-        "message": "QWNjb3JkaW5nIHRvIGFsbCBrbm93biBsYXdzIG9mIGF2aWF0aW9uLCB0aGVyZSBpcyBubyB3YXkgYSBiZWUgc2hvdWxkIGJlIGFibGUgdG8gZmx5Lg==",
-        "fileId": null,
-        "filename": null
-    },
-    {
-        "time": 1617028927.8282716,
-        "messageId": "efda2a96-909c-11eb-bd2f-b42e99435986",
-        "replyId": null,
-        "username": "a",
-        "nickname": "a",
-        "type": "text",
-        "message": "SXRzIHdpbmdzIGFyZSB0b28gc21hbGwgdG8gZ2V0IGl0cyBmYXQgbGl0dGxlIGJvZHkgb2ZmIHRoZSBncm91bmQu",
-        "fileId": null,
-        "filename": null
-    },
-    {
-        "time": 1617028941.5795443,
-        "messageId": "f80c717e-909c-11eb-b2a3-b42e99435986",
-        "replyId": null,
-        "username": "a",
-        "nickname": "a",
-        "type": "text",
-        "message": "VGhlIGJlZSwgb2YgY291cnNlLCBmbGllcyBhbnl3YXkgYmVjYXVzZSBiZWVzIGRvbid0IGNhcmUgd2hhdCBodW1hbnMgdGhpbmsgaXMgaW1wb3NzaWJsZS4g",
-        "fileId": null,
-        "filename": null
-    }
-]
+## invites
+### - get
+action: create an invite
+- [x] Method is functional.
+- [ ] Method is finished.
+- [ ] Sets cookie 
+
+
+needed data:
+```js
+    userID: "UUID (str) || '0'",
+
+    uses: int (optional),
+    expiration-time: float (time.time()) (optional),
 ```
 
 
-
-<br />
-<br />
-
-
-Getting messages by messageId
------------------------------
-This method should return one message, with the messageId that the client supplied. The purpose of this method is to look up individual messages for example as a way to get a reply.
-
-
-
-### Endpoints:
-* GET: `http(s)://url:port/api/v0/message/<chatroomId>`
-`<chatroomId>` should be replaced by the ID of the chatroom
-<br />
-
-### Required fields:
-* username
-* messageId
-* chatroomId
-
-<br />
-
-### Code example:
-
-```py
-
-url = http:/<server url>/api/v0/message/" + chatroomId
-
-headers = {
-    "username": "best_user",
-    "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec"
-}
-
-
-#NOTE get methods need to have data in the header field and not json
-res = session.get(url=url, headers=headers)
-
-print("status_code: ", res.status_code)
-print(res.text)
-```
-
-<br />
-
-### Example output:
-
-```json
-[
-    {
-        "time": 1617019313.8090487,
-        "messageId": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec",
-        "replyId": null,
-        "username": "best_user",
-        "nickname": "best_nickname",
-        "type": "text",
-        "message": "WW91IGhhdmUgbm8gbGlmZSEgWW91IGhhdmUgbm8gam9iLiBZb3UncmUgYmFyZWx5IGEgYmVlIQ==",
-        "fileId": null,
-        "filename": null
-    }
-]
-```
-
-
-Sending messages
-----------------
-
-<br />
-<br />
-<br />
-<br />
-
-
-
-
-
-
-
-
-
-files
-=====
-Uploading a file to a chatroom
-------------------------------
-This method allows the user to upload a file to the chatroom.
-
-### Endpoints:
-* POST: `http(s)://url:port/api/v0/file/<chatroomId>`
-    `<chatroomId>` should be replaced by the ID of the chatroom
-
-<br />
-
-
-### Required fields:
-* username
-* filename
-    - this is the original name of the file being sent.
-    - It will be stored for the recieving client to save the file.
-* data
-
-
-<br />
-
-
-### Implementation details:
-The server only accepts requests that are less than 1mb in size. For this reason larger files have to be split into chunks, that will be individually uploaded. On the last chuk the client will have to set the variable `last` to `true` so the server can finalize the upload. A file will only appear in the messages stream when it has been finalized. Finalized files can no longer be written to by anyone.
-**Note**: The chunk size includes the overhead from encoding and/or encryption
-
-
-<br />
-
-### code example
-
-```py
-import os
-
-url = <server url> + "/api/v0/file/" + chatroomId
-filename = "cool_picture.png"
-
-
-# get length of file
-length = os.path.getsize(filename)
-
-# Calculate chunk size, allowing for the overhead of base64 encoding
-chunk_size = int((1048576*3)/4) -1
-
-# open the file
-f = open(filepath, "rb")
-
-
-
-# start a loop of sending file chunks
-# TODO: finish the notes
-last = False
-while not last:
-        c = f.read(chunk_size)
-
-
-        # check if this will be the last part
-        if len(c) < chunk_size or f.tell() >= length:
-            last = True
-
-
-        data = {
-                "username" : globals()['username'],
-                "filename" : filename, 
-                "fileId"   : fileId,
-                "type"     : 'file',
-                "last"     : last,
-                "data"     : encode_binary(c),
-                "kId"      : None
-                }
-
-
-        # make request
-        response = globals()['s'].post(url, json=data)
-        if response.status_code != 200:
-            break
-        else:
-            print("text")
-            print(response.text)
-            fileId = response.json().get('fileId')
-            print("fileID")
-            print(fileId)
-
-    f.close()
-    # return the response if the loop stopped
-    return response.text, response.status_code
-
-```
-
-Downoading a file from the server
----------------------------------
-Method allows you to download a file from the server
-
-
-### Endpoints:
-* POST: `http(s)://url:port/api/v0/file/<chatroomId>`
-    `<chatroomId>` should be replaced by the ID of the chatroom
-
-
-
-
-
-<!--  The maximum amount of data in one request is 1 megabyte, so files that are larger than this have to be uploaded in chunks, broken into multiple requests -->
-Below this lies the unchecked and potentially harmful land of outdated documentation
-=======================================================================================
-
-chatrooms
-=========
-Creating a new chatroom
------------------------
-Method should create a new chatroom. Chatrooms are in effect their own segregated server-like systems([check out the docs](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs)), which means the user creating a chatroom will have to send all details for registering.
-<br />
-
-### chat defaults:
-* require_email is on
-* Creator becomes chatroom admin
-<br />
-
-### endpoints:
-* POST: `http(s)://url:port/api/v0/chatroom/`
-<br />
-
-### required fields:
-* username
-* email ( the server owner can change whether the chatroom owner needs an email or not )
-* nickname
-* password
-* chatroom_name ( this is not equivalent to the ID, which will be assigned at random )
-<br />
-
-### code example:
-```py
-url = http:/<server url>/api/v0/chatroom/"
-
-# format required data in json format
-data = {
-        "username"      : "me",
-        "email"         : "me@email.com",
-        "nickname"      : "not_me:)",
-        "password"      : "password123",
-        "chatroom_name" : "best chatroom ever"
-        }
-
-# make post request. NOTE: data is sent in the json field 
-res = session_obj.post(url=url, json=data)
-
-print(res.text)
-```
-
-### example output:
-Server returns the ID of the chatroom created
-
-**NOTE**: Due to python being slow at cryptographic operations, this might take a few seconds.
-```json
+example return: 
+```js
 {
-  "chatroom": "8b7f3eba-81b0-11eb-97e5-655df6aeb2ec", 
-  "name": "best chatroom ever"
+  invite: 'teahaz:d2e46916-dd99-11eb-b37b-b42e99435986/d56323a8-dd99-11eb-91b9-b42e99435986',
+  uses: 10,
+  'expiration-time': 1626098634.4710624,
+  inviteID: 'd56323a8-dd99-11eb-91b9-b42e99435986'
 }
+
 ```
 
+## - post
+action: create an invite
+- [x] Method is functional.
+- [ ] Method is finished.
+- [x] Sets cookie 
 
+needed data:
+```js
+    inviteID: "UUID" (str)
 
-
-
-
-
-invites
-=======
-Creating an invite
-------------------
-Creating an invite so other people can join your chatroom
-**NOTE:** On default settings the creator of the invite, has to be admin on the server
-<br />
-
-### endpoints:
-* GET: `http(s)://url:port/api/v0/invite/<chatroomId>`<br />
-`<chatroomId>` should be replaced by the ID of the chatroom
-<br />
-
-### required fields:
-* username
-* expr_time
-    - Expiration time of the invite.
-    - This has to be a date in Epoch time format.
-    - if you dont want the invite to expire then set this to 0.
-* uses
-    - The number of users that can join with this link.
-    - There is no option for unlimited, however there is no upper limit.
-<br />
-
-
-### code example:
-```py
-import time
-url = http(s)://url:port/api/v0/invite/" + chatroomId
-
-data = {
-        "username": username,
-        "expr_time": str(time.time() + 60 * 60 * 24),
-        "uses": str(10)
-        }
-
-#NOTE: In GET requests data has to be sent in the http header
-res = session_obj.get(url=url, headers=data)
-
-print(res.text)
-```
-<br />
-
-### example output:
-Returns the ID of the invite
-```json
-"1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
-```
-**NOTE:** This is probably best returned to the user as `chatroomID/inviteId`
-(**ps**: I will probably change this to an object with `name`, `chatroom` and `inviteID`. Its staying like this bc I only came up with the idea while writing the docs and I dont have energy rn)
-<br />
-<br />
-
-Using an invite
----------------
-Using that invite you found on a shady website.<br />
-(/s Please dont use our project for anything illegal.)<br />
-Chatrooms are in effect their own segregated server-like systems([check out the docs](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs)), which means that when using an Invite you have to send all details for registering
-
-
-### endpoints:
-* POST: `http(s)://url:port/api/v0/invite/<chatroomId>`<br />
-`<chatroomId>` should be replaced by the ID of the chatroom
-<br />
-
-
-### required fields:
-* username
-* email ( the server owner can change whether the chatroom owner needs an email or not )
-* nickname
-* password
-* inviteID
-   - the same invite ID that appeared in section [Creating an invite](#creating-an-invite)
-<br />
-
-
-### code example:
-```py
-url = http://<teahouse server>/api/v0/invite/" + chatroomId
-
-data = {
-        "username"      : "me",
-        "email"         : "me@email.com",
-        "nickname"      : "not_me:)",
-        "password"      : "password123",
-        "inviteID"      : "1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"
-        }
-
-# make post request with data in the json field
-res = session_obj.post(url=url, json=data)
-print(res.text)
+    username: "string"
+    password: "string"
 ```
 
-
-### example output
-returns a json object with the chatroom name and ID
-```json
+example return:
+(all information about a chatroom)
+```js
 {
-    "name": "best chat ever",
-    "chatroom": "47aec55e-7c27-11eb-87af-b5145ad18bcb"
+  userID: 'e9685fc0-dd9a-11eb-8fa6-b42e99435986',
+  chatroomID: 'e4d9e74e-dd9a-11eb-9025-b42e99435986',
+  chatroom_name: 'conv1',
+  channels: [
+    {
+      channelID: 'e4ddeb1e-dd9a-11eb-9025-b42e99435986',
+      channel_name: 'default',
+      public: 1
+    },
+    {
+      channelID: 'e6f32f36-dd9a-11eb-8113-b42e99435986',
+      channel_name: 'memes channel',
+      public: 1
+    }
+  ],
+  settings: [
+    { sname: 'chat_name', svalue: 'conv1', stype: 'str' },
+    { sname: 'min_password_length', svalue: 10, stype: 'int' }
+  ]
 }
+
 ```
--->
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

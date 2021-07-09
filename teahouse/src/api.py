@@ -5,6 +5,7 @@ import time
 import users_th as users
 import dbhandler as database
 import security_th as security
+import global_helpers as helpers
 import filesystem_th as filesystem
 
 
@@ -22,8 +23,13 @@ def create_chatroom(json_data):
 
     # get arguments
     username      = json_data.get('username')
+    nickname      = json_data.get('username')
     password      = json_data.get('password')
     chatroom_name = json_data.get('chatroom_name')
+
+
+    # The nickname argument is optional and if not set it will be the same as username
+    nickname      = (nickname if nickname != None else username)
 
 
     # generate ID for chatroom
@@ -63,59 +69,44 @@ def create_chatroom(json_data):
 
 
     # add user to chatroom
-    userID, status = users.add_user(username, password, chatroomID)
-    if status != 200:
-        return userID, status
+    username, status = users.add_user(chatroomID, username, nickname, password)
+    if status != 200: return username, status
 
 
     # add initial message
-    messageID, status = database.write_message(chatroomID, channelID, userID, None, None, "system", f"Welcome {username}!")
-    if status != 200:
-        return messageID, status
+    messageID, status = database.write_message(chatroomID, channelID, username, None, None, "system", f"Welcome {nickname}!")
+    if status != 200: return messageID, status
 
-
-    toret = {
-            "chatroom_name": chatroom_name,
-            "chatroomID": chatroomID,
-            "channels": [
-                {
-                    "channel_name": 'default',
-                    "channelID": channelID,
-                    "public": True,
-                    "permissions": { "r": True, "w": True, "x": True }
-                    }
-                ],
-            "userID": userID
-            }
-    return toret, 200
+    # return information about the created chatroom
+    return helpers.get_chat_info(chatroomID, username)
 
 def login(chatroomID: str, json_data: dict):
     """ Login to chatroom """
 
     # get arguments
-    userID   = json_data.get('userID')
+    username   = json_data.get('username')
     password = json_data.get('password')
 
     # Make sure all arguments are given
-    required = ['userID', 'password']
-    for i, a in enumerate([userID, password]):
+    required = ['username', 'password']
+    for i, a in enumerate([username, password]):
         if a == None or len(a) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
     # authenticate user
-    res, status = users.auth_user(chatroomID, userID, password)
+    res, status = users.auth_user(chatroomID, username, password)
     if status != 200: return res, status
 
 
     # get all channels for the client
-    channels, status = database.get_readable_channels(chatroomID, userID)
+    channels, status = database.get_readable_channels(chatroomID, username)
     if status != 200: return channels, status
 
 
     # These need to be returned for set_cookie.
     toret = {
             "chatroomID": chatroomID,
-            "userID": userID,
+            "username": username,
             "channels": channels
             }
     return toret, 200
@@ -126,14 +117,17 @@ def login(chatroomID: str, json_data: dict):
 def get_channels(chatroomID: str, json_data: dict):
     """ Get all chatrooms, and their permissions """
 
+    # NOTE replace with global_helpers.get_chat_info
+
+
     # get arguments
-    # Dont have to check userID as its needed for authentication,
+    # Dont have to check username as its needed for authentication,
     #   and it will have already been checked
-    userID = json_data.get('userID')
+    username = json_data.get('username')
 
 
     # get all channels that the user can read
-    channels, status = database.get_readable_channels(chatroomID, userID)
+    channels, status = database.get_readable_channels(chatroomID, username)
     if status != 200: return channels, status
 
 
@@ -143,7 +137,7 @@ def get_channels(chatroomID: str, json_data: dict):
     #   provides the user with some useful information.
     channels_list_with_perms = []
     for channel in channels:
-        channel, status = database.get_channel_permissions(chatroomID, channel['channelID'], userID)
+        channel, status = database.get_channel_permissions(chatroomID, channel['channelID'], username)
         if status != 200: return channels, status
 
         channels_list_with_perms.append(channel)
@@ -155,9 +149,9 @@ def create_channel(chatroomID: str, json_data: dict):
     """ Create a channel """
 
     # get arguments
-    # Dont have to check userID as its needed for authentication,
+    # Dont have to check username as its needed for authentication,
     #   and it will have already been checked
-    userID = json_data.get('userID')
+    username = json_data.get('username')
 
     channel_name = json_data.get('channel_name')
     is_public = True
@@ -171,7 +165,7 @@ def create_channel(chatroomID: str, json_data: dict):
 
     # NOTE currently only the chatroom constructor can add channels,
     #   we should probably change this, and add modifyable classes like discord has.
-    if userID != '0':
+    if username != '0':
         return "You do not have permission to perform this action.\
                     Currently only the chatroom constructor can modify settings.\
                     (this will probably change in the future)", 403
@@ -200,7 +194,7 @@ def send_message(chatroomID: str, json_data: dict):
     mtype     = 'text'
 
     channelID = json_data.get('channelID')
-    userID    = json_data.get('userID')
+    username    = json_data.get('username')
 
     keyID     = None
     mtext     = json_data.get('data')
@@ -208,16 +202,16 @@ def send_message(chatroomID: str, json_data: dict):
 
 
     # Make sure all arguments are given
-    required = ["mtype", "channelID", "userID", "data"]
-    for i, a in enumerate([mtype, channelID, userID, mtext]):
+    required = ["mtype", "channelID", "username", "data"]
+    for i, a in enumerate([mtype, channelID, username, mtext]):
         if a == None:
             return f"No value supplied for required field: {required[i]}.", 400
 
 
     # Validate user input
-    values = ["replyID", "channelID" ,"userID"] # , "keyID" ]
+    values = ["replyID", "channelID" ,"username"] # , "keyID" ]
                                                 # If uid is 0 then you dont need to check it.
-    for i, a in enumerate([replyID, channelID, (userID if userID != '0' else None)]):
+    for i, a in enumerate([replyID, channelID, (username if username != '0' else None)]):
         if a != None and not security.is_uuid(a):
             return f"Value for {values[i]} is not a valid ID!", 400
 
@@ -233,7 +227,7 @@ def send_message(chatroomID: str, json_data: dict):
 
 
     # Check if channel exists and that the user has access to it
-    channel_obj, status = database.get_channel_permissions(chatroomID, channelID, userID)
+    channel_obj, status = database.get_channel_permissions(chatroomID, channelID, username)
     if status != 200:
         return channel_obj, status
 
@@ -243,61 +237,105 @@ def send_message(chatroomID: str, json_data: dict):
         return "You do not have permission to write in this channel!", 403
 
 
-    return database.write_message(chatroomID, channelID, userID, replyID, keyID, 'text', mtext)
+    return database.write_message(chatroomID, channelID, username, replyID, keyID, 'text', mtext)
 
 def get_messages(chatroomID: str, json_data: dict):
     """ Get the last x messages since <time> """
 
-    # get data
-    count = json_data.get('count')
-    userID = json_data.get('userID')
-    timebefore = json_data.get('time')
+    # needed/optional data:
+    # Im adding this comment because most other methods
+    #   have all the information at the top, but that
+    #   doesnt make as much sense here.
+
+    # data:
+        # username
+        # get-method
+        # channelID (optional)
+        # count (optional)
+        # time (optional)
+
+    username = json_data.get('username')
+
+
+    # If channelID is set then get messages from just that one channel,
+    #  else get from all readable channels.
     channelID = json_data.get('channelID')
-
-
-    # set default values
-    count = (count if count != None else 10)
-    timebefore = (timebefore if timebefore != None else time.time())
-
 
     # validate if channelID is of a proper UUID format
     if channelID != None and not security.is_uuid(channelID):
         return "ChannelID is not a valid UUID", 400
 
-
-    # make sure variables have the right type
-    try:
-        # IMPORTANT count has to be checked because it can lead to sqli
-        count = int(count)
-    except Exception as e:
-        return f"Could not convert variable 'count' to an integer: {e}", 400
-
-    try:
-        timebefore = float(timebefore)
-    except Exception as e:
-        return f"Could not convert variable 'timebefore' to float: {e}", 400
-
-
-    # if a user specified a channel to get from, then add that into a 1 element list
+    # ChannelID is set, get list of 1 element
     if channelID != None and security.is_uuid(channelID):
-        channels = [{
-                "channelID": channelID
-                }]
+        channels = [{ "channelID": channelID }]
 
-
-    # if user did not specify any channel then get a list of readable channels
+    # ChannelID is not set, get all readable
     else:
-        channels, status = database.get_readable_channels(chatroomID, userID)
+        channels, status = database.get_readable_channels(chatroomID, username)
         if status != 200: return channels, status
 
-
-    # get only the id of each channel
+    # Get a list of **only** the channelIDs of needed channels.
     channel_ids = []
     for i in channels:
         channel_ids.append(i['channelID'])
 
 
-    return database.get_messages(chatroomID, count, timebefore, channel_ids)
+
+
+    # Get method specifies how you want to get information from the server.
+    #   Options for this variable are:
+    #       - since  || 0
+    #        get all messages since <time>
+    #       - count  || 1
+    #        Get <count> number of messages.
+    #        This method also supports the time argument to specify a starting time.
+    get_method = json_data.get('get-method')
+
+
+    if get_method in ['since', 0]:
+        # get since <time>
+
+        timesince = json_data.get('time')
+
+        # make sure variables have the right type
+        try:
+            timesince = float(timesince)
+        except Exception as e:
+            return f"Could not convert variable 'time' to float: {e}", 400
+
+        return database.get_messages_since(chatroomID, timesince, channel_ids)
+
+
+    elif get_method in ['count', 1]:
+        # get <count> messages (optionally starting from <time>)
+
+        count = json_data.get('count')
+        timebefore = json_data.get('time')
+
+        # set default values
+        count = (count if count != None else 10)
+            # timebefore defaults to now if we want messages starting from now.
+        timebefore = (timebefore if timebefore != None else time.time())
+
+
+        # make sure variables have the right type
+        try:
+            count = int(count)
+        except Exception as e:
+            return f"Could not convert variable 'count' to an integer: {e}", 400
+
+        try:
+            timebefore = float(timebefore)
+        except Exception as e:
+            return f"Could not convert variable 'time' to float: {e}", 400
+
+
+        return database.get_messages_count(chatroomID, count, timebefore, channel_ids)
+
+
+    else:
+        print('get_method: ',get_method , type(get_method))
+        return "Invalid or unset 'get-method'", 400
 
 
 
@@ -306,8 +344,8 @@ def create_invite(chatroomID: str, json_data: dict):
     """ Create an invite for a chatroom """
 
     uses       = json_data.get('uses')
-    userID     = json_data.get('userID')
-    bestbefore = json_data.get('bestbefore')
+    username     = json_data.get('username')
+    expiration_time = json_data.get('expiration-time')
 
     # placeholder for when classes work
     classID    = None
@@ -321,18 +359,18 @@ def create_invite(chatroomID: str, json_data: dict):
         return f"Could not convert variable 'uses' to integer: {e}", 400
 
     try:
-        bestbefore = (float(bestbefore) if bestbefore != None else time.time() + 60*60*24*7) 
+        expiration_time = (float(expiration_time) if expiration_time != None else time.time() + 60*60*24*7) 
     except Exception as e:
-        return f"Could not convert variable 'bestbefore' to float: {e}", 400
+        return f"Could not convert variable 'expiration-time' to float: {e}", 400
 
 
     # NOTE this should be updated when classes and chatroom settings work
-    if userID != '0':
+    if username != '0':
         return "Permission denied: you do not have permission to create an invite", 403
 
 
     # save invite
-    inviteID, status = database.write_invite(chatroomID, userID, classID, bestbefore, uses)
+    inviteID, status = database.write_invite(chatroomID, username, classID, expiration_time, uses)
     if status != 200: return inviteID, status
 
 
@@ -343,17 +381,15 @@ def create_invite(chatroomID: str, json_data: dict):
     return {
             "invite": invite_code,
             "uses": uses,
-            "bestbefore": bestbefore,
+            "expiration-time": expiration_time,
             "inviteID": inviteID
             }, 200
-
-
 
 def use_invite(chatroomID: str, json_data: dict):
     """ Process an invite """
 
-    userID = security.gen_uuid()
-    username = json_data.get('username')
+    username = security.gen_uuid()
+    nickname = json_data.get('nickname')
     password = json_data.get('password')
     inviteID = json_data.get('inviteID')
 
@@ -362,8 +398,8 @@ def use_invite(chatroomID: str, json_data: dict):
         return "Invalid invite ID sent to server. Must be uuid!", 400
 
 
-    required = ['username', 'password', 'inviteID']
-    for i, a in enumerate([username, password, inviteID]):
+    required = ['nickname', 'password', 'inviteID']
+    for i, a in enumerate([nickname, password, inviteID]):
         if a == None or len(a) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
@@ -373,14 +409,23 @@ def use_invite(chatroomID: str, json_data: dict):
     if inviteInfo['uses'] < 1:
         return "There are no more uses left on this invite", 403
 
-    if time.time() > inviteInfo['bestbefore']:
+    if time.time() > inviteInfo['expiration-time']:
         return "Invite has expired", 403
 
-    res, status = database.update_invite(chatroomID, inviteInfo)
-    return res, status
+
+    # decrement uses
+    uses = inviteInfo['uses']
+    uses = int(uses) - 1
+
+    res, status = database.update_invite(chatroomID, inviteID, inviteInfo['classID'], inviteInfo['expiration-time'],  uses)
+    if status != 200: return res, status
 
 
+    username, status = users.add_user(nickname, password, chatroomID)
+    if status != 200: return username, status
 
+
+    return helpers.get_chat_info(chatroomID, username)
 
 
 
