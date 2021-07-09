@@ -263,7 +263,6 @@ def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_
 
     return helpers.db_format_message(res.fetchall())
 
-
 def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list):
     """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
 
@@ -287,7 +286,32 @@ def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: l
 
     return helpers.db_format_message(cursor.fetchall())
 
+
+
+
 #-------------------------------------------------------------- Channels -----------------------
+def add_channel(chatroomID: str, channel_name: str, is_public: bool):
+    """
+        Add new channel to database
+
+        return:
+            channelID, status
+    """
+
+    # generate channelID
+    channelID = security.gen_uuid()
+
+    # insert into db
+    db = database(chatroomID)
+    res, status = db.insert('channels', (channelID, channel_name, is_public))
+    if status != 200:
+        return res, status
+
+
+    db.commit()
+    db.close()
+    return channelID, 200
+
 def fetch_channel(chatroomID: str, channelID: str):
     """
         If channel exists, the function tries to get information about it.
@@ -376,9 +400,9 @@ def get_channel_permissions(chatroomID: str, channelID: str, username: str):
     }
 
     # check if user is the constructor of the chatroom, because he can then read everything
-    cursor, status = db.select('username', 'userclasses', 'classID=?', ('0',))
-    if status != 200: return cursor, status
-    constructor = cursor.fetchall()[0][0]
+    constructor, status = db.select('username', 'userclasses', 'classID=?', ('0',))
+    if status != 200: return constructor, status
+    constructor = constructor[0][0]
     if constructor == username:
         toret['permissions']['x'] = True
         return toret, 200
@@ -422,7 +446,6 @@ def can_read(chatroomID: str, channelID: str, username: str):
 
     return permissions['permissions']['r'], 200
 
-
 def get_readable_channels(chatroomID: str, username: str):
     """
         Gets a list of all channels that are readable
@@ -448,27 +471,6 @@ def get_readable_channels(chatroomID: str, username: str):
 
     return new_channels, 200
 
-def add_channel(chatroomID: str, channel_name: str, is_public: bool):
-    """
-        Add new channel to database
-
-        return:
-            channelID, status
-    """
-
-    # generate channelID
-    channelID = security.gen_uuid()
-
-    # insert into db
-    db = database(chatroomID)
-    res, status = db.insert('channels', (channelID, channel_name, is_public))
-    if status != 200:
-        return res, status
-
-
-    db.commit()
-    db.close()
-    return channelID, 200
 
 
 
@@ -641,6 +643,7 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
 
 
 
+
 #-------------------------------------------------------------- Invites -----------------------
 def write_invite(chatroomID: str, username: str, classID: str, expiration_time: float, uses: int):
     """ Generates invite and saves it in the invites databased """
@@ -656,7 +659,6 @@ def write_invite(chatroomID: str, username: str, classID: str, expiration_time: 
     db.commit()
     db.close()
     return inviteID, 200
-
 
 def get_invite(chatroomID: str, inviteID: str) -> dict:
     """ Get all stored information about an invite """
@@ -689,7 +691,6 @@ def get_invite(chatroomID: str, inviteID: str) -> dict:
     db.close()
     return inviteData, 200
 
-
 def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time: float, uses: int):
     """ Update information stored on invite """
 
@@ -713,5 +714,25 @@ def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time:
     db.commit()
     db.close()
     return "OK", 200
+
+
+
+
+#-------------------------------------------------------------- Classes -----------------------
+def get_constructor(chatroomID: str):
+    """ 
+        Simple, fast function for gettitng the chatroom constructor
+
+        return:
+            username, status
+    """
+
+    db = database(chatroomID)
+
+
+    constructor, status = db.select('username', 'userclasses', 'classID=?', ('0',))
+    if status != 200: return constructor, status
+
+    return constructor[0][0], 200
 
 
