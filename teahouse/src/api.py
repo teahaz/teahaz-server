@@ -163,9 +163,10 @@ def create_channel(chatroomID: str, json_data: dict):
         return "Value for 'public_channel' has to be boolian!", 400
 
 
-    # NOTE currently only the chatroom constructor can add channels,
-    #   we should probably change this, and add modifyable classes like discord has.
-    if username != '0':
+    constructor, status = database.get_constructor(chatroomID)
+    if status != 200: return constructor, status
+
+    if username != constructor:
         return "You do not have permission to perform this action.\
                     Currently only the chatroom constructor can modify settings.\
                     (this will probably change in the future)", 403
