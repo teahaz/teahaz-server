@@ -210,9 +210,9 @@ def send_message(chatroomID: str, json_data: dict):
 
 
     # Validate user input
-    values = ["replyID", "channelID" ,"username"] # , "keyID" ]
+    values = ["replyID", "channelID"] # , "keyID" ]
                                                 # If uid is 0 then you dont need to check it.
-    for i, a in enumerate([replyID, channelID, (username if username != '0' else None)]):
+    for i, a in enumerate([replyID, channelID]):
         if a != None and not security.is_uuid(a):
             return f"Value for {values[i]} is not a valid ID!", 400
 
@@ -366,7 +366,9 @@ def create_invite(chatroomID: str, json_data: dict):
 
 
     # NOTE this should be updated when classes and chatroom settings work
-    if username != '0':
+    constructor, status = database.get_constructor(chatroomID)
+    if status != 200: return constructor, status
+    if username !=constructor:
         return "Permission denied: you do not have permission to create an invite", 403
 
 
@@ -389,18 +391,22 @@ def create_invite(chatroomID: str, json_data: dict):
 def use_invite(chatroomID: str, json_data: dict):
     """ Process an invite """
 
-    username = security.gen_uuid()
+    username = json_data.get('username')
     nickname = json_data.get('nickname')
     password = json_data.get('password')
     inviteID = json_data.get('inviteID')
+
+
+    # The nickname argument is optional and if not set it will be the same as username
+    nickname      = (nickname if nickname != None else username)
 
 
     if not security.is_uuid(inviteID):
         return "Invalid invite ID sent to server. Must be uuid!", 400
 
 
-    required = ['nickname', 'password', 'inviteID']
-    for i, a in enumerate([nickname, password, inviteID]):
+    required = ['username', 'password', 'inviteID']
+    for i, a in enumerate([username, password, inviteID]):
         if a == None or len(a) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
@@ -409,6 +415,7 @@ def use_invite(chatroomID: str, json_data: dict):
 
     if inviteInfo['uses'] < 1:
         return "There are no more uses left on this invite", 403
+
 
     if time.time() > inviteInfo['expiration-time']:
         return "Invite has expired", 403
@@ -422,7 +429,7 @@ def use_invite(chatroomID: str, json_data: dict):
     if status != 200: return res, status
 
 
-    username, status = users.add_user(nickname, password, chatroomID)
+    username, status = users.add_user(chatroomID, username, nickname, password)
     if status != 200: return username, status
 
 
@@ -438,7 +445,11 @@ def get_users(chatroomID: str, json_data: dict):
     # ofc that would only be available to users that can already view that channel.
 
     # NOTE this only gets a single user rn, but as there are no invites yet its not a huge problem.
-    user_data, status = database.fetch_user(chatroomID, '0')
+    constructor, status = database.get_constructor(chatroomID)
+    if status != 200: return constructor, status
+
+
+    user_data, status = database.fetch_user(chatroomID, constructor)
     return [user_data], 200
 
 

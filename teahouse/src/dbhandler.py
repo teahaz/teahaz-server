@@ -558,7 +558,7 @@ def fetch_user(chatroomID: str, username: str):
 
         return:
             {
-                username: '0' || 'UUID',
+                username: 'string',
                 nickname: "string",
                 colour: {
                     r: 0,

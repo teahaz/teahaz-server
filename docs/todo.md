@@ -5,12 +5,17 @@ Urgent fix for bazsi
 
 
 
+Security testing
+================
+- [ ] check wether you can supply int as arguments for username and nickname and such, and check if that is a problem
+
+
+
+
+
 Unify chatroom information
 ==========================
 login/register returns
-----------------------
-- [ ] Make login and create\_chatroom return the same data as use\_invite. (using the helper function)
-
 
 channels
 --------
@@ -18,6 +23,7 @@ channels
 - [ ] Some sort of unification between get\_readable\_channels and fetch\_all channels.
 - [ ] Sorting out a bunch of other channels mess.
 - [ ] Replace `public` property of channels with `rw` and have that apply by default with all classes overriding it.
+- [ ] Maybe dont replace above for speed idk
 
 
 Speed increase and clarity
@@ -28,3 +34,7 @@ Speed increase and clarity
 Probably but not urgent
 =======================
 - [ ] Remove all instances of `*.ID` to make the namespacing more consistent. (probably replace with snake_case `*._id`.
+
+
+
+
