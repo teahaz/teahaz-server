@@ -1,0 +1,8 @@
+{
+    "public":
+    {
+        "_id": "UUID",
+        "name": "string",
+        "admin": true
+    }
+}

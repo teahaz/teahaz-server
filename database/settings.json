@@ -1,0 +1,20 @@
+{
+    "public":
+    [
+        {
+            "sname": "string",
+            "svalue": "string",
+            "stype": "string"
+        },
+        {
+            "sname": "chatroom_name",
+            "svalue": "conv1",
+            "stype": "string"
+        },
+        {
+            "sname": "min_password_length",
+            "svalue": 10,
+            "stype": "int"
+        }
+    ]
+}
