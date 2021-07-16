@@ -10,6 +10,21 @@ services:
         ports:
             - 13337:13337
 
+        networks:
+            - database
+
+
+    mongodb:
+        image: mongo
+        restart: always
+
+        networks:
+            - database
+
+        volumes:
+            - ./storage/database:/data/db
+
+
     storageserver:
         build: ./storageServer
         volumes:
@@ -17,6 +32,45 @@ services:
             - ./storage/userdata:/usr/src/app/storage/userdata
         ports:
             - 13338:13338
+
+        # environment:
+            # bind_ip: 127.0.0.1
+            # MONGO_INITDB_ROOT_USERNAME: root
+            # MONGO_INITDB_ROOT_PASSWORD: example
+
+networks:
+    database:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # mongo-express:
+    #     image: mongo-express
+    #     restart: always
+    #     ports:
+    #         - 8081:8081
+    #     environment:
+    #         ME_CONFIG_MONGODB_ADMINUSERNAME: root
+    #         ME_CONFIG_MONGODB_ADMINPASSWORD: example
+
+
 
     # healthcheck:
     #     build: ./healthcheck
