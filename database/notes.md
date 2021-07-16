@@ -15,3 +15,27 @@ One way to rate liimit this is to have a maximum of 100 cookies for a user, and 
 Notes about examples
 ====================
 - Every message would have its own document, thus the messages in the `messages.json` file would not be stored in a list as it is there, but rather each message would be their own document.
+
+
+
+
+
+Orgnaisation of collections
+===========================
+
+
+```
+
+                        maindb
+                        /    \
+                       /      \
+                      /        \
+                  multiple chatrooms
+            /    |        |        |    \
+           /     |        |        |     \
+          /      |        |        |      \
+     Users    channels classes invites   messages
+       |         |       |        |          |
+  Individual documents for each user, message, channel, etc
+```
+
