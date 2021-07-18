@@ -1,5 +1,6 @@
 import os
 import time
+import pymongo
 import sqlite3
 
 import security_th as security
@@ -10,6 +11,9 @@ from logging_th import logger
 global log
 log = logger()
 
+
+# make mongodb connection
+mongodb = pymongo.MongoClient('mongodb', 27017)
 
 
 
@@ -26,6 +30,7 @@ class database():
 
 
     def __init__(self, chatroomID: str):
+        log.warn(database, "Depricated database used!")
 
         # cant return in __init__ but make sure that invalid uuid's are not being used
         assert(security.is_uuid(chatroomID))
@@ -128,6 +133,115 @@ class database():
 
 
 #-------------------------------------------------------------- Chatroom -----------------------
+def init_chat_mongo(chatroomID: str, chat_name: str):
+    """ Creating a mongodb database for a new chatroom """
+    log.log(init_chat, f"Creating chatroom {chatroomID}")
+
+    # This line should get a handle for the new database.
+    # note: mongodb doesnt actually create the database,
+    #   or any collections until the first document is inserted into them.
+    db = mongodb[chatroomID]
+
+
+    # insert constructor and default class
+    class_collection = db.classes
+    default_classes = [
+        {
+            "_id": "0",
+            "private":
+            {
+                "admin": True
+            },
+            "public":
+            {
+                "_id": "0",
+                "name": "constructor"
+            }
+        },
+        {
+            "_id": "1",
+            "private":
+            {
+                "admin": False
+            },
+            "public":
+            {
+                "_id": "1",
+                "name": "default"
+            }
+        }]
+    class_collection.insert_many(default_classes)
+
+
+    # Add the default channel
+    channelID = security.gen_uuid()
+    channel_collection = db.channels
+    default_channel = {
+            "_id": channelID,
+            "public":
+            {
+                "_id": channelID,
+                "name": "default",
+                "permissions":
+                {
+                    {
+                        "_id": "1",
+                        "r": True,
+                        "w": True,
+                        "x": False
+                    }
+                }
+            }
+        }
+    channel_collection.insert_one(default_channel)
+
+
+    # Add some default settings
+    settings_collection = db.settings
+    default_settings = [
+            {
+                "_id": "chatroom_name",
+                "public":
+                {
+                    "sname": "chatroom_name",
+                    "svalue": chat_name,
+                    "stype": "int"
+                }
+            },
+            {
+                "_id": "min_password_length",
+                "public":
+                {
+                    "sname": "min_password_length",
+                    "svalue": chat_name,
+                    "stype": "int"
+                }
+            }
+        ]
+    settings_collection.insert_many(default_settings)
+
+
+    # collect data for returning to the user
+    chatroom_data = {
+            "channels": default_channel['public'],
+            "settings":
+            [
+                    default_settings[0]['public'],
+                    default_settings[1]['public']
+            ],
+            "classes":
+            [
+                default_classes[0]['public'],
+                default_classes[1]['public']
+            ]
+        }
+
+    return chatroom_data, 200
+
+
+
+
+
 def init_chat(chatroomID: str, chat_name: str):
     """ Create chatroom database and add tables """
     log.log(init_chat, f"Creating chatroom {chatroomID}")
@@ -170,6 +284,23 @@ def init_chat(chatroomID: str, chat_name: str):
     db.commit()
     db.close()
     return {"channelID": channelID, "channel_name": 'default'}, 200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def check_settings(chatroomID: str, setting_name: str):
