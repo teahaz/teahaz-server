@@ -1,0 +1,18 @@
+{
+    "_id": "UUID (classID)",
+    "public":
+    {
+        "_id": "UUID",
+        "name": "string",
+        "permissions":
+        [
+            {
+                "_id": "UUID (classID)",
+                "r": true,
+                "w": true,
+                "x": false
+            }
+        ]
+    }
+}
+

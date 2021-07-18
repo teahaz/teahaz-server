@@ -1,0 +1,26 @@
+[
+{
+    "public":
+    {
+        "_id": "0",
+        "name": "constructor",
+        "admin": true
+    }
+},
+{
+    "public":
+    {
+        "_id": "1",
+        "name": "default",
+        "admin": false
+    }
+},
+{
+    "public":
+    {
+        "_id": "UUID",
+        "name": "string",
+        "admin": true
+    }
+}
+]
