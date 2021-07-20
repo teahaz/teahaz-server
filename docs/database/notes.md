@@ -24,6 +24,8 @@ Notes about examples
 - The admin keyword in a class is just a shorthand for having the same rights as the constructor. (*although unlike the constructor these can still be kicked by another admin)
 
 
+- Settings still have a list format, that said some settings (ie default_channel) have to be checked to be valid when they are being set
+
 
 Orgnaisation of collections
 ===========================

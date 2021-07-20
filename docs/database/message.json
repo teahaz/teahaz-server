@@ -48,7 +48,7 @@
             "type": "system",
             "action":
             {
-                "type": "newuser",
+                "event_type": "newuser",
                 "user_info":
                 {
                     "username": "string",

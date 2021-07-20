@@ -12,7 +12,6 @@ log = logger()
 def add_user(chatroomID: str, username: str, nickname: str, password: str):
     """ Add user to chatroom. """
 
-
     # make sure password is long enough
     pwlength, status = database.check_settings(chatroomID, "min_password_length")
     if status != 200:
@@ -23,12 +22,12 @@ def add_user(chatroomID: str, username: str, nickname: str, password: str):
 
 
     # save user creds
-    res, status = database.write_user(chatroomID, username, nickname, password)
+    user_data, status = database.write_user(chatroomID, username, nickname, password)
     if status != 200:
-        return res, status
+        return user_data, status
 
 
-    return username, 200
+    return user_data, 200
 
 
 

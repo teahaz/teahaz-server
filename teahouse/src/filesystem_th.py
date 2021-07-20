@@ -45,6 +45,8 @@ def create_chatroom_folders(chatroomID):
     try:
         os.mkdir(f'storage/chatrooms/{chatroomID}')
         os.mkdir(f'storage/chatrooms/{chatroomID}/uploads')
+
+        # NOTE this is no longer needed and just keeping to not crash while we migrate
         open(f"storage/chatrooms/{chatroomID}/main.db", "w+").close()
 
     except Exception as e:

@@ -16,6 +16,11 @@ log = logger()
 mongodb = pymongo.MongoClient('mongodb', 27017)
 
 
+def _gethandle(chatroomID: str):
+    if not security.is_uuid(chatroomID):
+        return "ChatroomID is not a valid uuid", 400
+    return mongodb[chatroomID], 200
+
 
 class database():
     """ Abstraction over database functions """
@@ -133,7 +138,7 @@ class database():
 
 
 #-------------------------------------------------------------- Chatroom -----------------------
-def init_chat_mongo(chatroomID: str, chat_name: str):
+def init_chat(chatroomID: str, chat_name: str):
     """ Creating a mongodb database for a new chatroom """
     log.log(init_chat, f"Creating chatroom {chatroomID}")
 
@@ -154,7 +159,7 @@ def init_chat_mongo(chatroomID: str, chat_name: str):
             },
             "public":
             {
-                "_id": "0",
+                "classID": "0",
                 "name": "constructor"
             }
         },
@@ -166,7 +171,7 @@ def init_chat_mongo(chatroomID: str, chat_name: str):
             },
             "public":
             {
-                "_id": "1",
+                "classID": "1",
                 "name": "default"
             }
         }]
@@ -180,55 +185,55 @@ def init_chat_mongo(chatroomID: str, chat_name: str):
             "_id": channelID,
             "public":
             {
-                "_id": channelID,
+                "channelID": channelID,
                 "name": "default",
                 "permissions":
-                {
+                [
                     {
-                        "_id": "1",
+                        "classID": "1",
                         "r": True,
                         "w": True,
                         "x": False
                     }
-                }
+                ]
             }
         }
     channel_collection.insert_one(default_channel)
 
 
     # Add some default settings
-    settings_collection = db.settings
-    default_settings = [
+    chatroom_collection = db.chatroom
+    default_settings = {
+            "_id": str(chatroomID),
+            "public":
             {
-                "_id": "chatroom_name",
-                "public":
-                {
-                    "sname": "chatroom_name",
-                    "svalue": chat_name,
-                    "stype": "int"
-                }
-            },
-            {
-                "_id": "min_password_length",
-                "public":
-                {
-                    "sname": "min_password_length",
-                    "svalue": chat_name,
-                    "stype": "int"
-                }
+                "settings":
+                [
+                    {
+                        "sname": "chatroom_name",
+                        "svalue": str(chat_name),
+                        "stype": "string"
+                    },
+                    {
+                        "sname": "min_password_length",
+                        "svalue": 10,
+                        "stype": "int"
+                    },
+                    {
+                        "sname": "default_channel",
+                        "svalue": channelID,
+                        "stype": "string"
+                    }
+                ]
             }
-        ]
-    settings_collection.insert_many(default_settings)
+        }
+    chatroom_collection.insert_one(default_settings)
 
 
     # collect data for returning to the user
     chatroom_data = {
-            "channels": default_channel['public'],
-            "settings":
-            [
-                    default_settings[0]['public'],
-                    default_settings[1]['public']
-            ],
+            "channels": [default_channel['public']],
+            "settings": default_settings['public']['settings'],
             "classes":
             [
                 default_classes[0]['public'],
@@ -242,68 +247,28 @@ def init_chat_mongo(chatroomID: str, chat_name: str):
 
 
 
-def init_chat(chatroomID: str, chat_name: str):
-    """ Create chatroom database and add tables """
-    log.log(init_chat, f"Creating chatroom {chatroomID}")
-
-    # Get db object
-    db = database(chatroomID)
-    if not db.exists:
-        return f"Chatroom: {chatroomID}, does not exist!", 404
-
-
-    # add tables
-    db.create('settings',    ['sname',   'svalue', 'stype'])
-    db.create('invites',     ['inviteID', 'username', 'classID', 'expiration_time', 'uses'])
-
-    db.create('users',       ['username',  'nickname', 'password'])
-    db.create('colours',     ['username',  'r', 'g', 'b'])
-    db.create('cookies',     ['username',  'cookie'])
-
-    db.create('classes',     ['classID', 'classname'])
-    db.create('userclasses', ['classID', 'username'])
-
-    db.create('channels',    ['channelID', 'channelname',  'public'])
-    db.create('permissions', ['channelID', 'classID', 'r', 'w', 'x'])
-
-    db.create('messages',    ['messageID', 'channelID', 'username', 'replyID', 'keyID', 'mtime', 'mtype', 'data'])
-    db.create('files',       ['fileID', 'filename', 'size'])
-
-
-    # Add 'default' to channels
-    channelID = security.gen_uuid()
-    assert(db.insert('channels', (channelID, 'default', True))[1] == 200)
-
-    # Add default settings
-    assert(db.insert('settings', ('chat_name', chat_name, "str"))[1] == 200)
-    assert(db.insert('settings', ('min_password_length', 10, "int"))[1] == 200)
-
-    # Add constructor class
-    assert(db.insert('classes', ('0', "constructor"))[1] == 200)
-
-    db.commit()
-    db.close()
-    return {"channelID": channelID, "channel_name": 'default'}, 200
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def check_settings(chatroomID: str, setting_name: str):
+    """ Fetch the setting value corresponding to a setting name from database"""
+
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
+
+    document = db.chatroom.find_one()
+    print('document: ',document , type(document))
+    settings = document['public']['settings']
+
+    for setting in settings:
+        if setting.get('sname') == setting_name:
+            return setting.get('svalue'), 200
+
+    return "No such setting", 400
+
+
+
+
+
+def old_check_settings(chatroomID: str, setting_name: str):
     """ From settings table fetch setting value corresponding to supplied setting name """
 
     db = database(chatroomID)
@@ -318,6 +283,7 @@ def check_settings(chatroomID: str, setting_name: str):
 
     db.close()
     return data[0][0], 200
+
 
 
 def fetch_all_settings(chatroomID: str):
@@ -345,28 +311,58 @@ def fetch_all_settings(chatroomID: str):
 
 
 #-------------------------------------------------------------- Messages -----------------------
-def write_message(chatroomID: str, channelID: str, username: str, replyID: str, keyID: str, mtype: str, data: str):
-    """ Write message into the messages table """
+def write_message_event(chatroomID: str, mtype: str, data: dict):
+    # NOTE: talk to bazsi about this
+    # Should messages include userdata and channel/permission data embedded into them.
+    # pros:
+    #     - much much faster
+    #     - following the "acces together --> store together" mongodb paradime
+    #     - much easier to work with
+    #
+    # cons:
+    #     - Once a message is sent nothing will change on it,
+    #         this means that if someone changes their nickname then it wont change in old messages.
+    #         Same goes for permissions, you wont be able to revoke a users permission to a message
+    #         they once had access to. (this second part makes sense tho as some clients may save them anyway)
+    """ Write message into the messages collection """
 
     # get db
-    db = database(chatroomID)
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
 
     # get id and time
-    mtime = time.time()
     messageID = security.gen_uuid()
 
 
-    # write message
-    status = db.insert("messages", (messageID, channelID, username, replyID, keyID, mtime, mtype, data))[1]
+    # get default channel
+    channelID, status = check_settings(chatroomID, "default_channel")
     if status != 200:
-        return "Failed to write message.", 500
+        return f"Internal database error while getting default channel {channelID}", 500
 
-    db.commit()
-    db.close()
+    # format message
+    message_obj ={
+            "_id": messageID,
+            "private":
+            {
+                "chanread":
+                [
+                    '1' # can read 1 means that this message can be read by everyone
+                ]
+            },
+            "public":
+            {
+                "messageID": messageID,
+                "time": time.time(),
+                "type": str(mtype),
+                "action": "hey"
+            }
+        }
 
-    # Client guy asked for the same message formatting as get returns,
-    #  might as well use the same function.
-    return helpers.db_format_message([(messageID, channelID, username, replyID, keyID, mtime, mtype, data)]), 200
+    # add to database
+    db.messages.insert_one(message_obj)
+
+    return message_obj['public'], 200
+
 
 def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
     """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
@@ -611,37 +607,58 @@ def get_readable_channels(chatroomID: str, username: str):
 def write_user(chatroomID: str, username: str, nickname: str, password: str):
     """ write user to database """
 
+
+    db, status = _gethandle(chatroomID)
+    print('status: ',status , type(status))
+    if status != 200: return db, status
+
+
     # hash password
     password = security.hashpw(password)
 
+    user_data = {
+            "_id": str(username),
+            "private":
+            {
+                "password": password,
+                "cookies": []
+            },
+            "public":
+            {
+                "username": str(username),
+                "nickname": str(nickname),
+                "colour":
+                {
+                    "r": None,
+                    "g": None,
+                    "b": None,
+                },
+                "classes": []
+            }
+        }
 
-    # get db
-    db = database(chatroomID)
+
+    # if this is the first user in the chatroom then make them the constructor
+    first_user = db.users.find_one()
+    if not first_user:
+        user_data['public']['classes'].append('0')
+
+    # assing the default class to the user
+    user_data['public']['classes'].append('1')
 
 
-    # Check if this is the first user in the chatrtoom.
-    # If this is the case then assign the constructor rank to the user
-    users, status = db.select("*", "users")
-    if status != 200:
-        return "Internal database error while checking users", status
-    if len(users) < 1:
-        db.insert('userclasses', ('0', username))
+    # make sure someone with the same username doesnt already exist
+    if db.users.find_one({"_id": str(username)}) != None:
+        return "A user with this username already exists", 400
 
 
-    # save details of user
-    res, status = db.insert('users', (username, nickname, password))
-    if status != 200:
-        return f"internal database error while saving user credientials.", status
+    db.users.insert_one(user_data)
+    return user_data['public'], 200
 
 
-    # set user colour
-    res, status = db.insert('colours', (username, None,None,None))
-    if status != 200:
-        return f"internal database error while setting user colour.", status
 
-    db.commit()
-    db.close()
-    return "OK", 200
+
+
 
 def fetch_user_creds(chatroomID: str, username: str):
     """
@@ -744,15 +761,11 @@ def fetch_user(chatroomID: str, username: str):
 def store_cookie(chatroomID: str, username: str, cookie: str):
     """ Writes a cookie to the database """
 
-    db = database(chatroomID)
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
 
-    status = db.insert('cookies', (username, cookie))[1]
-    if status != 200:
-        return "Internal database error while setting cookie.", 500
+    db.users.update_one({'_id': str(username)}, {"$push": {'private': {'cookies': security.gen_uuid()}}})
 
-
-    db.commit()
-    db.close()
     return "OK", 200
 
 def get_cookies(chatroomID: str, username: str, cookie: str):

@@ -50,35 +50,34 @@ def create_chatroom(json_data):
         return res, 500
 
 
-    # Create and set up main.db in the chatroom folder
-    channel_obj, status = database.init_chat(chatroomID, chatroom_name)
+    # Create mongodb database for the catroom
+    chatroom_data, status = database.init_chat(chatroomID, chatroom_name)
     if status != 200:
         log.error(create_chatroom, f"Failed to create chatroom database.\n Traceback: {res}")
 
-        # remove the chatroom folders
+        # If creating the database fails then remove chatroom folders
         filesystem.remove_chatroom(chatroomID)
-        return channel_obj, status
+        return chatroom_data, status
 
 
-    # channel_obj is structured like:
-    # {
-    #         chatroom_name: "default",
-    #         channelID: "id"
-    #         }
-    channelID = channel_obj['channelID']
 
-
-    # add user to chatroom
-    username, status = users.add_user(chatroomID, username, nickname, password)
-    if status != 200: return username, status
+    # add the default user to the chatrom
+    user_data, status = users.add_user(chatroomID, username, nickname, password)
+    print('status: ',status , type(status))
+    if status != 200: return user_data, status
+    print('user_data: ',user_data , type(user_data))
 
 
     # add initial message
-    messageID, status = database.write_message(chatroomID, channelID, username, None, None, "system", f"Welcome {nickname}!")
+    messageID, status = database.write_message_event(chatroomID, "system", { "event_type": "newuser", "user_info": user_data })
     if status != 200: return messageID, status
 
+    chatroom_data['users'] = [user_data]
+    chatroom_data['chatroomID'] = chatroomID
+
     # return information about the created chatroom
-    return helpers.get_chat_info(chatroomID, username)
+    return chatroom_data, 200
+
 
 def login(chatroomID: str, json_data: dict):
     """ Login to chatroom """

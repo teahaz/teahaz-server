@@ -1,4 +1,5 @@
 {
+    "_id": "username",
     "private":
     {
         "password": "string",

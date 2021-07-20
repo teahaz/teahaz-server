@@ -1,11 +1,168 @@
 API documentation v0
 ====================
-***NOTE:*** This is not proper documentation, but a very basic description of the api.
-**NOTE2:** Typed this on the bus so idk how good quality this all is. :)
+This Documentation is a brief overview of how each method works, and how a client would interact with them. The documentation tries to be programing language independant but for the most part is written with python and javascript in mind.
+
+
+Table of contents
+-----------------
+
+### Methods
+* chatroom
+    - creating a chatroom
 
 
 
-Available methods:
+
+
+
+
+
+
+Documentation of different methods.
+==================================
+
+
+
+Creating a chatroom.
+--------------------
+method: `get`
+path: `/api/v0/chatroom`
+
+In order to create a chatroom the server needs 3 pieces of information. The name of the chatroom and login details (ie username and password). The login details are needed regardless of whether or not you are already registered ot a differnt chatroom as teahaz has an independant database for all chatrooms. (More docs on this design choice later)
+
+Note: you can also optionally pass a 'nickname' (display name) value to the server. If you dont set this it will automatically be the same as your username.
+<br />
+
+example data for this method:
+```js
+{
+    chatroom_name: "chatroom for only cool people",
+    username: "one such cool person",
+    password: "very secret"
+}
+```
+
+<br />
+<br />
+
+The server will set up a new [mongodb database](https://docs.mongodb.com/manual/core/databases-and-collections/) for the chatroom, with 5 collections: users, messages, channels, classes, and chatroom. (more detail on these later). The server also adds some default information into these collections:
+- adding the creator of the chatroom (constructor in teahaz terms) to the users collection
+- creating a 'default' channel
+- creating the 'constructor' (reserved only for the creator of a chatroom) and 'default' (for everyone) classes and adding your user to both.
+- adding an event into the messages collection to to notify people of a new user (in the case of the first user this doesnt have much meaning)
+
+
+<br />
+<br />
+
+Example return data for creating a chatroom:
+```js
+{
+  channels: [
+    {
+      channelID: '8aa869a0-e8ec-11eb-9db0-b42e99435986',
+      name: 'default',
+      permissions:
+      [
+          {
+              classID: '1',
+              r: true,
+              w: true,
+              x: false
+          }
+      ]
+    }
+  ],
+  chatroomID: '8aa5f076-e8ec-11eb-9db0-b42e99435986',
+  classes: [
+    {
+        classID: '0',
+        name: 'constructor'
+    },
+    {
+        classID: '1',
+        name: 'default'
+    }
+  ],
+  settings: [
+    {
+        sname: 'chatroom_name',
+        svalue: 'chatroom for only cool people',
+        stype: 'string'
+    },
+    {
+        sname: 'min_password_length',
+        svalue: 10,
+        stype: 'int'
+    },
+    {
+      sname: 'default_channel',
+      svalue: '8aa869a0-e8ec-11eb-9db0-b42e99435986',
+      stype: 'string'
+    }
+  ],
+  users: [
+    {
+      classes:
+      [
+          '0',
+          '1'
+      ],
+      colour:
+      {
+          b: null,
+          g: null,
+          r: null
+      },
+      username: 'one such cool person',
+      nickname: 'one such cool person'
+    }
+  ]
+}
+```
+
+As you can probably see wherever possible the server tries to return as much information as it can. This is done as an attempt to help the user of the api not have to make as many requests. You can read more on what this data means [here](https://http.cat/501).
+
+
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+old docs:
+=========
+
+Table of contents
 -----------------
 
 * chatroom
@@ -26,6 +183,19 @@ url: `/api/v0/messages/<chatroomID>`
 
 <br />
 <br />
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 More detail on some variables.
 -----------------------------
