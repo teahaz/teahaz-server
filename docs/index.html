@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css" integrity="sha512-Oy18vBnbSJkXTndr2n6lDMO5NN31UljR8e/ICzVPrGpSud4Gkckb8yUpqhKuUNoE+o9gAb4O/rAxxw1ojyUVzg==" crossorigin="anonymous" />
+        <style>
+            .markdown-body {
+                box-sizing: border-box;
+                min-width: 200px;
+                max-width: 980px;
+                margin: 0 auto;
+                padding: 45px;
+            }
+
+            @media (max-width: 767px) {
+                .markdown-body {
+                    padding: 15px;
+                }
+            }
+        </style>
+    </head>
+    <article class="markdown-body">
+<h1>API documentation v0</h1>
+<p><em><strong>NOTE:</strong></em> This is not proper documentation, but a very basic description of the api.<br>
+<strong>NOTE2:</strong> Typed this on the bus so idk how good quality this all is. :)</p>
+<h2>Available methods:</h2>
+<ul>
+<li>
+<p>chatroom<br>
+url: <code>/api/v0/chatroom</code></p>
+</li>
+<li>
+<p>login<br>
+url: <code>/api/v0/login/&lt;chatroomID&gt;</code></p>
+</li>
+<li>
+<p>users<br>
+url: <code>/api/v0/users/&lt;chatroomID&gt;</code></p>
+</li>
+<li>
+<p>channles<br>
+url: <code>/api/v0/channels/&lt;chatroomID&gt;</code></p>
+</li>
+<li>
+<p>messages<br>
+url: <code>/api/v0/messages/&lt;chatroomID&gt;</code></p>
+</li>
+</ul>
+<br>
+<br>
+<h2>More detail on some variables.</h2>
+<h3>username:</h3>
+<p>type: str<br>
+This used to be the <code>nickname</code> of the user, it can be freely changed, and has no meaning on the server-side. However this is the name that should be displayed to other users.<br>
+When talking to the server, a user should be refered to by their <code>userID</code></p>
+<h3>password:</h3>
+<p>type: str<br>
+The users password.</p>
+<h3>chatroomID:</h3>
+<p>type: UUID (str)<br>
+A unique ID assigned to each chatroom at creation. These are assigned by the server, and returned when the chatroom is created.<br>
+The server does not understand chatroom names and chatrooms should be refered to by their <code>chatroomID</code>.</p>
+<h3>chatroom_name:</h3>
+<p>type: str<br>
+The name of a chatroom. Similar to <code>username</code> this is a sort of "nickname" and when talking to the server, the chtroom should be refered to by its <code>chatroomID</code>.</p>
+<h3>channels:</h3>
+<p>type: Array of objects (list of dicts)</p>
+<p>A list of channels and all their details.<br>
+Channels on teahaz are similar to channels on discord as in they are sperate streams of messages, athat can have independant permissions for different groups of people.</p>
+<p>Example of a channel object:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-kos">{</span>
+    <span class="pl-kos">{</span>
+        <span class="pl-s1">channel_name</span>": <span class="pl-s">"default"</span><span class="pl-kos">,</span>
+        <span class="pl-s1">channelID</span><span class="pl-s">": "</span><span class="pl-c1">UUID</span> <span class="pl-kos">(</span><span class="pl-s1">str</span><span class="pl-kos">)</span>",
+        public: Bool,
+        permissions: {
+            r: Bool,
+            w: Bool,
+            x: Bool
+            }
+    }
+}</pre></div>
+<h4>channel_name:</h4>
+<p>type: str<br>
+This is the name of the channel. Similarly to all other names this doesnt have a meaning on the server, and the channel should be refered to by its <code>channelID</code>.</p>
+<h4>channelID</h4>
+<p>type: UUID (str)<br>
+Unique identifier of a channel.</p>
+<h4>permissions</h4>
+<p>type: object (dict)</p>
+<p>This object represents the permissions your user has over a channel. This uses a slightly unix like syntax of useing <code>r w x</code> for read write and admin (execute).</p>
+<ul>
+<li>
+<p>r (read)<br>
+type: Bool<br>
+Permission to read messages.<br>
+This permission also sets whether the user has the ability to see the chatroom, and to interact with it in any way.</p>
+</li>
+<li>
+<p>w (write)<br>
+type: Bool<br>
+Permission to write messages.</p>
+</li>
+<li>
+<p>x (admin)<br>
+type: Bool<br>
+Executive or admin permission.<br>
+This permission allows you to manage other users messages in the channel, as well as some other admin features.<br>
+(none of this has been implemented yet)</p>
+</li>
+</ul>
+<h4>public</h4>
+<p>type: Bool<br>
+Shorthand for rw and x being true.<br>
+<strong>NOTE:</strong> This is only temporary fix for some backend stuff, and will be removed when classes work. Dont really rely on / use it</p>
+<br>
+<h2>other information</h2>
+<h3>headers vs json_data</h3>
+<p>On all <code>GET</code> requests json has to be embedded in the request header because the http spec does not allow sending data in those requests. In all other reqests, variables has to be sent in the http data field (or <code>json=</code> with python requests)</p>
+<h3>&lt;chatoomID&gt; at the end of url</h3>
+<p>When you see &lt;chatroomID&gt; at the end of a url, its because the ID of a chatroom has to be part of the path. (without the &lt; &gt; symbols)</p>
+<p>eg: <code>/api/v0/login/847e5380-d656-11eb-8c72-69e0783d7026</code></p>
+<h3>Login / register operations taking long</h3>
+<p>This is an unfortunate feature of using strong hashing for passwords. Whenever passwords are sent, it takes a couple seconds to save/verify them because of the hashing used. (<code>bcrypt</code>)</p>
+<h3>Cookies.</h3>
+<p>All methods that dont set a cookie for the user (ie: different forms of login and register) require a cookie header to be set.</p>
+<p>Cookie format:</p>
+<pre><code>&lt;chatroomID&gt;=&lt;cookie&gt;
+// &lt;cookie&gt; is a UUID assigned by the server
+</code></pre>
+<p>Most http libraries (like python reqests) should handle cookies automatically.</p>
+<br>
+<br>
+<br>
+<h1>More detail on methods</h1>
+<h2>chatroom</h2>
+<p>url: <code>/api/v0/chatroom</code></p>
+<h3>post</h3>
+<p>action: Create a new chatroom.</p>
+<p>needed data:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-kos">{</span>
+    <span class="pl-c1">username</span>: <span class="pl-s">"string"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">password</span>: <span class="pl-s">"string"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">chatroom_name</span>: <span class="pl-s">"string"</span>
+<span class="pl-kos">}</span></pre></div>
+<p>example data returned:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-kos">{</span>
+    <span class="pl-c1">chatroom_name</span>: <span class="pl-s">"string"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">chatroomID</span>: <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">channels</span>: <span class="pl-kos">[</span>
+            <span class="pl-kos">{</span>
+                <span class="pl-c1">channel_name</span>: <span class="pl-s">"default"</span><span class="pl-kos">,</span>
+                <span class="pl-c1">channelID</span>": <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+                <span class="pl-c1">public</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                <span class="pl-c1">permissions</span>: <span class="pl-kos">{</span>
+                    <span class="pl-c1">r</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                    <span class="pl-c1">w</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                    <span class="pl-c1">x</span>: <span class="pl-v">Bool</span>
+                    <span class="pl-kos">}</span>
+            <span class="pl-kos">}</span>
+        <span class="pl-kos">]</span><span class="pl-kos">,</span>
+    <span class="pl-s">"userID"</span>: <span class="pl-s1">userID</span>
+    <span class="pl-kos">}</span>
+<span class="pl-kos">}</span></pre></div>
+<p><strong>This method sets a cookie</strong></p>
+<br>
+<h2>login</h2>
+<p>url: <code>/api/v0/login/&lt;chatroomID&gt;</code></p>
+<h3>post</h3>
+<p>action: Login to a chatroom.</p>
+<p><em><strong>NOTE</strong></em>: This requires you to already have an account.</p>
+<p>needed data:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-kos">{</span>
+    <span class="pl-c1">userID</span>: <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">password</span>: <span class="pl-s">"string"</span>
+<span class="pl-kos">}</span></pre></div>
+<p>example data returned:</p>
+<div class="highlight highlight-source-js"><pre><span class="pl-kos">{</span>
+    <span class="pl-c1">chatroomID</span>: <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">userID</span>:  <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+    <span class="pl-c1">channels</span>: <span class="pl-kos">[</span>
+        <span class="pl-kos">{</span>
+            <span class="pl-c1">channel_name</span>": <span class="pl-s">"default"</span><span class="pl-kos">,</span>
+            <span class="pl-c1">channelID</span>": <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+            <span class="pl-c1">public</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+            <span class="pl-c1">permissions</span>: <span class="pl-kos">{</span>
+                <span class="pl-c1">r</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                <span class="pl-c1">w</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                <span class="pl-c1">x</span>: <span class="pl-v">Bool</span>
+                <span class="pl-kos">}</span>
+        <span class="pl-kos">}</span><span class="pl-kos">,</span>
+        <span class="pl-kos">{</span>
+            <span class="pl-c1">channel_name</span>": <span class="pl-s">"string"</span><span class="pl-kos">,</span>
+            <span class="pl-c1">channelID</span>": <span class="pl-s">"UUID (str)"</span><span class="pl-kos">,</span>
+            <span class="pl-c1">public</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+            <span class="pl-c1">permissions</span>: <span class="pl-kos">{</span>
+                <span class="pl-c1">r</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                <span class="pl-c1">w</span>: <span class="pl-v">Bool</span><span class="pl-kos">,</span>
+                <span class="pl-c1">x</span>: <span class="pl-v">Bool</span>
+                <span class="pl-kos">}</span>
+        <span class="pl-kos">}</span>
+    <span class="pl-kos">]</span>
+<span class="pl-kos">}</span></pre></div>
+<p><strong>This method sets a cookie</strong></p>
+<h3>get</h3>
+<p>action: Check if you are logged in.</p>
+<p>needed data:</p>
+<div class="highlight highlight-source-js"><pre>    userID: <span class="pl-s">"UUID (str)"</span></pre></div>
+<p>There is no useful data returned by this, other than a status code to indicate whether or not you are logged in.</p>
+<p>status code 200 == logged in<br>
+status code 401 == not logged in</p>
+<h2>users</h2>
+<p>url: <code>/api/v0/users/&lt;chatroomID&gt;</code></p>
+<h3>get</h3>
+<p>action: Get all users of a chatroom</p>
+<p>This method returns all the users of the chatroom. In the future I will add an option to filter this to users with read access to a specific channel. (kinda discord like)</p>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<h1>Below this lies the unchecked and potentially harmful land of outdated documentation</h1>
+<h1>chatrooms</h1>
+<h2>Creating a new chatroom</h2>
+<p>Method should create a new chatroom. Chatrooms are in effect their own segregated server-like systems(<a href="https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs">check out the docs</a>), which means the user creating a chatroom will have to send all details for registering.<br>
+<br></p>
+<h3>chat defaults:</h3>
+<ul>
+<li>require_email is on</li>
+<li>Creator becomes chatroom admin</li>
+</ul>
+<br>
+<h3>endpoints:</h3>
+<ul>
+<li>POST: <code>http(s)://url:port/api/v0/chatroom/</code></li>
+</ul>
+<br>
+<h3>required fields:</h3>
+<ul>
+<li>username</li>
+<li>email ( the server owner can change whether the chatroom owner needs an email or not )</li>
+<li>nickname</li>
+<li>password</li>
+<li>chatroom_name ( this is not equivalent to the ID, which will be assigned at random )</li>
+</ul>
+<br>
+<h3>code example:</h3>
+<div class="highlight highlight-source-python"><pre><span class="pl-s1">url</span> <span class="pl-c1">=</span> <span class="pl-s1">http</span>:<span class="pl-c1">/</span><span class="pl-c1">&lt;</span><span class="pl-s1">server</span> <span class="pl-s1">url</span><span class="pl-c1">&gt;</span><span class="pl-c1">/</span><span class="pl-s1">api</span><span class="pl-c1">/</span><span class="pl-s1">v0</span><span class="pl-c1">/</span><span class="pl-s1">chatroom</span><span class="pl-c1">/</span>"
+
+<span class="pl-c"># format required data in json format</span>
+<span class="pl-s1">data</span> <span class="pl-c1">=</span> {
+        <span class="pl-s">"username"</span>      : <span class="pl-s">"me"</span>,
+        <span class="pl-s">"email"</span>         : <span class="pl-s">"me@email.com"</span>,
+        <span class="pl-s">"nickname"</span>      : <span class="pl-s">"not_me:)"</span>,
+        <span class="pl-s">"password"</span>      : <span class="pl-s">"password123"</span>,
+        <span class="pl-s">"chatroom_name"</span> : <span class="pl-s">"best chatroom ever"</span>
+        }
+
+<span class="pl-c"># make post request. NOTE: data is sent in the json field </span>
+<span class="pl-s1">res</span> <span class="pl-c1">=</span> <span class="pl-s1">session_obj</span>.<span class="pl-en">post</span>(<span class="pl-s1">url</span><span class="pl-c1">=</span><span class="pl-s1">url</span>, <span class="pl-s1">json</span><span class="pl-c1">=</span><span class="pl-s1">data</span>)
+
+<span class="pl-en">print</span>(<span class="pl-s1">res</span>.<span class="pl-s1">text</span>)</pre></div>
+<h3>example output:</h3>
+<p>Server returns the ID of the chatroom created</p>
+<p><strong>NOTE</strong>: Due to python being slow at cryptographic operations, this might take a few seconds.</p>
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>chatroom<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>8b7f3eba-81b0-11eb-97e5-655df6aeb2ec<span class="pl-pds">"</span></span>, 
+  <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>best chatroom ever<span class="pl-pds">"</span></span>
+}</pre></div>
+<h1>invites</h1>
+<h2>Creating an invite</h2>
+<p>Creating an invite so other people can join your chatroom<br>
+<strong>NOTE:</strong> On default settings the creator of the invite, has to be admin on the server<br>
+<br></p>
+<h3>endpoints:</h3>
+<ul>
+<li>GET: <code>http(s)://url:port/api/v0/invite/&lt;chatroomId&gt;</code><br><br>
+<code>&lt;chatroomId&gt;</code> should be replaced by the ID of the chatroom</li>
+</ul>
+<br>
+<h3>required fields:</h3>
+<ul>
+<li>username</li>
+<li>expr_time
+<ul>
+<li>Expiration time of the invite.</li>
+<li>This has to be a date in Epoch time format.</li>
+<li>if you dont want the invite to expire then set this to 0.</li>
+</ul>
+</li>
+<li>uses
+<ul>
+<li>The number of users that can join with this link.</li>
+<li>There is no option for unlimited, however there is no upper limit.</li>
+</ul>
+</li>
+</ul>
+<br>
+<h3>code example:</h3>
+<div class="highlight highlight-source-python"><pre><span class="pl-k">import</span> <span class="pl-s1">time</span>
+<span class="pl-s1">url</span> <span class="pl-c1">=</span> <span class="pl-en">http</span>(<span class="pl-s1">s</span>):<span class="pl-c1">//</span><span class="pl-s1">url</span>:<span class="pl-s1">port</span><span class="pl-c1">/</span><span class="pl-s1">api</span><span class="pl-c1">/</span><span class="pl-s1">v0</span><span class="pl-c1">/</span><span class="pl-s1">invite</span><span class="pl-c1">/</span>" <span class="pl-c1">+</span> <span class="pl-s1">chatroomId</span>
+
+<span class="pl-s1">data</span> <span class="pl-c1">=</span> {
+        <span class="pl-s">"username"</span>: <span class="pl-s1">username</span>,
+        <span class="pl-s">"expr_time"</span>: <span class="pl-en">str</span>(<span class="pl-s1">time</span>.<span class="pl-en">time</span>() <span class="pl-c1">+</span> <span class="pl-c1">60</span> <span class="pl-c1">*</span> <span class="pl-c1">60</span> <span class="pl-c1">*</span> <span class="pl-c1">24</span>),
+        <span class="pl-s">"uses"</span>: <span class="pl-en">str</span>(<span class="pl-c1">10</span>)
+        }
+
+<span class="pl-c">#NOTE: In GET requests data has to be sent in the http header</span>
+<span class="pl-s1">res</span> <span class="pl-c1">=</span> <span class="pl-s1">session_obj</span>.<span class="pl-en">get</span>(<span class="pl-s1">url</span><span class="pl-c1">=</span><span class="pl-s1">url</span>, <span class="pl-s1">headers</span><span class="pl-c1">=</span><span class="pl-s1">data</span>)
+
+<span class="pl-en">print</span>(<span class="pl-s1">res</span>.<span class="pl-s1">text</span>)</pre></div>
+<br>
+<h3>example output:</h3>
+<p>Returns the ID of the invite</p>
+<div class="highlight highlight-source-json"><pre><span class="pl-s"><span class="pl-pds">"</span>1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb<span class="pl-pds">"</span></span></pre></div>
+<p><strong>NOTE:</strong> This is probably best returned to the user as <code>chatroomID/inviteId</code><br>
+(<strong>ps</strong>: I will probably change this to an object with <code>name</code>, <code>chatroom</code> and <code>inviteID</code>. Its staying like this bc I only came up with the idea while writing the docs and I dont have energy rn)<br>
+<br><br>
+<br></p>
+<h2>Using an invite</h2>
+<p>Using that invite you found on a shady website.<br><br>
+(/s Please dont use our project for anything illegal.)<br><br>
+Chatrooms are in effect their own segregated server-like systems(<a href="https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/edit/new-backend-structure/docs">check out the docs</a>), which means that when using an Invite you have to send all details for registering</p>
+<h3>endpoints:</h3>
+<ul>
+<li>POST: <code>http(s)://url:port/api/v0/invite/&lt;chatroomId&gt;</code><br><br>
+<code>&lt;chatroomId&gt;</code> should be replaced by the ID of the chatroom</li>
+</ul>
+<br>
+<h3>required fields:</h3>
+<ul>
+<li>username</li>
+<li>email ( the server owner can change whether the chatroom owner needs an email or not )</li>
+<li>nickname</li>
+<li>password</li>
+<li>inviteID
+<ul>
+<li>the same invite ID that appeared in section <a href="#creating-an-invite">Creating an invite</a></li>
+</ul>
+</li>
+</ul>
+<br>
+<h3>code example:</h3>
+<div class="highlight highlight-source-python"><pre><span class="pl-s1">url</span> <span class="pl-c1">=</span> <span class="pl-s1">http</span>:<span class="pl-c1">//</span><span class="pl-c1">&lt;</span><span class="pl-s1">teahouse</span> <span class="pl-s1">server</span><span class="pl-c1">&gt;</span><span class="pl-c1">/</span><span class="pl-s1">api</span><span class="pl-c1">/</span><span class="pl-s1">v0</span><span class="pl-c1">/</span><span class="pl-s1">invite</span><span class="pl-c1">/</span>" <span class="pl-c1">+</span> <span class="pl-s1">chatroomId</span>
+
+<span class="pl-s1">data</span> <span class="pl-c1">=</span> {
+        <span class="pl-s">"username"</span>      : <span class="pl-s">"me"</span>,
+        <span class="pl-s">"email"</span>         : <span class="pl-s">"me@email.com"</span>,
+        <span class="pl-s">"nickname"</span>      : <span class="pl-s">"not_me:)"</span>,
+        <span class="pl-s">"password"</span>      : <span class="pl-s">"password123"</span>,
+        <span class="pl-s">"inviteID"</span>      : <span class="pl-s">"1ffc7d5e-7c2b-11eb-87af-b5145ad18bcb"</span>
+        }
+
+<span class="pl-c"># make post request with data in the json field</span>
+<span class="pl-s1">res</span> <span class="pl-c1">=</span> <span class="pl-s1">session_obj</span>.<span class="pl-en">post</span>(<span class="pl-s1">url</span><span class="pl-c1">=</span><span class="pl-s1">url</span>, <span class="pl-s1">json</span><span class="pl-c1">=</span><span class="pl-s1">data</span>)
+<span class="pl-en">print</span>(<span class="pl-s1">res</span>.<span class="pl-s1">text</span>)</pre></div>
+<h3>example output</h3>
+<p>returns a json object with the chatroom name and ID</p>
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>best chat ever<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>chatroom<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>47aec55e-7c27-11eb-87af-b5145ad18bcb<span class="pl-pds">"</span></span>
+}</pre></div>
+<p>--&gt;</p>

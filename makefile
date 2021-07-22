@@ -7,7 +7,7 @@ run:
 # rebuild the image
 rebuild:
 	sudo docker-compose build --no-cache
-	sudo docker-compose up
+	# sudo docker-compose up
 
 
 # update the image
