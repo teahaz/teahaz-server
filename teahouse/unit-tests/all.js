@@ -19,7 +19,7 @@ const main = async() =>
         username: "a",
         password: "1234567890",
         nickname: "thomas",
-        chatroom_name: "best chat"
+        chatroom_name: "best chat",
     }).enable();
 
 
@@ -63,6 +63,19 @@ const main = async() =>
 
 
 
+    //works
+    let info = await conv1.get_chat_info()
+    info = info.data
+
+    assert(info.chatroom_name == conv1.chatroom_name);
+    assert(info.chatroomID    == conv1.chatroomID);
+
+    assert(JSON.stringify(info.channels) == JSON.stringify(conv1.channels));
+    assert(JSON.stringify(info.settings) == JSON.stringify(conv1.settings));
+    assert(JSON.stringify(info.classes)  == JSON.stringify(conv1.classes));
+    assert(JSON.stringify(info.users)    == JSON.stringify(conv1.users));
+
+    console.log("✅ Successfully checked login / got chatroom info!");
 
 
 

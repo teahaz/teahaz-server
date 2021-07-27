@@ -22,6 +22,7 @@ def check_default(method: str, chatroomID: str, request: object, need_login: boo
             option should be true or false depending on wether cookies have to be checked
     """
 
+
     # If method is get then data has to be sent in headers
     data = (request.get_json() if method != 'get' else request.headers)
 

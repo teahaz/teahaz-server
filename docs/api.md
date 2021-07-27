@@ -9,6 +9,7 @@ Table of contents
 ### Methods
 * chatroom
     - creating a chatroom
+    - get chatroom information / check login
 * login
     - Login
 
@@ -166,25 +167,41 @@ If successful the server will assign you a new cookie, and return the [standard 
 
 <br />
 <br />
+
+get chatroom information / check login
+--------------------------------------
+
+This method serves 2 main purposes:
+1. Getting up-to-date information about a chatroom.
+2. Checking if the client is logged in.
+
+In order to make the request you need to send your username and a cookie.
+
+Example python code:
+```
+import requests
+
+chatroomID = ID_OF_CHATROOM
+
+data = {
+    "username": YOUR_USERNAME,
+}
+
+r = requests.get(url="http://teahaz.co.uk/api/v0/chatroom/"+chatroomID, headers=data)
+
+print(r.json())
+```
+**Note**: Data has to be sent in the http header. [why?](https://http.cat/501)
+
+If you are logged in then the method returns the [standard data for a chatroom](http://http.cat/501). If however you are not logged in, this along with most functions that require a login will return "client not logged in" with a status code of 401.
+
+
+
 <br />
 <br />
 <br />
 <br />
 <br />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

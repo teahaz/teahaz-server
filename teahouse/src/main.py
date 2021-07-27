@@ -28,7 +28,12 @@ restful = Api(app)
 
 class Chatrooms(Resource):
     """ /api/v0/chatrooms """
-    def post(self): # create chatroom
+    def post(self, chatroomID=None): # create chatroom
+
+        # In this method chatroomID doesnt mean anything,
+        # but its best to set it to None anyway just incase
+        # some looser sent a chatroomID to create_chatroom.
+        chatroomID = None
 
         # check data
         res, status = helpers.check_default(
@@ -57,6 +62,28 @@ class Chatrooms(Resource):
         res = make_response(chat_obj)
         res.set_cookie(chat_obj.get('chatroomID'), cookie)
         return res
+
+
+    def get(self, chatroomID=None):
+        """
+            Get information about a chatroom,
+            also used to check if you are logged in
+        """
+
+        # check chatroomID as this method will work without it too
+        if not chatroomID:
+            return "ChatroomID must be included in the path for this method", 400
+
+        # check data
+        res, status = helpers.check_default(
+                'get',
+                chatroomID,
+                request,
+                True
+            )
+        if status != 200: return res, status
+
+        return helpers.get_chat_info(chatroomID, request.headers.get('username'))
 
 
 class Login(Resource):
@@ -94,20 +121,6 @@ class Login(Resource):
         return res
 
 
-    def get(self, chatroomID):
-        """ Check if you are logged into a chatroom """
-
-        # check data
-        res, status = helpers.check_default(
-                'get',
-                chatroomID,
-                request,
-                True
-            )
-        if status != 200: return res, status
-
-
-        return "Already logged in", 200
 
 
 class Invites(Resource):
@@ -243,7 +256,11 @@ class Users(Resource):
 #   which could just return data about an invite without needing
 #   for auth or anything
 
-restful.add_resource(Chatrooms,'/api/v0/chatroom',              '/api/v0/chatroom/')
+restful.add_resource(Chatrooms,
+        '/api/v0/chatroom',
+        '/api/v0/chatroom/',
+        '/api/v0/chatroom/<chatroomID>',
+        '/api/v0/chatroom/<chatroomID>/')
 restful.add_resource(Login,    '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')
 restful.add_resource(Users,    '/api/v0/users/<chatroomID>',    '/api/v0/users/<chatroomID>/')
 restful.add_resource(Invites,  '/api/v0/invites/<chatroomID>',  '/api/v0/invites/<chatroomID>/')
