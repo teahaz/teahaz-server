@@ -9,6 +9,8 @@ Table of contents
 ### Methods
 * chatroom
     - creating a chatroom
+* login
+    - Login
 
 
 
@@ -25,21 +27,27 @@ Documentation of different methods.
 
 Creating a chatroom.
 --------------------
-method: `get`
+method: `post`
 path: `/api/v0/chatroom`
 
-In order to create a chatroom the server needs 3 pieces of information. The name of the chatroom and login details (ie username and password). The login details are needed regardless of whether or not you are already registered ot a differnt chatroom as teahaz has an independant database for all chatrooms. (More docs on this design choice later)
+In order to create a chatroom the server needs 3 pieces of information. The name of the chatroom and login details (username and password). The login details are needed regardless of whether or not you are already registered ot a differnt chatroom as teahaz has an independant database for all chatrooms. (More docs on this design choice later)
 
 Note: you can also optionally pass a 'nickname' (display name) value to the server. If you dont set this it will automatically be the same as your username.
 <br />
 
-example data for this method:
-```js
-{
-    chatroom_name: "chatroom for only cool people",
-    username: "one such cool person",
-    password: "very secret"
+example python code for creating a chatroom
+```python
+import requests
+
+data = {
+    "chatroom_name": "th dev"
+    "username": YOUR_USERNAME,
+    "password": YOUR_PASSWORD
 }
+
+r = requests.post(url="http://teahaz.co.uk/api/v0/chatroom/", data=data)
+
+print(r.json())
 ```
 
 <br />
@@ -123,7 +131,38 @@ Example return data for creating a chatroom:
 
 As you can probably see wherever possible the server tries to return as much information as it can. This is done as an attempt to help the user of the api not have to make as many requests. You can read more on what this data means [here](https://http.cat/501).
 
+<br />
+<br />
+<br />
 
+Login
+-----
+method `post`
+path: `/api/v0/login/`[\<chatroomID\>](https://http.cat/501)
+
+<br />
+
+If the chatroom already exists, and your user has already joined by some means, it can now use the login method. The method for the most part is pretty much what you would expect, you need to send your username and password and you will recieve a cookie so that you can use to further communicate with the server.
+
+Example python code to login:
+```py
+import requests
+
+chatroomID = ID_OF_CHATROOM
+
+data = {
+    "username": YOUR_USERNAME,
+    "password": YOUR_PASSWORD
+}
+
+r = requests.post(url="http://teahaz.co.uk/api/v0/login/"+chatroomID, data=data)
+
+print(r.json())
+```
+
+<br />
+
+If successful the server will assign you a new cookie, and return the [standard data for joining a chatroom](http://http.cat/501).
 
 <br />
 <br />

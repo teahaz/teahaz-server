@@ -1,51 +1,108 @@
 const util = require('util')
 const assert = require('assert');
-const chatroom = require('./teahaz.js').chatroom
+const chatroom = require('./nth').chatroom
 
+const print = (o) => console.dir(o, {depth: null})
 
-
-const main = async(conv1) =>
+const main = async() =>
 {
-    // create chatroom
-    await conv1.create_chatroom({
-        chat_name: 'conv1'
-    })
+
+
+    /*
+     * Test create chatroom.
+     *
+     * The .enable method should automatically
+     * run create with these variables.
+     */
+    let conv0 = await new chatroom({
+        server: 'http://localhost:13337',
+        username: "a",
+        password: "1234567890",
+        nickname: "thomas",
+        chatroom_name: "best chat"
+    }).enable();
+
+
+    print(conv0)
+    console.log('============================================================================')
+
+
+    // a couple of tests
+    assert(conv0.chatroomID);
+    assert(conv0.cookie);
+    assert(conv0.channels.length == 1);
+    assert(conv0.classes.length == 2);
+    assert(conv0.users.length == 1);
+    assert(conv0.settings.length == 3);
+    assert(conv0.chatroom_name)
+
+    console.log("✅ Successfully created chatroom!");
+
+    /*
+     * Test login.
+     *
+     * Ofc login should not be used like this,
+     * for many reasons, including the fact that
+     * create already assinged a cookie, thus its redundant.
+     *
+     * Howerver for unit tests this makes more sense.
+     */
+    let conv1 = await new chatroom(conv0).enable()
+
+    assert(conv0.chatroom_name == conv1.chatroom_name);
+    assert(conv0.chatroomID    == conv1.chatroomID);
+
+    assert(JSON.stringify(conv0.channels) == JSON.stringify(conv1.channels));
+    assert(JSON.stringify(conv0.settings) == JSON.stringify(conv1.settings));
+    assert(JSON.stringify(conv0.classes)  == JSON.stringify(conv1.classes));
+    assert(JSON.stringify(conv0.users)    == JSON.stringify(conv1.users));
+
+    console.log("✅ Successfully logged in!");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    process.exit()
+    await conv0.check_login()
     .then((res) =>
         {
             // console.log(res.headers)
-            console.dir(conv1, {depth: null})
-            console.log("\n------------------------------------------------------\n")
-            console.log("✅ Creating chatroom successful!");
-        })
-    .catch((res) =>
-        {
-            console.log(res);
-            console.error("❌ Creating chatroom failed!");
-            process.exit(1);
-        });
-
-
-
-    await conv1.login()
-    .then((res) =>
-        {
-            // console.log(res.headers)
-            // console.log(res)
-            console.log("✅ Successfully logged in!");
-        })
-    .catch((res) =>
-        {
-            console.log(res);
-            console.error("❌ Login in failed!");
-            process.exit(1);
-        });
-
-
-    await conv1.check_login()
-    .then((res) =>
-        {
-            // console.log(res.headers)
-            // console.log(conv1)
+            // console.log(conv)
             console.log("✅ Checked login!");
         })
     .catch((res) =>
@@ -56,7 +113,7 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.create_channel({
+    await conv0.create_channel({
         channel_name: "memes channel",
         public_channel: true
     })
@@ -72,11 +129,11 @@ const main = async(conv1) =>
             process.exit(1);
         });
 
-    await conv1.get_channels()
+    await conv0.get_channels()
     .then((res) =>
         {
             // console.log(res)
-            // console.log(conv1)
+            // console.log(conv)
             console.log("✅ Got channels!");
         })
     .catch((res) =>
@@ -93,13 +150,13 @@ const main = async(conv1) =>
     while (i < 100)
     {
         // send 100 messages to differnt channels
-        await conv1.send_message({
+        await conv0.send_message({
             message: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
-            channelID: conv1.channels[i%2].channelID
+            channelID: conv0.channels[i%2].channelID
         })
         .then((res) =>
             {
-                // console.log(conv1)
+                // console.log(conv)
                 // console.log(res)
             })
         .catch((res) =>
@@ -111,7 +168,7 @@ const main = async(conv1) =>
         if (i == 49)
             middle_message_time = new Date().getTime() / 1000
 
-        // await conv1._sleep(500)
+        // await conv._sleep(500)
         i += 1
     }
     console.log("✅ sent 100 messages!");
@@ -122,7 +179,7 @@ const main = async(conv1) =>
 
 
 
-    await conv1.monitor_messages({
+    await conv0.monitor_messages({
         since: 0
     })
     .then((res) =>
@@ -149,10 +206,10 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.get_messages({
+    await conv0.get_messages({
         count: 100,
         // start_time: 1624611669.907108,
-        // channelID: conv1.channels[0].channelID
+        // channelID: conv.channels[0].channelID
     })
     .then((res) =>
         {
@@ -168,10 +225,10 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.get_messages({
+    await conv0.get_messages({
         count: 100,
         start_time: middle_message_time,
-        // channelID: conv1.channels[0].channelID
+        // channelID: conv.channels[0].channelID
     })
     .then((res) =>
         {
@@ -189,10 +246,10 @@ const main = async(conv1) =>
 
 
 
-    await conv1.monitor_messages({
+    await conv0.monitor_messages({
         count: 5,
         since: middle_message_time,
-        channelID: conv1.channels[0].channelID
+        channelID: conv0.channels[0].channelID
     })
     .then((res) =>
         {
@@ -200,7 +257,7 @@ const main = async(conv1) =>
 
             // check if everything worked
             for (const msg of res)
-                assert(msg.channelID == conv1.channels[0].channelID, "Failed to filter ot one channel!")
+                assert(msg.channelID == conv0.channels[0].channelID, "Failed to filter ot one channel!")
 
             console.log("✅ Got messages since <time> with channel filter.");
         })
@@ -212,10 +269,10 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.get_messages({
+    await conv0.get_messages({
         count: 5,
         // start_time: 1624611669.907108,
-        channelID: conv1.channels[1].channelID
+        channelID: conv0.channels[1].channelID
     })
     .then((res) =>
         {
@@ -223,7 +280,7 @@ const main = async(conv1) =>
 
             // check if everything worked
             for (const msg of res)
-                assert(msg.channelID == conv1.channels[1].channelID, "Failed to filter ot one channel!")
+                assert(msg.channelID == conv0.channels[1].channelID, "Failed to filter ot one channel!")
 
             // assert(res.length == 5, "Got wrong amount of messages!");
             console.log("✅ Got <count> messages with channel filter.");
@@ -236,10 +293,10 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.get_messages({
+    await conv0.get_messages({
         count: 100,
         start_time: middle_message_time,
-        channelID: conv1.channels[0].channelID
+        channelID: conv0.channels[0].channelID
     })
     .then((res) =>
         {
@@ -247,7 +304,7 @@ const main = async(conv1) =>
 
             // check if everything worked
             for (const msg of res)
-                assert(msg.channelID == conv1.channels[0].channelID, "Failed to filter ot one channel!")
+                assert(msg.channelID == conv0.channels[0].channelID, "Failed to filter ot one channel!")
 
             // assert(res.length == 51, "Got wrong amount of messages!");
             console.log("✅ Got <count> messages with start_time and channel filter");
@@ -266,7 +323,7 @@ const main = async(conv1) =>
 
 
 
-    await conv1.get_users()
+    await conv0.get_users()
     .then((res) =>
         {
             // console.log(res)
@@ -279,13 +336,13 @@ const main = async(conv1) =>
             process.exit(1);
         });
 
-    await conv1.create_invite({
+    await conv0.create_invite({
         uses: 10,
         expiration_time: (new Date().getTime() / 1000) + 1000
     })
     .then((res) =>
         {
-            conv1.invite = res.inviteID;
+            conv0.invite = res.inviteID;
             // console.log(res)
             console.log("✅ Created invite!");
         })
@@ -297,8 +354,8 @@ const main = async(conv1) =>
         });
 
 
-    await conv1.use_invite({
-        inviteID: conv1.invite,
+    await conv0.use_invite({
+        inviteID: conv0.invite,
         username: 'hehehehehe',
         password: 'newpw, very cool!'
     })
@@ -315,39 +372,9 @@ const main = async(conv1) =>
 
 
     console.log("\n------------------------------------------------------\n")
-    console.dir(conv1, { depth: null });
+    console.dir(conv0, { depth: null });
 }
 
+main()
 
 
-
-let conv1 = new chatroom({
-    username: 'consumer of semen',
-    password: 'slkdjflksdjfkl;sdjklfsdjlkfj',
-    server: 'http://localhost:13337/',
-    // server: 'https://teahaz.co.uk',
-
-
-    // // use the same chatroom
-    // chatroomID: '9a9acf74-d591-11eb-b454-b42e99435986',
-    // userID: '0',
-    //
-    // proxy: {
-    //     host: 'localhost',
-    //     port: 8080
-    // },
-    raw_response: false
-});
-main(conv1)
-
-
-
-
-
-
-// // login
-// conv1.login()
-// .then((res) =>
-//     {
-//         // console.log(res.)
-//     })

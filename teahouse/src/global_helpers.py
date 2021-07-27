@@ -111,26 +111,39 @@ def db_format_message(messages: list):
 
 
 #################################################### other ###################################
-def get_chat_info(chatroomID: str, username: str):
+def get_chat_info(chatroomID: str, username: str) -> (dict, int):
     """ Get all information about a chatroom """
 
+    chatroom_data = {
+            "chatroomID": chatroomID
+            }
 
+    # get chatroom settings
     settings, status = database.fetch_all_settings(chatroomID)
-    if status != 200: return settings, status
+    if status != 200: return settings, chatroomID
+    chatroom_data['settings'] = settings
 
+    # get chatroom name
+    chatroom_name, status = database.check_settings(chatroomID, 'chatroom_name')
+    if status != 200: return chatroom_name, chatroomID
+    chatroom_data['chatroom_name'] = chatroom_name
 
-    chatname, status = database.check_settings(chatroomID, 'chat_name')
-    if status != 200: return chatname, status
+    # get users
+    users, status = database.fetch_all_users(chatroomID)
+    if status != 200: return users, status
+    chatroom_data['users'] = users
 
+    # get classes
+    classes, status = database.fetch_all_classes(chatroomID)
+    if status != 200: return classes, status
+    chatroom_data['classes'] = classes
 
-    channels, status = database.get_readable_channels(chatroomID, username)
+    # get channels
+    channels, status = database.fetch_all_readable_channels(chatroomID, username)
     if status != 200: return channels, status
+    chatroom_data['channels'] = channels
+
+    return chatroom_data, 200
 
 
-    # NOTE maye add all users as well and classes aswell
-    return {
-            "chatroomID"   : chatroomID,
-            "chatroom_name": chatname,
-            "channels"     : channels,
-            "settings"     : settings
-            }, 200
+

@@ -1,26 +1,20 @@
 [
 {
+    "_id": "0",
     "public":
     {
-        "_id": "0",
+        "classID": "0",
         "name": "constructor",
         "admin": true
     }
 },
 {
+    "_id": "1",
     "public":
     {
-        "_id": "1",
+        "classID": "1",
         "name": "default",
         "admin": false
-    }
-},
-{
-    "public":
-    {
-        "_id": "UUID",
-        "name": "string",
-        "admin": true
     }
 }
 ]

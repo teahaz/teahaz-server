@@ -7,9 +7,15 @@
         "permissions":
         [
             {
-                "_id": "UUID (classID)",
+                "classID": "UUID (classID)",
                 "r": true,
                 "w": true,
+                "x": false
+            },
+            {
+                "classID": "UUID (classID)",
+                "r": true,
+                "w": false,
                 "x": false
             }
         ]

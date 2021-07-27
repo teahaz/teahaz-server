@@ -36,6 +36,7 @@ dev:
 	sleep 2
 	echo "You must add '127.0.0.1	mongodb' to /etc/hosts for this dev environment to work!"
 	curl mongodb:27017
+	mongo-express 2> /dev/null &
 	cd ./storageServer/src/; python3 main.py &
 	sleep 1
 	cd ./teahouse/src/; python3 main.py

@@ -47,7 +47,7 @@ class Chatrooms(Resource):
         if status != 200:
             return chat_obj, status
 
-        cookie, status = users.set_cookie(chat_obj.get('chatroomID'), chat_obj.get('username'))
+        cookie, status = users.set_cookie(chat_obj['chatroomID'], request.get_json()['username'])
 
         # storing cookie failed
         if status != 200:
@@ -74,18 +74,22 @@ class Login(Resource):
             )
         if status != 200: return res, status
 
+
         # auth chatroom
-        chat_obj, status = api.login(chatroomID, request.get_json())
+        chatroom_data, status = api.login(chatroomID, request.get_json())
         if status != 200:
-            return chat_obj, status
+            return chatroom_data, status
+
+
 
         # set cookie
-        cookie, status = users.set_cookie(chatroomID, chat_obj.get('username'))
+        cookie, status = users.set_cookie(chatroomID, request.get_json()['username'])
         if status != 200:
             return cookie, status
 
+
         # return with cookie
-        res = make_response(chat_obj)
+        res = make_response(chatroom_data)
         res.set_cookie(chatroomID, cookie)
         return res
 

@@ -63,21 +63,19 @@ def create_chatroom(json_data):
 
     # add the default user to the chatrom
     user_data, status = users.add_user(chatroomID, username, nickname, password)
-    print('status: ',status , type(status))
     if status != 200: return user_data, status
-    print('user_data: ',user_data , type(user_data))
 
 
     # add initial message
     messageID, status = database.write_message_event(chatroomID, "system", { "event_type": "newuser", "user_info": user_data })
     if status != 200: return messageID, status
 
-    chatroom_data['users'] = [user_data]
-    chatroom_data['chatroomID'] = chatroomID
+    # no longer using chatroom_data in favour of helpers.get_chat_info
+    # chatroom_data['users'] = [user_data]
+    # chatroom_data['chatroomID'] = chatroomID
 
     # return information about the created chatroom
-    return chatroom_data, 200
-
+    return helpers.get_chat_info(chatroomID, username)
 
 def login(chatroomID: str, json_data: dict):
     """ Login to chatroom """
@@ -96,19 +94,8 @@ def login(chatroomID: str, json_data: dict):
     res, status = users.auth_user(chatroomID, username, password)
     if status != 200: return res, status
 
-
-    # get all channels for the client
-    channels, status = database.get_readable_channels(chatroomID, username)
-    if status != 200: return channels, status
-
-
-    # These need to be returned for set_cookie.
-    toret = {
-            "chatroomID": chatroomID,
-            "username": username,
-            "channels": channels
-            }
-    return toret, 200
+    # return with useful information about the chatroom
+    return helpers.get_chat_info(chatroomID, username)
 
 
 
