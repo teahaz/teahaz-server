@@ -4,6 +4,7 @@
 
 import users_th as users
 import dbhandler as database
+import security_th as security
 import filesystem_th as filesystem
 
 # setup logging
@@ -106,6 +107,105 @@ def db_format_message(messages: list):
         return f"Internal database error wile formatting messages.", 500
 
     return messages_list, 200
+
+
+
+#################################################### permissions #############################
+def get_admins(chatroomID: str) -> (list, int):
+    """ Get the usernames of all admins in the chatroom """
+
+    # get all classes
+    classes, status = database.fetch_all_classes(chatroomID)
+    if status != 200: return classes, status
+
+    # filter to only admin ones
+    admin_classes = []
+    for c in classes:
+        if c['admin'] == True:
+            admin_classes.append(c['classID'])
+
+
+    # get all users
+    users, status = database.fetch_all_users(chatroomID)
+    if status != 200: return users, status
+
+    # compare the 2 lits
+    admins = set()
+    for u in users:
+        for classID in u['classes']:
+            if classID in admin_classes:
+                admins.add(u['username'])
+
+
+    return list(admins), 200
+
+
+def sanitize_permission_list(chatroomID, permissions: list) -> (dict or str, int):
+    """ Check if permissions array is valid, and not malicious in some way """
+
+    if type(permissions) != list:
+        return "Permissions array must by of type array (list)", 400
+
+    if len(permissions) < 1:
+        return "Permissions array must have at least one entry", 400
+
+    # Get all valid class ids for to make sure no one is setting
+    # classes that dont exist.
+    classes, status = database.fetch_all_classes(chatroomID)
+    if status != 200: return classes, status
+    class_ids = []
+    for c in classes:
+        class_ids.append(c['classID'])
+
+
+    seen_ids = []
+    clean_permissions = []
+    for p in permissions:
+        if type(p) != dict:
+            return "Each entry in the permissions array must be a (map/object/dict)", 400
+
+
+        classID = p.get('classID')
+
+        if classID in seen_ids:
+            return "Can only set one permission for one classID", 400
+        else:
+            seen_ids.append(classID)
+
+        if classID == None:
+            return "ClassID must be set for each permission", 400
+
+        if type(classID) != str:
+            return "ClassID must be of type string", 400
+
+        if classID == '0':
+            return "Cannot set permissions for the chatroom constructor", 400
+
+        if classID not in class_ids:
+            return "ClassID is not a valid class", 400
+
+        r = p.get('r')
+        w = p.get('w')
+        x = p.get('x')
+
+        for i, a in enumerate([r, w, x]):
+            if a == None:
+                return f"No {['r', 'w', 'x'][i]} value supplied!  ('{classID}' in permissions)", 400
+
+            if type(a) != bool:
+                return f"{['r', 'w', 'x'][i]} Must be of type bool! ('{classID}' in permissions)", 400
+
+        # re defining permissions helps avoid users from adding a huge amount of data for nothing
+        clean_permissions.append({
+            "classID": classID,
+            "r": r,
+            "w": w,
+            "x": x,
+                })
+
+    return clean_permissions, 200
+
+
 
 
 

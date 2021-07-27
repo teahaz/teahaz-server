@@ -2,7 +2,7 @@
     "_id": "UUID (classID)",
     "public":
     {
-        "_id": "UUID",
+        "channelID": "UUID",
         "name": "string",
         "permissions":
         [

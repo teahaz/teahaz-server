@@ -229,13 +229,14 @@ class Chatroom
         this._extract_cookie(response);
     }
 
-
     /*
      *  ===========================================================================
      *   --------------------------  Exported functions  -------------------------
      *  ===========================================================================
      */
 
+
+    // ==================================== Local / modifier functions ============================================
     async enable({type, ...args}={})
     {
         /*
@@ -312,6 +313,9 @@ class Chatroom
     }
 
 
+    // ==================================== server functions ======================================================
+
+
     async create({chatroom_name, callback_success, callback_error}={})
     {
         /*
@@ -334,7 +338,7 @@ class Chatroom
             data: {
                 "username": this.username,
                 "password": this.password,
-                "chatroom_name": chatroom_name || this.chatroom_name
+                "chatroom-name": chatroom_name || this.chatroom_name
             },
             proxy: this.proxy
         })
@@ -352,7 +356,6 @@ class Chatroom
                 return Promise.reject(response);
             })
     }
-
 
     async login({callback_success, callback_error}={})
     {
@@ -395,7 +398,6 @@ class Chatroom
             })
     }
 
-
     async get_chat_info({callback_success, callback_error}={})
     {
         /*
@@ -413,7 +415,8 @@ class Chatroom
         return axios({
             method: 'get',
             url: `${this.server}/api/v0/chatroom/${this.chatroomID}`,
-            headers: {
+            headers:
+            {
                 "User-Agent": user_agent,
                 "Content-Type": "application/json",
                 "Cookie": `${this.chatroomID}=${this.cookie}`,
@@ -434,8 +437,62 @@ class Chatroom
                 this._runcallbacks(callback_error, response);
                 return Promise.reject(response);
             })
-
     }
+
+    async create_channel({channel_name, permissions, callback_success, callback_error}={})
+    {
+        /*
+         * Create a new channel in the chatroom.
+         *
+         * This currently can only be done by a chatroom admin.
+         */
+
+        assert(this.username, "'chatroomID' variable is undefined.");
+        assert(this.chatroomID, "'chatroomID' variable is undefined.");
+        assert(channel_name, "'channel_name' variable has not been set.");
+
+        // if no permissions are set then just have some sane defaults
+        if (permissions == undefined)
+            permissions = [
+                {
+                    classID: '1',
+                    r: true,
+                    w: true,
+                    x: false
+                }
+            ];
+
+        return axios({
+            method: 'post',
+            url: `${this.server}/api/v0/channels/${this.chatroomID}`,
+            headers:
+            {
+                "User-Agent": user_agent,
+                "Content-Type": "application/json",
+                "Cookie": `${this.chatroomID}=${this.cookie}`
+            },
+            data:
+            {
+                "username": this.username,
+                "channel-name": channel_name,
+                "permissions": permissions
+            }
+        })
+        .then((response) =>
+            {
+                this.channels.push(response.data);
+
+                this._runcallbacks(callback_success, response);
+                return Promise.resolve(response);
+            })
+        .catch((res) => 
+            {
+                this._runcallbacks(callback_error, response);
+                return Promise.reject(res);
+            });
+    }
+
+
 }
 
 

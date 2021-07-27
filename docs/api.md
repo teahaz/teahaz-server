@@ -12,7 +12,8 @@ Table of contents
     - get chatroom information / check login
 * login
     - Login
-
+* channels
+    - create channel
 
 
 
@@ -170,6 +171,8 @@ If successful the server will assign you a new cookie, and return the [standard 
 
 get chatroom information / check login
 --------------------------------------
+method `get`
+path: `/api/v0/chatroom/`[\<chatroomID\>](https://http.cat/501)
 
 This method serves 2 main purposes:
 1. Getting up-to-date information about a chatroom.
@@ -199,10 +202,87 @@ If you are logged in then the method returns the [standard data for a chatroom](
 
 <br />
 <br />
-<br />
-<br />
+
+Create channel
+--------------
+method `post`
+path: `/api/v0/channels/`[\<chatroomID\>](https://http.cat/501)
+
+Channels on the server are like seperate streams of messages similar to what discord and other larger group messaging platforms have. To create a new chatroom you need to send the server your username, the name of the new chatroom and some permission information so the server knows who can view, write, or edit the channel.
+
+Permission information is stored as a list. The list needs to have a classID that refers to a class of users, and it needs to have an r, w and x value for read write and manage. (This scheme is taken from unix systems where x is execute, but as that doesnt make much sense here we have changed it to manage.)
+
+Example permissions for a channel:
+```js
+[
+    {
+        classID: "i",
+        r: true,
+        w: true,
+        x: false
+    },
+    {
+        classID: "cc2b9f4c-eef9-11eb-b1eb-b42e99435986",
+        r: true,
+        w: true,
+        x: true
+    }
+]
+```
+NOTE: classID in most cases in a UUID, classID: "1" refers to the default class (everyone).
+
 <br />
 
+Example python code for creating a new channel:
+```py
+import requests
+
+chatroomID = ID_OF_CHATROOM
+
+data = {
+    "username": YOUR_USERNAME,
+    "channel-name": NAME_OF_NEW_CHANNEL,
+    "permissions": [
+        {
+            classID: "i",
+            r: true,
+            w: true,
+            x: false
+        },
+        {
+            classID: "cc2b9f4c-eef9-11eb-b1eb-b42e99435986",
+            r: true,
+            w: true,
+            x: true
+        }
+    ]
+}
+
+r = requests.post(url="http://teahaz.co.uk/api/v0/chatroom/"+chatroomID, data=data)
+
+print(r.json())
+```
+
+If successful the server should return the ID, name, and permissions of the new channel.
+
+Example:
+```
+{
+  channelID: 'cc2b9f4c-eef9-11eb-b1eb-b42e99435986',
+  name: 'default',
+  permissions: [ { classID: '1', r: true, w: true, x: false } ]
+},
+```
+
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 
 
 

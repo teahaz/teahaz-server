@@ -121,8 +121,6 @@ class Login(Resource):
         return res
 
 
-
-
 class Invites(Resource):
     """ /api/v0/invites/ """
 
@@ -169,6 +167,21 @@ class Invites(Resource):
 
 class Channels(Resource):
     """ /api/v0/channels/ """
+    def post(self, chatroomID):
+        """ Creating a new channel """
+
+        # check data
+        res, status = helpers.check_default(
+                'post',
+                chatroomID,
+                request,
+                True
+            )
+        if status != 200: return res, status
+
+        return api.create_channel(chatroomID, request.get_json())
+
+
     def get(self, chatroomID):
         """ Get details about all channels that the user can read """
 
@@ -184,19 +197,6 @@ class Channels(Resource):
 
         return api.get_channels(chatroomID, request.headers)
 
-    def post(self, chatroomID):
-        """ Creating a new channel """
-
-        # check data
-        res, status = helpers.check_default(
-                'post',
-                chatroomID,
-                request,
-                True
-            )
-        if status != 200: return res, status
-
-        return api.create_channel(chatroomID, request.get_json())
 
 
 class Messages(Resource):

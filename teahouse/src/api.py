@@ -18,14 +18,14 @@ log = logger()
 
 
 
-def create_chatroom(json_data):
+def create_chatroom(json_data) -> (dict, int):
     """ Create a chatroom """
 
     # get arguments
     username      = json_data.get('username')
     nickname      = json_data.get('username')
     password      = json_data.get('password')
-    chatroom_name = json_data.get('chatroom_name')
+    chatroom_name = json_data.get('chatroom-name')
 
 
     # The nickname argument is optional and if not set it will be the same as username
@@ -77,7 +77,7 @@ def create_chatroom(json_data):
     # return information about the created chatroom
     return helpers.get_chat_info(chatroomID, username)
 
-def login(chatroomID: str, json_data: dict):
+def login(chatroomID: str, json_data: dict) -> (dict, int):
     """ Login to chatroom """
 
     # get arguments
@@ -97,6 +97,38 @@ def login(chatroomID: str, json_data: dict):
     # return with useful information about the chatroom
     return helpers.get_chat_info(chatroomID, username)
 
+
+
+def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
+    """ Create a channel """
+
+    username     = json_data.get('username')
+    channel_name = json_data.get('channel-name')
+    permissions  = json_data.get('permissions')
+
+
+    if type(channel_name) != str or len(channel_name) > 200:
+        return "Channel_name must be a string that is less than 200 characters long", 400
+
+
+    admins, status =  helpers.get_admins(chatroomID)
+    if status != 200: return admins, status
+
+
+    if username not in admins:
+        return "You do not have permission to create channels", 403
+
+
+    permissions, status = helpers.sanitize_permission_list(chatroomID, permissions)
+    if status != 200: return permissions, status
+
+
+
+    channel_obj, status = database.write_channel(chatroomID, channel_name, permissions)
+    if status != 200: return channel_obj, status
+
+
+    return channel_obj, 200
 
 
 
@@ -131,45 +163,6 @@ def get_channels(chatroomID: str, json_data: dict):
 
     return channels_list_with_perms, 200
 
-def create_channel(chatroomID: str, json_data: dict):
-    """ Create a channel """
-
-    # get arguments
-    # Dont have to check username as its needed for authentication,
-    #   and it will have already been checked
-    username = json_data.get('username')
-
-    channel_name = json_data.get('channel_name')
-    is_public = True
-
-    # check some data
-    if not channel_name:
-        return "You must specify a channel_name!", 400
-    if type(is_public) != bool:
-        return "Value for 'public_channel' has to be boolian!", 400
-
-
-    constructor, status = database.get_constructor(chatroomID)
-    if status != 200: return constructor, status
-
-    if username != constructor:
-        return "You do not have permission to perform this action.\
-                    Currently only the chatroom constructor can modify settings.\
-                    (this will probably change in the future)", 403
-
-
-    # save channel in db
-    channelID, status = database.add_channel(chatroomID, channel_name, is_public)
-    if status != 200:
-        return channelID, status
-
-
-    return {
-            "channelID": channelID,
-            "channel_name": channel_name,
-            "public": is_public,
-            "permissions": { "r": True, "w": True, "x": True }
-            }, 200
 
 
 

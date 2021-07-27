@@ -366,27 +366,29 @@ def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: l
 
 
 #-------------------------------------------------------------- Channels -----------------------
-def add_channel(chatroomID: str, channel_name: str, is_public: bool):
-    """
-        Add new channel to database
-
-        return:
-            channelID, status
-    """
+def write_channel(chatroomID: str, channel_name: str, permissions: list) -> (dict or str, int):
+    """ Add new channel to database """
 
     # generate channelID
     channelID = security.gen_uuid()
 
     # insert into db
-    db = database(chatroomID)
-    res, status = db.insert('channels', (channelID, channel_name, is_public))
-    if status != 200:
-        return res, status
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
 
+    channel_data = {
+            "_id": channelID,
+            "public":
+                {
+                    "channelID": channelID,
+                    "name": channel_name,
+                    "permissions": permissions
+                }
+            }
 
-    db.commit()
-    db.close()
-    return channelID, 200
+    db.channels.insert_one(channel_data)
+
+    return channel_data['public'], 200
 
 def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (dict, int):
     """ Fetch all information about a channel """

@@ -64,7 +64,6 @@ def set_cookie(chatroomID: str, username: str):
 
 def check_cookie(chatroomID: str, cookie: str, username: str):
     """ Check if a cookie value is valid for the specified user """
-    print("got to cookie check")
 
     if not username or not cookie:
         print('username: ',username , type(username))

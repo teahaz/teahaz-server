@@ -62,8 +62,16 @@ const main = async() =>
 
 
 
+    /*
+     * Test getting chatroom information,
+     * and check_login.
+     *
+     * This function is used both to get general
+     * information about a chatroom and to check
+     * whether the client is logged in.
+     * (ie cookies are valid)
+     */
 
-    //works
     let info = await conv1.get_chat_info()
     info = info.data
 
@@ -79,60 +87,15 @@ const main = async() =>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    process.exit()
-    await conv0.check_login()
-    .then((res) =>
-        {
-            // console.log(res.headers)
-            // console.log(conv)
-            console.log("✅ Checked login!");
-        })
-    .catch((res) =>
-        {
-            console.log(res);
-            console.error("❌ Checking login failed!");
-            process.exit(1);
-        });
-
-
-    await conv0.create_channel({
-        channel_name: "memes channel",
-        public_channel: true
+    /*
+     * Test creating a new channel.
+     */
+    await conv1.create_channel({
+        channel_name: "memes channel"
     })
     .then((res) =>
         {
-            // console.log(res)
+            print(res.data);
             console.log("✅ Created new channel");
         })
     .catch((res) =>
@@ -141,6 +104,44 @@ const main = async() =>
             console.error("❌ Failed to create channel!");
             process.exit(1);
         });
+
+    console.log('==========================================================')
+    print(conv1);
+
+    process.exit(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     await conv0.get_channels()
     .then((res) =>
