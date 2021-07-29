@@ -6,6 +6,8 @@ const version = 0;
 const user_agent = `teahaz.js (v ${version})`;
 
 const print = (o) => console.dir(o, {depth: null})
+
+
 /*
  *
  *  An instance of the chatroom class in teahaz.js
@@ -485,14 +487,49 @@ class Chatroom
                 this._runcallbacks(callback_success, response);
                 return Promise.resolve(response);
             })
-        .catch((res) => 
+        .catch((response) => 
             {
                 this._runcallbacks(callback_error, response);
-                return Promise.reject(res);
+                return Promise.reject(response);
             });
     }
 
+    async send_message({message, channelID, replyID, callback_success, callback_error}={})
+    {
+        assert(typeof(message) == 'string', "'message' has to be of type string.")
+        assert(channelID, "'channelID' variable has not been set!")
 
+        // We need to encode messages to simulate the encryption we will have later.
+        message = this._encode(message)
+
+        return axios({
+            method: 'post',
+            url: `${this.server}/api/v0/messages/${this.chatroomID}`,
+            headers:
+            {
+                "User-Agent": user_agent,
+                "Content-Type": "application/json",
+                "Cookie": `${this.chatroomID}=${this.cookie}`
+            },
+            data:
+            {
+                username: this.username,
+                data: message,
+                channelID,
+                replyID
+            }
+        })
+        .then((response) =>
+            {
+                this._runcallbacks(callback_success, response);
+                return Promise.resolve(response);
+            })
+        .catch((response) => 
+            {
+                this._runcallbacks(callback_error, response);
+                return Promise.reject(response);
+            });
+    }
 }
 
 

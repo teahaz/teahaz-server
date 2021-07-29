@@ -132,40 +132,6 @@ def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
 
 
 
-def get_channels(chatroomID: str, json_data: dict):
-    """ Get all chatrooms, and their permissions """
-
-    # NOTE replace with global_helpers.get_chat_info
-
-
-    # get arguments
-    # Dont have to check username as its needed for authentication,
-    #   and it will have already been checked
-    username = json_data.get('username')
-
-
-    # get all channels that the user can read
-    channels, status = database.get_readable_channels(chatroomID, username)
-    if status != 200: return channels, status
-
-
-    # Get permissions for channels.
-    # This is not strictly needed as all channels
-    #   in this list can be read, but I think it
-    #   provides the user with some useful information.
-    channels_list_with_perms = []
-    for channel in channels:
-        channel, status = database.get_channel_permissions(chatroomID, channel['channelID'], username)
-        if status != 200: return channels, status
-
-        channels_list_with_perms.append(channel)
-
-
-    return channels_list_with_perms, 200
-
-
-
-
 
 def send_message(chatroomID: str, json_data: dict):
     """ Save message sent from user """
@@ -180,7 +146,6 @@ def send_message(chatroomID: str, json_data: dict):
     mtext     = json_data.get('data')
 
 
-
     # Make sure all arguments are given
     required = ["mtype", "channelID", "username", "data"]
     for i, a in enumerate([mtype, channelID, username, mtext]):
@@ -190,15 +155,9 @@ def send_message(chatroomID: str, json_data: dict):
 
     # Validate user input
     values = ["replyID", "channelID"] # , "keyID" ]
-                                                # If uid is 0 then you dont need to check it.
     for i, a in enumerate([replyID, channelID]):
         if a != None and not security.is_uuid(a):
             return f"Value for {values[i]} is not a valid ID!", 400
-
-
-    # Make sure message is of allowed type
-    if mtype != 'text':
-        return "Only messages with type 'text' are permitted for this method!", 400
 
 
     # users should not be able to send empty messages
@@ -207,16 +166,14 @@ def send_message(chatroomID: str, json_data: dict):
 
 
     # Check if channel exists and that the user has access to it
-    channel_obj, status = database.get_channel_permissions(chatroomID, channelID, username)
-    if status != 200:
-        return channel_obj, status
+    permissions, status = database.get_channel_permissions(chatroomID, channelID, username)
+    if status != 200: return permissions, status
 
 
-    # NOTE maybe someone writing should have read permission as well
-    if channel_obj['permissions']['w'] == False:
-        return "You do not have permission to write in this channel!", 403
+    if not permissions['w']:
+        return "You do not have permissions to write in this channel", 403
 
-
+    # continue on from here
     return database.write_message(chatroomID, channelID, username, replyID, keyID, 'text', mtext)
 
 def get_messages(chatroomID: str, json_data: dict):

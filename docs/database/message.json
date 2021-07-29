@@ -1,16 +1,9 @@
 [
     {
-        "private":
-        {
-            "permissions":
-            {
-                "_id": "UUID",
-                "public": true
-            }
-        },
+        "_id": "UUID",
         "public":
         {
-            "_id": "UUID",
+            "messageID": "UUID",
             "time": "time",
             "keyID": "string",
             "reply_id": "UUID",
@@ -25,22 +18,9 @@
 
 
     {
-        "private":
-        {
-            "permissions":
-            {
-                "public": false,
-                "classes": 
-                [
-                    "UUID",
-                    "UUID",
-                    "UUID"
-                ]
-            }
-        },
         "public":
         {
-            "_id": "UUID",
+            "messageID": "UUID",
             "time": "time",
             "channel_id": "UUID",
 
@@ -67,22 +47,10 @@
 
 
     {
-        "private":
-        {
-            "permissions":
-            {
-                "public": false,
-                "classes": 
-                [
-                    "UUID",
-                    "UUID",
-                    "UUID"
-                ]
-            }
-        },
+        "_id": "UUID",
         "public":
         {
-            "_id": "UUID",
+            "messageID": "UUID",
             "time": "time",
             "keyID": "string",
             "reply_id": "UUID",

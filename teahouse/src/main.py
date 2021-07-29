@@ -182,23 +182,6 @@ class Channels(Resource):
         return api.create_channel(chatroomID, request.get_json())
 
 
-    def get(self, chatroomID):
-        """ Get details about all channels that the user can read """
-
-        # check data
-        res, status = helpers.check_default(
-                'get',
-                chatroomID,
-                request,
-                True
-            )
-        if status != 200: return res, status
-
-
-        return api.get_channels(chatroomID, request.headers)
-
-
-
 class Messages(Resource):
     """ /api/v0/messages/ """
 

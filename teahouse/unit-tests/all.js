@@ -90,12 +90,21 @@ const main = async() =>
     /*
      * Test creating a new channel.
      */
+    let channel_name = "memes channel";
+    let permissions = [{
+        classID: '1',
+        r: true,
+        w: false,
+        x: false
+    }]
     await conv1.create_channel({
-        channel_name: "memes channel"
+        channel_name,
+        permissions
     })
     .then((res) =>
         {
-            print(res.data);
+            assert(channel_name == res.data.name)
+            assert(JSON.stringify(permissions) == JSON.stringify(res.data.permissions))
             console.log("✅ Created new channel");
         })
     .catch((res) =>
@@ -104,6 +113,23 @@ const main = async() =>
             console.error("❌ Failed to create channel!");
             process.exit(1);
         });
+
+
+    await conv1.send_message({
+        message: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
+        channelID: conv1.channels[0].channelID,
+    })
+    .then((res) =>
+        {
+            console.log(res.data)
+            console.log("✅ successfully sent message");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to send message!");
+        });
+
 
     console.log('==========================================================')
     print(conv1);
@@ -140,22 +166,6 @@ const main = async() =>
 
 
 
-
-
-
-    await conv0.get_channels()
-    .then((res) =>
-        {
-            // console.log(res)
-            // console.log(conv)
-            console.log("✅ Got channels!");
-        })
-    .catch((res) =>
-        {
-            console.log(res, { depth: null });
-            console.error("❌ Failed to get channels!");
-            process.exit(1);
-        });
 
     // process.exit(1);
 

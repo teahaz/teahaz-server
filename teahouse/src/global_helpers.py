@@ -111,7 +111,7 @@ def db_format_message(messages: list):
 
 
 #################################################### permissions #############################
-def get_admins(chatroomID: str) -> (list, int):
+def get_admins(chatroomID: str) -> (list or str, int):
     """ Get the usernames of all admins in the chatroom """
 
     # get all classes
@@ -123,7 +123,6 @@ def get_admins(chatroomID: str) -> (list, int):
     for c in classes:
         if c['admin'] == True:
             admin_classes.append(c['classID'])
-
 
     # get all users
     users, status = database.fetch_all_users(chatroomID)

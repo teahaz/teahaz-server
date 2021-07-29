@@ -271,8 +271,11 @@ def fetch_all_settings(chatroomID: str):
 
 
 #-------------------------------------------------------------- Messages -----------------------
-def write_message_event(chatroomID: str, mtype: str, data: dict):
-    """ Write message into the messages collection """
+def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str, int):
+    """ Write an event into the messages collection """
+
+    # just make sure that I am using this function correctly
+    assert(mtype not in ['text', 'file'])
 
     # get db
     db, status = _gethandle(chatroomID)
@@ -281,28 +284,15 @@ def write_message_event(chatroomID: str, mtype: str, data: dict):
     # get id and time
     messageID = security.gen_uuid()
 
-
-    # get default channel
-    channelID, status = check_settings(chatroomID, "default_channel")
-    if status != 200:
-        return f"Internal database error while getting default channel {channelID}", 500
-
     # format message
     message_obj ={
             "_id": messageID,
-            "private":
-            {
-                "chanread":
-                [
-                    '1' # can read 1 means that this message can be read by everyone
-                ]
-            },
             "public":
             {
                 "messageID": messageID,
                 "time": time.time(),
                 "type": str(mtype),
-                "action": "hey"
+                "action": data
             }
         }
 
@@ -310,6 +300,11 @@ def write_message_event(chatroomID: str, mtype: str, data: dict):
     db.messages.insert_one(message_obj)
 
     return message_obj['public'], 200
+
+def write_message_text(chatroomID: str, username: str, message: str) -> (dict or str, int):
+    """ Write a message inot the messages field """
+
+
 
 def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
     """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
@@ -396,7 +391,7 @@ def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (di
     db, status= _gethandle(chatroomID)
     if status != 200: return db, status
 
-    channel = db.channel.find_one({'_id': channelID})
+    channel = db.channels.find_one({'_id': channelID})
     if not channel:
         return "Channel not found", 404
 
@@ -405,9 +400,7 @@ def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (di
 
     return channel, 200
 
-
-
-def fetch_all_channels(chatroomID: str, include_private=False) -> (list, int):
+def fetch_all_channels(chatroomID: str, include_private=False) -> (list or str, int):
     """ Get a list of all channels """
 
     db, status= _gethandle(chatroomID)
@@ -421,6 +414,52 @@ def fetch_all_channels(chatroomID: str, include_private=False) -> (list, int):
             channels.append(d['public'])
 
     return channels, 200
+
+def get_channel_permissions(chatroomID: str, channelID: str, username: str) -> (dict or str, int):
+    """
+        Gets channel permissions from the perspective of the user.
+
+        ie: it gets the what the user can do in a channel
+    """
+
+    db, status = _gethandle(channelID)
+    if status != 200: return db, status
+
+    user, status = fetch_user(chatroomID, username)
+    if status != 200: return user, status
+
+    admins, status = helpers.get_admins(chatroomID)
+    if status != 200: return admins, status
+
+    # if a user is an admin (including the constructor) he has access to everything
+    if user['username'] in admins:
+        return {
+                "r": True,
+                "w": True,
+                "x": True,
+                }, 200
+
+
+    channel, status = fetch_channel(chatroomID, channelID)
+    if status != 200: return channel, status
+
+    # set up defautls that will be changed
+    permissions = {
+            "r": False,
+            "w": False,
+            "x": False,
+            }
+
+    # loop through all classes and get the highest better permission of each
+    for p in channel['permissions']:
+        if p['classID'] in user['classes']:
+            if p['r'] == True: permissions['r'] = True
+            if p['w'] == True: permissions['w'] = True
+            if p['x'] == True: permissions['x'] = True
+
+
+    return permissions, 200
+
 
 
 def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
@@ -463,8 +502,6 @@ def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
                 return True, 200
 
     return False, 200
-
-
 
 def fetch_all_readable_channels(chatroomID: str, username: str):
     """ Gets a list of all channels that are readable to the user.  """
