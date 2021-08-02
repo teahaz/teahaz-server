@@ -157,7 +157,7 @@ def send_message(chatroomID: str, json_data: dict):
     values = ["replyID", "channelID"] # , "keyID" ]
     for i, a in enumerate([replyID, channelID]):
         if a != None and not security.is_uuid(a):
-            return f"Value for {values[i]} is not a valid ID!", 400
+            return f"Value for {values[i]} is not a valid UUID!", 400
 
 
     # users should not be able to send empty messages
@@ -174,7 +174,8 @@ def send_message(chatroomID: str, json_data: dict):
         return "You do not have permissions to write in this channel", 403
 
     # continue on from here
-    return database.write_message(chatroomID, channelID, username, replyID, keyID, 'text', mtext)
+    return database.write_message_text(chatroomID, chatroomID, username, mtext, replyID)
+
 
 def get_messages(chatroomID: str, json_data: dict):
     """ Get the last x messages since <time> """

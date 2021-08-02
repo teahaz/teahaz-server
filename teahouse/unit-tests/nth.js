@@ -231,6 +231,22 @@ class Chatroom
         this._extract_cookie(response);
     }
 
+    _get_user_info(username)
+    {
+        /*
+         * Get all locally stored information
+         * about a user.
+         *
+         * This would really be used to get a nickname
+         * or a colour.
+         */
+        for (const user of this.users)
+        {
+            if (username == user.username)
+                return user
+        }
+    }
+
     /*
      *  ===========================================================================
      *   --------------------------  Exported functions  -------------------------
@@ -499,8 +515,12 @@ class Chatroom
         assert(typeof(message) == 'string', "'message' has to be of type string.")
         assert(channelID, "'channelID' variable has not been set!")
 
+        // keep unencoded message for the return
+        // (there is no need to decode it)
+        let o_message = message;
+
         // We need to encode messages to simulate the encryption we will have later.
-        message = this._encode(message)
+        message = this._encode(message);
 
         return axios({
             method: 'post',
@@ -521,6 +541,20 @@ class Chatroom
         })
         .then((response) =>
             {
+                // Add in some information to the message
+                // that the server doesnt but could still be
+                // useful.
+                response.data.message = o_message;
+
+                // The current users colour is not stored as
+                // an instance variable, so this information
+                // has to be gotten from the users array like
+                // it would be if it were some other user.
+                let user = this._get_user_info(this.username)
+                response.data.colour = user.colour;
+                response.data.nickname = user.nickname;
+
+
                 this._runcallbacks(callback_success, response);
                 return Promise.resolve(response);
             })

@@ -281,7 +281,7 @@ def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str
     db, status = _gethandle(chatroomID)
     if status != 200: return db, status
 
-    # get id and time
+    # randomly generate an id for the message
     messageID = security.gen_uuid()
 
     # format message
@@ -292,7 +292,7 @@ def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str
                 "messageID": messageID,
                 "time": time.time(),
                 "type": str(mtype),
-                "action": data
+                "data": data
             }
         }
 
@@ -301,9 +301,38 @@ def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str
 
     return message_obj['public'], 200
 
-def write_message_text(chatroomID: str, username: str, message: str) -> (dict or str, int):
+def write_message_text(chatroomID: str, channelID: str, username: str, message: str, replyID: str = None) -> (dict or str, int):
     """ Write a message inot the messages field """
 
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
+
+    # randomly generate an id for the message
+    messageID = security.gen_uuid()
+
+    # format message
+    message_obj ={
+            "_id": messageID,
+            "public":
+            {
+                "messageID": messageID,
+                "time": time.time(),
+                "channelID": channelID,
+                "username": username,
+                "type": 'text',
+                "data": message
+            }
+        }
+
+    # If there is a replyID is set then add then change the message
+    # from a standard text to a reply.
+    if replyID != None:
+        message_obj['public']['type'] = 'reply-text'
+        message_obj['public']['replyID'] = replyID
+
+
+    db.messages.insert_one(message_obj)
+    return message_obj['public'], 200
 
 
 def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):

@@ -11,9 +11,12 @@ Table of contents
     - creating a chatroom
     - get chatroom information / check login
 * login
-    - Login
+    - login
 * channels
     - create channel
+* messages
+    - send message
+    - send reply message
 
 
 
@@ -274,6 +277,64 @@ Example:
 },
 ```
 
+<br />
+<br />
+
+
+
+send message
+------------
+
+
+I dont really have the energy to do these now and if I dont then they will suck so here is an outline for future self
+
+
+- you can send messages to a chatroom
+
+- within a chatroom you must specify which channel you send to
+    (must be valid uuid)
+
+
+- retrun has:
+```
+
+{
+  messageID: 'd334da3e-f3c1-11eb-b9fe-4f5968c71063',
+  time: 1627929936.2626493,
+  channelID: 'cdf68efa-f3c1-11eb-b9fe-4f5968c71063',
+  username: 'a',
+  type: 'text',
+  data: 'aGVsbG8=',
+}
+```
+
+crusially missing:
+
+```
+  message: 'hello',
+  colour: { r: null, g: null, b: null },
+  nickname: 'a'
+```
+you should really put this in if you are making a client file.
+
+
+
+
+<br />
+<br />
+
+
+
+send reply message
+------------------
+
+Exactly the same as send message, but you have to specify a `replyID` which has to be a valid uuid of a previos message.
+
+
+
+
+
+
 
 <br />
 <br />
@@ -291,6 +352,7 @@ Example:
 
 
 
+- send reply message
 
 
 

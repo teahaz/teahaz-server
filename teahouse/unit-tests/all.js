@@ -36,6 +36,7 @@ const main = async() =>
     assert(conv0.settings.length == 3);
     assert(conv0.chatroom_name)
 
+
     console.log("✅ Successfully created chatroom!");
 
     /*
@@ -115,13 +116,30 @@ const main = async() =>
         });
 
 
+    /*
+     * Sending a message to a chatroom.
+     *
+     * This send is supposed to be successful
+     * (there will be send tests later that are supposed to fail)
+     */
+
+    // message_text is saved for comparison
+    let message_text = 'hello';
+    // messageID is saved to make the reply
+    let prev_messageID = '';
+
     await conv1.send_message({
-        message: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
+        message: message_text,
         channelID: conv1.channels[0].channelID,
     })
     .then((res) =>
         {
-            console.log(res.data)
+            // check if text is correct and it has been
+            // decoded/unencoded successfully
+            assert(res.data.message == message_text);
+            assert(res.data.type == 'text');
+
+            prev_messageID = res.data.messageID;
             console.log("✅ successfully sent message");
         })
     .catch((res) =>
@@ -130,6 +148,31 @@ const main = async() =>
             console.error("❌ Failed to send message!");
         });
 
+    /*
+     * Sending a reply message.
+     *
+     * This send is supposed to be successful
+     * (there will be send tests later that are supposed to fail)
+     */
+    let r_message_text = 'sup?';
+    await conv1.send_message({
+        message: r_message_text,
+        channelID: conv1.channels[0].channelID,
+        replyID: prev_messageID
+    })
+    .then((res) =>
+        {
+            // check if text is correct and it has been
+            // decoded/unencoded successfully
+            assert(res.data.message == r_message_text);
+            assert(res.data.type == 'reply-text');
+            console.log("✅ successfully sent reply");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to send message!");
+        });
 
     console.log('==========================================================')
     print(conv1);
