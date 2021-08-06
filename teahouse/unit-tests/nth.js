@@ -564,6 +564,19 @@ class Chatroom
                 return Promise.reject(response);
             });
     }
+
+    async get_since({time, channelID, callback_success, callback_error}={})
+    {
+        assert(typeof(time) == 'number', "'time' variable has to be a number.");
+
+        // axios doesnt allow undefined in a header
+        headers = {
+            "User-Agent": user_agent,
+            "Content-Type": "application/json",
+            "Cookie": `${this.chatroomID}=${this.cookie}`
+            
+        }
+    }
 }
 
 

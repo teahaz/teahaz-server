@@ -176,7 +176,6 @@ def send_message(chatroomID: str, json_data: dict):
     # continue on from here
     return database.write_message_text(chatroomID, chatroomID, username, mtext, replyID)
 
-
 def get_messages(chatroomID: str, json_data: dict):
     """ Get the last x messages since <time> """
 
@@ -203,20 +202,20 @@ def get_messages(chatroomID: str, json_data: dict):
     if channelID != None and not security.is_uuid(channelID):
         return "ChannelID is not a valid UUID", 400
 
-    # ChannelID is set, get list of 1 element
+    # ChannelID is set, get array of 1 element
     if channelID != None and security.is_uuid(channelID):
         channels = [{ "channelID": channelID }]
 
     # ChannelID is not set, get all readable
     else:
-        channels, status = database.get_readable_channels(chatroomID, username)
+        channels, status = database.fetch_all_readable_channels(chatroomID, username)
         if status != 200: return channels, status
 
-    # Get a list of **only** the channelIDs of needed channels.
+    # Get an array that only contains the id's of channels,
+    # instead of a lot of other data.
     channel_ids = []
     for i in channels:
         channel_ids.append(i['channelID'])
-
 
 
 

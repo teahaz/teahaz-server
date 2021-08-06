@@ -335,34 +335,46 @@ def write_message_text(chatroomID: str, channelID: str, username: str, message: 
     return message_obj['public'], 200
 
 
-def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
-    """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
+def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list) -> (list or str, int):
+    """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
 
     # get db
-    db = database(chatroomID)
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
 
 
-    # conditions = "channelID = ?" * len(channels_to_look_in)
-    conditions = []
-    for i in channels_to_look_in:
-        conditions.append("channelID = ?")
-    conditions = " OR ".join(conditions)
+    # conditions
+    #  -  time of send >= supplied time
+    #  -  has to be withing the channels_to_look_in array
+    #       (array of either just one channel or all
+    #            that the user can read)
+
+    query = { 
+        '$and' :
+        [
+            {
+                "public":
+                {
+                    "time":
+                    {
+                        "$gte": timesince
+                    }
+                }
+            }
+        ]
+    }
+
+    messages = []
+    for m in db.messages.find(query):
+        messages.append(m['public'])
 
 
-    # add all variables to a tuple
-    variables = (timebefore,)
-    for i in channels_to_look_in:
-        variables += (i,)
-    variables += (count,)
+    return messages, 200
 
 
-    res, status = db._run(f"SELECT * FROM messages WHERE mtime <= ? AND ({conditions}) ORDER BY mtime DESC LIMIT ?", variables)
-    if status != 200: return res, status
 
-    return helpers.db_format_message(res.fetchall())
-
-def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list):
-    """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
+def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
+    """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
 
     db = database(chatroomID)
 
