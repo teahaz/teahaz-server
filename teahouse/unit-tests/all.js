@@ -128,6 +128,7 @@ const main = async() =>
     // messageID is saved to make the reply
     let prev_messageID = '';
 
+    // sending a simple message in the default channel
     await conv1.send_message({
         message: message_text,
         channelID: conv1.channels[0].channelID,
@@ -148,6 +149,31 @@ const main = async() =>
             console.error("❌ Failed to send message!");
         });
 
+
+    let meme_message = "Hello memes channel, unfortunately there are no images yet so I cannot send a meme. :(";
+    // sending a message in the newly created memes channel
+    await conv1.send_message({
+        message: meme_message,
+        channelID: conv1.channels[1].channelID,
+    })
+    .then((res) =>
+        {
+            // check if text is correct and it has been
+            // decoded/unencoded successfully
+            assert(res.data.message == meme_message);
+            assert(res.data.type == 'text');
+
+            prev_messageID = res.data.messageID;
+            console.log("✅ successfully sent message");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to send message!");
+        });
+
+
+
     /*
      * Sending a reply message.
      *
@@ -166,6 +192,7 @@ const main = async() =>
             // decoded/unencoded successfully
             assert(res.data.message == r_message_text);
             assert(res.data.type == 'reply-text');
+            assert(res.data.username == conv1.username);
             console.log("✅ successfully sent reply");
         })
     .catch((res) =>
@@ -174,13 +201,67 @@ const main = async() =>
             console.error("❌ Failed to send message!");
         });
 
-    console.log('==========================================================')
+
+
+
+
+    /*
+     * Get all messages since <time>.
+     *
+     * The method should return all messages that
+     * have been sent since the supplied time variable.
+     *
+     * There is also an optional channelID variable to only
+     * get messages from one channel. If this is not set
+     * then it will look in all channels the user has access
+     * to.
+     */
+
+    // Get from all channels
+    await conv1.get({
+        time: 0
+    })
+    .then((res) =>
+        {
+            // There shouldve been 4 messages sent so far.
+            assert(res.data.length == 4);
+            console.log("✅ Successfully got messages from all channels.");
+        })
+    .catch((res) =>
+        {
+            console.error(res);
+            console.error("❌ Failed to send message!");
+        });
+
+
+    // Get from just one channel
+    await conv1.get({
+        time: 0,
+        channelID: conv1.channels[1].channelID
+    })
+    .then((res) =>
+        {
+            // There shouldve been one message in the memes
+            // channel plus one system message.
+            assert(res.data.length == 2);
+            console.log("✅ Successfully got messages from only one channel.");
+        })
+    .catch((res) =>
+        {
+            console.error(res);
+            console.error("❌ Failed to send message!");
+        });
+
+
+    // Get from only one channel.
+    // await conv1.get({ })
+
+
+    console.log('============================================================================')
     print(conv1);
 
+
     process.exit(0);
-
-
-
 
 
 

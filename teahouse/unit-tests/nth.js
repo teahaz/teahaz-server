@@ -565,17 +565,43 @@ class Chatroom
             });
     }
 
-    async get_since({time, channelID, callback_success, callback_error}={})
+    async get({time, channelID, callback_success, callback_error}={})
     {
         assert(typeof(time) == 'number', "'time' variable has to be a number.");
 
-        // axios doesnt allow undefined in a header
-        headers = {
+        // Due to the limitations of the http standard
+        // we have to send information for GET requests
+        // in the header.
+        let headers = {
             "User-Agent": user_agent,
             "Content-Type": "application/json",
-            "Cookie": `${this.chatroomID}=${this.cookie}`
-            
+            "Cookie": `${this.chatroomID}=${this.cookie}`,
+
+            "username": this.username,
+            "time": time,
         }
+
+        // Axios doesnt allow you to send undefined in a header
+        // so the channelID will only be set if its defined.
+        //
+        if (typeof(channelID) != "undefined")
+            headers['channelID'] = channelID
+
+        return axios({
+            method: 'get',
+            url: `${this.server}/api/v0/messages/${this.chatroomID}`,
+            headers: headers
+        })
+        .then((response) =>
+            {
+                this._runcallbacks(callback_success, response);
+                return Promise.resolve(response);
+            })
+        .catch((response) => 
+            {
+                this._runcallbacks(callback_error, response);
+                return Promise.reject(response);
+            });
     }
 }
 

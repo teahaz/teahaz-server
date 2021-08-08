@@ -13,6 +13,13 @@ global log
 log = logger()
 
 
+#################################################### global variables #############################
+# These define what message types are channel agnostic and what arent.
+# System messages are sent in all channels while standard messages
+# are confined to one channel only.
+system_message_types = ['system']
+standard_message_types = ['text', 'reply-text', 'file', 'reply-file']
+
 
 #################################################### main ########################################
 def check_default(method: str, chatroomID: str, request: object, need_login: bool):

@@ -284,38 +284,60 @@ Example:
 
 send message
 ------------
+method: `post`
+path: `/api/v0/message/`[\<chatroomID\>](https://http.cat/501)
+
+This method lets you send a message to a teahaz chatroom. To send a message you need to specify 2 things, the ID of the channel you are sending the meessage to and the message itself. In teahaz each chatroom has multiple channels (seperate streams of messages), and a message sent by a user can only belong in one channel. For this reason you must specify a valid channelID in each message.
+
+Currently teahaz clients dont support end to end encryption (**yet**), even though on the server-side most of the infrastructure for it is already built out. As a placeholder all clients must base64 encode messages that are being sent to the server.
 
 
-I dont really have the energy to do these now and if I dont then they will suck so here is an outline for future self
+Example python code for sending a message:
+```py
+import base64
+import requests
 
 
-- you can send messages to a chatroom
+chatroomID = ID_OF_CHATROOM
+message_text = "Hello, how are you guys?"
 
-- within a chatroom you must specify which channel you send to
-    (must be valid uuid)
+data = {
+    channelID: ID_OF_CHANNEL,
+            # base64 encoding the message
+    message: base64.b64encode(message_text.encode('utf-8')).decode('utf-8')
+}
 
+r = requests.post(url='http://teahaz.co.uk/api/v0/messages/'+channelID, data=data)
 
-- retrun has:
+print(r.json())
 ```
 
+The server should return your message in the same format as a standard request to get messages does.
+
+Example returned data:
+
+```js
 {
   messageID: 'd334da3e-f3c1-11eb-b9fe-4f5968c71063',
   time: 1627929936.2626493,
   channelID: 'cdf68efa-f3c1-11eb-b9fe-4f5968c71063',
   username: 'a',
   type: 'text',
-  data: 'aGVsbG8=',
+  data: 'SGVsbG8sIGhvdyBhcmUgeW91IGd1eXM/',
 }
 ```
+More information on how to interpret this [here](https://http.cat/501)
 
-crusially missing:
 
+**NOTE**: When displaying the message on a client, you should not display the users `username` but rather get their `nickname`(display name) from previously got user data.
+
+
+Note for people making client files: `teahaz.js` adds the following information to each message to make the consumers work easier, I highly recomend doing this too.
 ```
   message: 'hello',
   colour: { r: null, g: null, b: null },
   nickname: 'a'
 ```
-you should really put this in if you are making a client file.
 
 
 
@@ -327,8 +349,22 @@ you should really put this in if you are making a client file.
 
 send reply message
 ------------------
+Sending a message reply is largely the same as sending a standard message, other than a few key differences:
 
-Exactly the same as send message, but you have to specify a `replyID` which has to be a valid uuid of a previos message.
+- You need to specify a `replyID`. This ID should be the messageID of an existing message.
+- The message `type` has to be `reply-text`
+
+The returned data should reflect these differences as well.
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -334,7 +334,6 @@ def write_message_text(chatroomID: str, channelID: str, username: str, message: 
     db.messages.insert_one(message_obj)
     return message_obj['public'], 200
 
-
 def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list) -> (list or str, int):
     """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
 
@@ -343,60 +342,27 @@ def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: l
     if status != 200: return db, status
 
 
-    # conditions
-    #  -  time of send >= supplied time
-    #  -  has to be withing the channels_to_look_in array
-    #       (array of either just one channel or all
-    #            that the user can read)
-
-    query = { 
-        '$and' :
-        [
-            {
-                "public":
-                {
-                    "time":
-                    {
-                        "$gte": timesince
-                    }
-                }
-            }
-        ]
+    # Make a query for mongodb.
+    # The query should get all messages that:
+    #   - have been sent since the <timesince> variable
+    #           (epoch time)
+    #   - Is either a system message or is in one of
+    #       of the channels in the channels_to_look_in variable
+    query = {
+            "$and":
+            [
+                {"public.time": { "$gte": timesince }},
+                {"$or":
+                [
+                    {"public.type": {"$in": helpers.system_message_types}},
+                    {"public.channelID": {"$in": channels_to_look_in}}
+                ]}
+            ]
     }
 
-    messages = []
-    for m in db.messages.find(query):
-        messages.append(m['public'])
-
-
+    # Loop over the messages iterator and return an array.
+    messages = [m['public'] for m in db.messages.find(query)]
     return messages, 200
-
-
-
-def get_messages_count(chatroomID: str, count: int, timebefore: float, channels_to_look_in: list):
-    """ Get {count} amount of messages starting from {timebefore} from channels specified by {channels_to_look_in}.  """
-
-    db = database(chatroomID)
-
-    # conditions = "channelID = ?" * len(channels_to_look_in)
-    conditions = []
-    for i in channels_to_look_in:
-        conditions.append("channelID = ?")
-    conditions = " OR ".join(conditions)
-
-
-    # add all variables to a tuple
-    variables = (timesince,)
-    for i in channels_to_look_in:
-        variables += (i,)
-
-
-    cursor, status = db._run(f"SELECT * FROM messages WHERE mtime >= ? AND ({conditions}) ORDER BY mtime DESC LIMIT 100", variables)
-    if status != 200: return cursor, status
-
-    return helpers.db_format_message(cursor.fetchall())
-
-
 
 
 

@@ -214,22 +214,6 @@ class Messages(Resource):
         return api.get_messages(chatroomID, request.headers)
 
 
-class Users(Resource):
-    """ /api/v0/users/ """
-
-    def get(self, chatroomID):
-        """ Get all users of the chatroom """
-
-        # check data
-        res, status = helpers.check_default(
-                'get',
-                chatroomID,
-                request,
-                True
-            )
-        if status != 200: return res, status
-
-        return api.get_users(chatroomID, request.headers)
 
 
 
@@ -245,7 +229,6 @@ restful.add_resource(Chatrooms,
         '/api/v0/chatroom/<chatroomID>',
         '/api/v0/chatroom/<chatroomID>/')
 restful.add_resource(Login,    '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')
-restful.add_resource(Users,    '/api/v0/users/<chatroomID>',    '/api/v0/users/<chatroomID>/')
 restful.add_resource(Invites,  '/api/v0/invites/<chatroomID>',  '/api/v0/invites/<chatroomID>/')
 restful.add_resource(Channels, '/api/v0/channels/<chatroomID>', '/api/v0/channels/<chatroomID>/')
 restful.add_resource(Messages, '/api/v0/messages/<chatroomID>', '/api/v0/messages/<chatroomID>/')

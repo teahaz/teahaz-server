@@ -18,6 +18,7 @@ log = logger()
 
 
 
+# -------------------------------------------------------------------- chatroom -------------------------------------------------------
 def create_chatroom(json_data) -> (dict, int):
     """ Create a chatroom """
 
@@ -77,6 +78,10 @@ def create_chatroom(json_data) -> (dict, int):
     # return information about the created chatroom
     return helpers.get_chat_info(chatroomID, username)
 
+
+
+
+# -------------------------------------------------------------------- login ----------------------------------------------------------
 def login(chatroomID: str, json_data: dict) -> (dict, int):
     """ Login to chatroom """
 
@@ -99,40 +104,8 @@ def login(chatroomID: str, json_data: dict) -> (dict, int):
 
 
 
-def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
-    """ Create a channel """
 
-    username     = json_data.get('username')
-    channel_name = json_data.get('channel-name')
-    permissions  = json_data.get('permissions')
-
-
-    if type(channel_name) != str or len(channel_name) > 200:
-        return "Channel_name must be a string that is less than 200 characters long", 400
-
-
-    admins, status =  helpers.get_admins(chatroomID)
-    if status != 200: return admins, status
-
-
-    if username not in admins:
-        return "You do not have permission to create channels", 403
-
-
-    permissions, status = helpers.sanitize_permission_list(chatroomID, permissions)
-    if status != 200: return permissions, status
-
-
-
-    channel_obj, status = database.write_channel(chatroomID, channel_name, permissions)
-    if status != 200: return channel_obj, status
-
-
-    return channel_obj, 200
-
-
-
-
+# -------------------------------------------------------------------- messages -------------------------------------------------------
 def send_message(chatroomID: str, json_data: dict):
     """ Save message sent from user """
 
@@ -174,109 +147,55 @@ def send_message(chatroomID: str, json_data: dict):
         return "You do not have permissions to write in this channel", 403
 
     # continue on from here
-    return database.write_message_text(chatroomID, chatroomID, username, mtext, replyID)
+    return database.write_message_text(chatroomID, channelID, username, mtext, replyID)
 
 def get_messages(chatroomID: str, json_data: dict):
-    """ Get the last x messages since <time> """
+    """ Get all messages since <time> """
 
-    # needed/optional data:
-    # Im adding this comment because most other methods
-    #   have all the information at the top, but that
-    #   doesnt make as much sense here.
-
-    # data:
-        # username
-        # get-method
-        # channelID (optional)
-        # count (optional)
-        # time (optional)
-
+    time = json_data.get('time')
     username = json_data.get('username')
-
-
-    # If channelID is set then get messages from just that one channel,
-    #  else get from all readable channels.
     channelID = json_data.get('channelID')
 
-    # validate if channelID is of a proper UUID format
-    if channelID != None and not security.is_uuid(channelID):
-        return "ChannelID is not a valid UUID", 400
 
-    # ChannelID is set, get array of 1 element
-    if channelID != None and security.is_uuid(channelID):
+
+    # If channelID is a uuid then only look for messages
+    # in that one channel.
+    if security.is_uuid(channelID):
         channels = [{ "channelID": channelID }]
 
-    # ChannelID is not set, get all readable
-    else:
+    # If channelID is not set then look for messages in
+    # all readable channels.
+    elif channelID == None:
         channels, status = database.fetch_all_readable_channels(chatroomID, username)
         if status != 200: return channels, status
 
-    # Get an array that only contains the id's of channels,
-    # instead of a lot of other data.
+    # If neither than channelID is probably not valid.
+    else:
+        return "ChannelID is set but it is not a valid UUID!", 400
+
+
+    # fetch_all_readable_channels returns a bunch of data about
+    # the chatrooms that is unimportant. Filter to just have the
+    # channelIDs in an array.
     channel_ids = []
     for i in channels:
         channel_ids.append(i['channelID'])
 
 
 
-    # Get method specifies how you want to get information from the server.
-    #   Options for this variable are:
-    #       - since  || 0
-    #        get all messages since <time>
-    #       - count  || 1
-    #        Get <count> number of messages.
-    #        This method also supports the time argument to specify a starting time.
-    get_method = json_data.get('get-method')
+    # The 'time' variable has to be either float, or
+    # a value that can be converted to float without any issue.
+    try:
+        timesince = float(time)
+    except Exception as e:
+        return f"Could not convert variable 'time' to float: {e}", 400
 
-
-    if get_method in ['since', 0]:
-        # get since <time>
-
-        timesince = json_data.get('time')
-
-        # make sure variables have the right type
-        try:
-            timesince = float(timesince)
-        except Exception as e:
-            return f"Could not convert variable 'time' to float: {e}", 400
-
-        return database.get_messages_since(chatroomID, timesince, channel_ids)
-
-
-    elif get_method in ['count', 1]:
-        # get <count> messages (optionally starting from <time>)
-
-        count = json_data.get('count')
-        timebefore = json_data.get('time')
-
-        # set default values
-        count = (count if count != None else 10)
-            # timebefore defaults to now if we want messages starting from now.
-        timebefore = (timebefore if timebefore != None else time.time())
-
-
-        # make sure variables have the right type
-        try:
-            count = int(count)
-        except Exception as e:
-            return f"Could not convert variable 'count' to an integer: {e}", 400
-
-        try:
-            timebefore = float(timebefore)
-        except Exception as e:
-            return f"Could not convert variable 'time' to float: {e}", 400
-
-
-        return database.get_messages_count(chatroomID, count, timebefore, channel_ids)
-
-
-    else:
-        print('get_method: ',get_method , type(get_method))
-        return "Invalid or unset 'get-method'", 400
+    # Return messages
+    return database.get_messages_since(chatroomID, timesince, channel_ids)
 
 
 
-
+# -------------------------------------------------------------------- invite --------------------------------------------------------
 def create_invite(chatroomID: str, json_data: dict):
     """ Create an invite for a chatroom """
 
@@ -374,19 +293,37 @@ def use_invite(chatroomID: str, json_data: dict):
 
 
 
-def get_users(chatroomID: str, json_data: dict):
-    """ Get all users of a chatroom """
+# -------------------------------------------------------------------- channels -------------------------------------------------------
+def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
+    """ Create a channel """
 
-    # NOTE maybe later add option to filter by channel, where it only gets users that have permission to view a channel.
-    # ofc that would only be available to users that can already view that channel.
-
-    # NOTE this only gets a single user rn, but as there are no invites yet its not a huge problem.
-    constructor, status = database.get_constructor(chatroomID)
-    if status != 200: return constructor, status
+    username     = json_data.get('username')
+    channel_name = json_data.get('channel-name')
+    permissions  = json_data.get('permissions')
 
 
-    user_data, status = database.fetch_user(chatroomID, constructor)
-    return [user_data], 200
+    if type(channel_name) != str or len(channel_name) > 200:
+        return "Channel_name must be a string that is less than 200 characters long", 400
+
+
+    admins, status =  helpers.get_admins(chatroomID)
+    if status != 200: return admins, status
+
+
+    if username not in admins:
+        return "You do not have permission to create channels", 403
+
+
+    permissions, status = helpers.sanitize_permission_list(chatroomID, permissions)
+    if status != 200: return permissions, status
+
+
+
+    channel_obj, status = database.write_channel(chatroomID, channel_name, permissions)
+    if status != 200: return channel_obj, status
+
+
+    return channel_obj, 200
 
 
 

@@ -35,7 +35,7 @@ dev:
 	cd ./storage; sudo docker run -p 27017:27017 -v database:/data/db  mongo:latest &
 	sleep 2
 	echo "You must add '127.0.0.1	mongodb' to /etc/hosts for this dev environment to work!"
-	curl mongodb:27017
+	# curl mongodb:27017
 	mongo-express 2> /dev/null &
 	cd ./storageServer/src/; python3 main.py &
 	sleep 1
