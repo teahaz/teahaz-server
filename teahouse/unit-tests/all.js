@@ -224,6 +224,7 @@ const main = async() =>
     .then((res) =>
         {
             // There shouldve been 4 messages sent so far.
+            print(res.data);
             assert(res.data.length == 4);
             console.log("✅ Successfully got messages from all channels.");
         })
