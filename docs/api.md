@@ -359,10 +359,87 @@ The returned data should reflect these differences as well.
 
 
 
+<br />
+<br />
 
 
 
 
+get messages
+------------
+
+Download messages from a server.
+Currently there is only one way to do this. You must specify a time , and the server will return all messages that have been sent since then.
+
+
+**Note:** yes, this could overload the server if there are too many messages. yes, I have thought of this, but currently I dont have a better idea for a get method, and ill implement one when I do. Also for now there is no rate limit. :/
+
+<br/>
+
+By default get looks for new messages in every channel that your user has read access to, and will also get system messages that dont belong to any channel. You can change this by sending a channelID, in which-case the server will only return messages in that channel and system messages.
+
+
+Example python code:
+```py
+import requests
+
+chatroomID = ID_OF_CHATROOM
+
+headers = {
+    "username": YOUR_USERNAME,
+    "channelID": ID_OF_CHANNEL, # (optional)
+    "time": TIME_IN_EPOCH_FORMAT
+}
+
+r = requests.get(url="http://teahaz.co.uk/api/v0/messages/"+chatroomID, headers=headers)
+
+print(r.json())
+
+```
+**Note**: Data has to be sent in the http header. [why?](https://http.cat/501)
+
+
+
+Example returned data:
+```
+[
+  {
+    messageID: 'ec22d058-fb9d-11eb-9930-91dece58809e',
+    time: 1628794125.5074627,
+    type: 'system',
+    data: {
+      event_type: 'newuser',
+      user_info: {
+        username: 'a',
+        nickname: 'a',
+        colour: { r: null, g: null, b: null },
+        classes: [ '0', '1' ]
+      }
+    }
+  },
+  {
+    messageID: 'eec2a338-fb9d-11eb-9930-91dece58809e',
+    time: 1628794129.9102864,
+    channelID: 'e9840327-fb9d-11eb-9930-91dece58809e',
+    username: 'a',
+    type: 'text',
+    data: 'aGVsbG8='
+  }
+]
+```
+The above example has a system message and a message sent by a user called `a`. Messages on th can take many differnt forms, for more information refer to [this](http://http.cat/501).
+
+
+
+**NOTE**: When displaying the message on a client, you should not display the users `username` but rather get their `nickname`(display name) from previously got user data.
+
+
+Note for people making client files: `teahaz.js` adds the following information to each message to make the consumers work easier, I highly recomend doing this too.
+```
+  message: 'hello',
+  colour: { r: null, g: null, b: null },
+  nickname: 'a'
+```
 
 
 
@@ -388,7 +465,6 @@ The returned data should reflect these differences as well.
 
 
 
-- send reply message
 
 
 
