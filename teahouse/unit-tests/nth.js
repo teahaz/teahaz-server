@@ -2,12 +2,54 @@ const assert = require('assert');
 const crypto = require('crypto');
 const axios = require("axios").default;
 
-const version = 0;
-const user_agent = `teahaz.js (v ${version})`;
 
-const print = (o) => console.dir(o, {depth: null})
+// --------------------------------------- global variables ------------------------------
+/*
+ * USER_AGENT and version are arent
+ * needed but I think its a nice to have
+ * if I want to imnplement some sort of
+ * warning about outdated clients later.
+ */
+const VERSION = 0;
+const USER_AGENT = `teahaz.js (v ${VERSION})`;
 
 
+// Differnt message types
+
+/*
+ * System messages are messages sent directly by the server,
+ * they usually refer to some sort of envent.
+ */
+const SYSTEM_MESSAGE_TYPES = ['system'];
+
+
+/*
+ * Encoded messages (encrypted in the future) are
+ * messages whose body needs to be decoded (decrpted)
+ * to interpret the message.
+ */
+const ENCODED_MESSAGE_TYPES = ['text', 'reply-text'];
+
+/*
+ * Standard messages are messages sent by a user.
+ */
+const STANDARD_MESSAGE_TYPES = ['text', 'reply-text', 'file', 'reply-file'];
+
+
+/*
+ * Just a cool print function to save
+ * some time for debugging.
+ */
+const print = (o) => console.dir(o, {depth: null});
+
+
+
+
+
+
+
+
+// --------------------------------------- Chatroom ckass ------------------------------
 /*
  *
  *  An instance of the chatroom class in teahaz.js
@@ -113,8 +155,15 @@ class Chatroom
          *      username: 'consumer of semen'
          *    }
          * ]
+         *
+         * Add what information we have about our user to this array.
+         * All of this will likely be overwritten anyway, but might help.
          */
-        this.users = [];
+        this.users = [{
+            username,
+            nickname: args.nickname,
+            colour: args.colour
+        }];
 
         /*
          * The settings variable contains an array of all of the server settings.
@@ -160,17 +209,6 @@ class Chatroom
     _encode(text) { return Buffer.from(text, 'binary').toString('base64'); } // placeholder for encryption
     _decode(text) { return Buffer.from(text, 'base64').toString('binary'); } // placeholder for decryption
 
-
-    async _keep_up_to_date()
-    {
-        /*
-         * This method should be called by the constructor.
-         *
-         * It is supposed to make a request to the server every x
-         * seconds to make sure all chatroom related variables
-         * are up to date.
-         */
-    }
 
     _runcallbacks(callback, arg)
     {
@@ -245,6 +283,47 @@ class Chatroom
             if (username == user.username)
                 return user
         }
+    }
+
+    _add_user_info_message(message)
+    {
+        // system messages are good as they are
+        if (SYSTEM_MESSAGE_TYPES.includes(message.type))
+            return message
+
+
+        /*
+         * Try find the user that sent
+         * the message in the users list.
+         *
+         * If it could find it then set
+         * the nickname variable.
+         */
+        for (const u of this.users)
+            if (message.username == u.username)
+                message.nickname = u.nickname;
+
+
+        /*
+         * If there is no user with that name,
+         * then use their username instead.
+         *
+         * Im not entirely sure about this move
+         * as im not sure we should be displaying
+         * the users username.
+         * This is not a security reason, just that
+         * the username is unchangable and it might
+         * make it worse for some users.
+         */
+        if (message.nickname == undefined)
+            message.nickname = message.username;
+
+
+        // Encoded messages have to be decoded
+        if (ENCODED_MESSAGE_TYPES.includes(message.type))
+            message.text = this._decode(message.data)
+
+        return message
     }
 
     /*
@@ -350,7 +429,7 @@ class Chatroom
             method: 'post',
             url: `${this.server}/api/v0/chatroom/`,
             header: {
-                "User-Agent": user_agent,
+                "User-Agent": USER_AGENT,
                 "Content-Type": "application/json"
             },
             data: {
@@ -392,7 +471,7 @@ class Chatroom
             method: 'post',
             url: `${this.server}/api/v0/login/${this.chatroomID}`,
             header: {
-                "User-Agent": user_agent,
+                "User-Agent": USER_AGENT,
                 "Content-Type": "application/json"
             },
             data: {
@@ -435,7 +514,7 @@ class Chatroom
             url: `${this.server}/api/v0/chatroom/${this.chatroomID}`,
             headers:
             {
-                "User-Agent": user_agent,
+                "User-Agent": USER_AGENT,
                 "Content-Type": "application/json",
                 "Cookie": `${this.chatroomID}=${this.cookie}`,
                 username: this.username
@@ -485,7 +564,7 @@ class Chatroom
             url: `${this.server}/api/v0/channels/${this.chatroomID}`,
             headers:
             {
-                "User-Agent": user_agent,
+                "User-Agent": USER_AGENT,
                 "Content-Type": "application/json",
                 "Cookie": `${this.chatroomID}=${this.cookie}`
             },
@@ -517,7 +596,7 @@ class Chatroom
 
         // keep unencoded message for the return
         // (there is no need to decode it)
-        let o_message = message;
+        let message_text = message;
 
         // We need to encode messages to simulate the encryption we will have later.
         message = this._encode(message);
@@ -527,7 +606,7 @@ class Chatroom
             url: `${this.server}/api/v0/messages/${this.chatroomID}`,
             headers:
             {
-                "User-Agent": user_agent,
+                "User-Agent": USER_AGENT,
                 "Content-Type": "application/json",
                 "Cookie": `${this.chatroomID}=${this.cookie}`
             },
@@ -541,19 +620,9 @@ class Chatroom
         })
         .then((response) =>
             {
-                // Add in some information to the message
-                // that the server doesnt but could still be
-                // useful.
-                response.data.message = o_message;
 
-                // The current users colour is not stored as
-                // an instance variable, so this information
-                // has to be gotten from the users array like
-                // it would be if it were some other user.
-                let user = this._get_user_info(this.username)
-                response.data.colour = user.colour;
-                response.data.nickname = user.nickname;
-
+                // Add some info like nickname and decoded message to the message.
+                response.data = this._add_user_info_message(response.data);
 
                 this._runcallbacks(callback_success, response);
                 return Promise.resolve(response);
@@ -573,7 +642,7 @@ class Chatroom
         // we have to send information for GET requests
         // in the header.
         let headers = {
-            "User-Agent": user_agent,
+            "User-Agent": USER_AGENT,
             "Content-Type": "application/json",
             "Cookie": `${this.chatroomID}=${this.cookie}`,
 
@@ -594,6 +663,14 @@ class Chatroom
         })
         .then((response) =>
             {
+                // Add some info like nickname and decoded message to the message.
+                let messages_array = []
+                for (const m of response.data)
+                {
+                    messages_array.push(this._add_user_info_message(m));
+                }
+                response.data = messages_array;
+
                 this._runcallbacks(callback_success, response);
                 return Promise.resolve(response);
             })

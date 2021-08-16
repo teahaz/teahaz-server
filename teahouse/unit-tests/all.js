@@ -137,7 +137,7 @@ const main = async() =>
         {
             // check if text is correct and it has been
             // decoded/unencoded successfully
-            assert(res.data.message == message_text);
+            assert(res.data.text == message_text);
             assert(res.data.type == 'text');
 
             prev_messageID = res.data.messageID;
@@ -160,7 +160,7 @@ const main = async() =>
         {
             // check if text is correct and it has been
             // decoded/unencoded successfully
-            assert(res.data.message == meme_message);
+            assert(res.data.text == meme_message);
             assert(res.data.type == 'text');
 
             prev_messageID = res.data.messageID;
@@ -190,7 +190,7 @@ const main = async() =>
         {
             // check if text is correct and it has been
             // decoded/unencoded successfully
-            assert(res.data.message == r_message_text);
+            assert(res.data.text == r_message_text);
             assert(res.data.type == 'reply-text');
             assert(res.data.username == conv1.username);
             console.log("✅ successfully sent reply");
