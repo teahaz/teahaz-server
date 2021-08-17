@@ -1,1 +1,1 @@
-../../../../teahaz.js/main/teahaz.rewrite.js
+../../../../teahaz.js/main/teahaz.js

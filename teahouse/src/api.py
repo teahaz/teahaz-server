@@ -196,52 +196,49 @@ def get_messages(chatroomID: str, json_data: dict):
 
 
 # -------------------------------------------------------------------- invite --------------------------------------------------------
-def create_invite(chatroomID: str, json_data: dict):
+def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     """ Create an invite for a chatroom """
 
-    uses       = json_data.get('uses')
-    username     = json_data.get('username')
+    username        = json_data.get('username')
+
+    uses            = json_data.get('uses')
+    classes         = json_data.get('classes')
     expiration_time = json_data.get('expiration-time')
 
-    # placeholder for when classes work
-    classID    = None
+
+    # These should be manditory because I dont like
+    # setting default values for things.
+    for i in ['uses', 'expiration_time']:
+        if json_data.get(i) == None:
+            return "No value supplied for required argument: {i}"
 
 
-
-    # if not set assing default variable, if set then try convert values to their correct types
-    try:
-        uses = (int(uses) if uses != None else 1)
-    except Exception as e:
-        return f"Could not convert variable 'uses' to integer: {e}", 400
-
-    try:
-        expiration_time = (float(expiration_time) if expiration_time != None else time.time() + 60*60*24*7) 
-    except Exception as e:
-        return f"Could not convert variable 'expiration-time' to float: {e}", 400
+    # There can be multiple classes supplied in a list
+    if type(classes) != list and classes != None:
+        return "ClassID was set to an invalid value. Must be array or None.", 400
 
 
-    # NOTE this should be updated when classes and chatroom settings work
-    constructor, status = database.get_constructor(chatroomID)
-    if status != 200: return constructor, status
-    if username !=constructor:
-        return "Permission denied: you do not have permission to create an invite", 403
+    # make sure all classes are valid
+    if type(classes) == list:
+        for classID in classes:
+            if not security.is_uuid(classID) and classID not in ['0', '1']:
+                return "One of the values in 'classes' is not a valid classID", 400
 
+    # If no classes are specified then default to the 'default' class.
+    # for bazsis benefit, yes I am checking None and empty list together here :)
+    if not classes:
+        classes = ['1']
+
+    # check if the user can create an invite
+    is_admin, status = database.check_permission(chatroomID, username, "admin")
+    if status != 200: return is_admin, status
+
+    if is_admin != True:
+        return "Permission denied: You dont have permissions to create an invite.", 403
 
     # save invite
-    inviteID, status = database.write_invite(chatroomID, username, classID, expiration_time, uses)
-    if status != 200: return inviteID, status
+    return  database.write_invite(chatroomID, username, classID, expiration_time, uses)
 
-
-    # create a sharable invite code
-    invite_code = f"teahaz:{chatroomID}/{inviteID}"
-
-
-    return {
-            "invite": invite_code,
-            "uses": uses,
-            "expiration-time": expiration_time,
-            "inviteID": inviteID
-            }, 200
 
 def use_invite(chatroomID: str, json_data: dict):
     """ Process an invite """

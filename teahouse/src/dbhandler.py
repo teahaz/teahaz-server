@@ -579,8 +579,7 @@ def write_user(chatroomID: str, username: str, nickname: str, password: str):
     db.users.insert_one(user_data)
     return user_data['public'], 200
 
-
-def fetch_user(chatroomID: str, username: str, include_private=False):
+def fetch_user(chatroomID: str, username: str, include_private=False) -> (dict or str, int):
     """
         Fetch all public information about a user
 
@@ -601,7 +600,6 @@ def fetch_user(chatroomID: str, username: str, include_private=False):
 
     return user_data, 200
 
-
 def fetch_all_users(chatroomID:str):
     """ Fetch all users (members) of a chatroom """
 
@@ -613,6 +611,30 @@ def fetch_all_users(chatroomID:str):
         users.append(d['public'])
 
     return users, 200
+
+def check_permission(chatroomID: str, username: str, permission_name: str) -> (bool or str, int):
+    """
+        With permission name supplied to something like 'admin',
+        the function checks whether or not the user has any class
+        where this is set to 'true'.
+
+        Note: any true value overwrites all other non-true value,
+        so the user only needs this permission from any one class.
+    """
+    user_data, status = fetch_user(chatroomID, username)
+    if status != 200: return user_data, status
+
+    for classID in user_data['classes']:
+        class_data, status = fetch_class(chatroomID, classID)
+        if status != 200:
+            return "Internal database error: User classes are corrupt", 500
+
+        # return on the first true
+        if class_data[permission_name] == True:
+            return True, 200
+
+    # if It didnt find any true value, then return false
+    return False, 200
 
 
 
@@ -648,20 +670,32 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
 
 
 #-------------------------------------------------------------- Invites -----------------------
-def write_invite(chatroomID: str, username: str, classID: str, expiration_time: float, uses: int):
-    """ Generates invite and saves it in the invites databased """
+def write_invite(chatroomID: str, username: str, classes: str, expiration_time: float, uses: int) -> (dict or str, int):
+    """ Generate an invite and save it in the database """
 
     inviteID = security.gen_uuid()
 
-    db = database(chatroomID)
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
 
-    status = db.insert('invites', (inviteID, username, classID, expiration_time, uses))[1]
-    if status != 200:
-        return "Internal database error while saving invite", 500
+    invite_obj = {
+            "_id": inviteID,
+            "public":
+            {
+                "inviteID": inviteID,
+                "username": username,
+                uses: uses,
+                classes: classes,
+                expiration_time: expiration_time,
+            }
+        }
 
-    db.commit()
-    db.close()
-    return inviteID, 200
+    db.invites.insert_one(invite_obj)
+    return invite_obj, 200
+
+
+
+
 
 def get_invite(chatroomID: str, inviteID: str) -> dict:
     """ Get all stored information about an invite """
@@ -737,7 +771,7 @@ def get_constructor(chatroomID: str):
 
     return constructor[0][0], 200
 
-def fetch_all_classes(chatroomID: str) -> (dict, int):
+def fetch_all_classes(chatroomID: str) -> (dict or str, int):
     """ Gets all classes of a chatroom. """
 
     db, status = _gethandle(chatroomID)
@@ -749,4 +783,17 @@ def fetch_all_classes(chatroomID: str) -> (dict, int):
 
     return classes, 200
 
+def fetch_class(chatroomID: str, classID: str) -> (dict or str, int):
+    """ Fetch all information about a class """
 
+    if classID not in ['0', '1'] and not security.is_uuid(classID):
+        return "Invalild classID was supplied", 500
+
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
+
+    class_data = db.find_one({'_id': classID})
+    if class_data == None:
+        return "No such class", 500
+
+    return class_data['public'], 200

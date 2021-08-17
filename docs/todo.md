@@ -6,9 +6,11 @@ Security testing
 
 
 
+
 Probably but not urgent
 =======================
 - [ ] Remove all instances of `*.ID` to make the namespacing more consistent. (probably replace with snake_case `*._id`.
+
 
 
 
@@ -19,7 +21,7 @@ Database
 Currently we store a lot of data that doesnt really have relationship, would be better if it didnt have a schema and could probably be more efficiently dont with a document database. Furthermore sqlite is slow but most other databases dont support grouping like mongo db does.
 On the otherhand with mongodb we would probably have to have a seperate document for every message which could get hairy I think idk.
 
-- finish the one above
+- I have already started, and almost finished this one
 
 
 
@@ -28,3 +30,13 @@ On the otherhand with mongodb we would probably have to have a seperate document
 Settings
 ========
 - [ ] Provide a setting to modify the maximum message size (text).
+
+
+
+Permissions
+===========
+- [ ] Add more granular permission settings in class objects.
+Currently the only information other than id and name stored in a class obj is `admin=bool`. I should change this to a more granular permission system where it can hold many different settings. (eg: `can_create_invite=bool` or `manage_messages=bool`)
+
+
+
