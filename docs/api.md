@@ -1,6 +1,6 @@
 API documentation v0
 ====================
-This Documentation is a brief overview of how each method works, and how a client would interact with them. The documentation tries to be programing language independant but for the most part is written with python and javascript in mind.
+This Documentation is a brief overview of how each method works, and how a client would interact with them. The documentation tries to be programing language indipendant but for the most part is written with python and javascript in mind.
 
 
 Table of contents
@@ -35,7 +35,7 @@ Creating a chatroom.
 method: `post`
 path: `/api/v0/chatroom`
 
-In order to create a chatroom the server needs 3 pieces of information. The name of the chatroom and login details (username and password). The login details are needed regardless of whether or not you are already registered ot a differnt chatroom as teahaz has an independant database for all chatrooms. (More docs on this design choice later)
+In order to create a chatroom the server needs 3 pieces of information. The name of the chatroom and login details (username and password). The login details are needed regardless of whether or not you are already registered ot a differnt chatroom as teahaz has an independent database for all chatrooms. (More docs on this design choice later)
 
 Note: you can also optionally pass a 'nickname' (display name) value to the server. If you dont set this it will automatically be the same as your username.
 <br />
@@ -367,6 +367,8 @@ The returned data should reflect these differences as well.
 
 get messages
 ------------
+method: `get`
+path: `/api/v0/message/`[\<chatroomID\>](https://http.cat/501)
 
 Download messages from a server.
 Currently there is only one way to do this. You must specify a time , and the server will return all messages that have been sent since then.
@@ -440,10 +442,84 @@ Note for people making client files: `teahaz.js` adds the following information 
   colour: { r: null, g: null, b: null },
   nickname: 'a'
 ```
+<br />
+<br />
 
 
 
 
+Create an invite
+----------------
+method: `get`
+path: `/api/v0/invites/`[\<chatroomID\>](https://http.cat/501)
+
+The only way to add a new person to a chatroom is through an invite. This method shows how a \**chatroom admin* can create an inivte.
+
+*chatroom admin*: Currently only users with a role that has the `admin` attribute set to true can create an invite. This will later change as more granular permissions are introduced.
+
+
+
+**Arguments:**
+- uses: The amount of times an invite can be used before it expires.
+- expiration\_time: Epoch date, represents when the invite expires.
+ For these first 2 there is no option for unlimited, but you can set very large numbers for both, in affect making them unlimited.
+- classes: An array of classID's that anyone using the invite will get assigned to. (optional, default is ['1'])
+
+<br />
+<br />
+
+### An issue with the current implementation
+Http headers dont natively support arrays. On the other hand classes has to be an array. The server currently supports 2 methods of getting around this.
+
+1. The proper method:
+Http has a built in way of getting around this, and that is to just set multiple headers to the same thing. For example:
+```js
+classes: <uuid>
+classes: <uuid>
+classes: 0
+```
+This unfortunately isnt that simple in most programming languages, as json doesnt allow you to declear the same key twice.
+
+
+2. The very unclean way:
+Teahaz server will understand and interpret a string of values seperated by commas the same way.
+For example:
+```
+classes: 1, 2, 3, 4, 5, 6, 7, 8
+```
+
+
+Example python code for creating an invite:
+```py
+import requests
+
+chatroomID = ID_OF_CHATROOM
+
+headers = {
+    "username": YOUR_USERNAME,
+    "channelID": ID_OF_CHANNEL, # (optional)
+
+    "uses": NUMBER_OF_USES,
+    "expiration_time": TIME_IN_EPOCH_FORMAT,
+    "classes": str(['0', UUID, UUID, UUID]).strip('[').strip(']')
+}
+
+r = requests.get(url="http://teahaz.co.uk/api/v0/invites/"+chatroomID, headers=headers)
+
+print(r.json())
+```
+
+
+Example return:
+```js
+{
+  inviteID: '472c23c0-0650-11ec-8015-b42e99435986',
+  username: 'a',
+  uses: '1',
+  classes: ['0', UUID, UUID, UUID],
+  expiration_time: '1629971240.268'
+}
+```
 
 
 
@@ -540,7 +616,7 @@ The name of a chatroom. Similar to `username` this is a sort of "nickname" and w
 type: Array of objects (list of dicts) 
 
 A list of channels and all their details.
-Channels on teahaz are similar to channels on discord as in they are sperate streams of messages, athat can have independant permissions for different groups of people.
+Channels on teahaz are similar to channels on discord as in they are sperate streams of messages, athat can have independent permissions for different groups of people.
 
 
 Example of a channel object:

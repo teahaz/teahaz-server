@@ -219,7 +219,11 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     #   the header multiple times as flask
     #   will interpret them both the same.
     if type(classes) == str:
-        classes = classes.split(',')
+        classes_unclean = classes.split(',')
+        classes = []
+        for c in classes_unclean:
+            classes.append(c.strip())
+
 
 
     print('classes: ',classes , type(classes))
