@@ -670,7 +670,7 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
 
 
 #-------------------------------------------------------------- Invites -----------------------
-def write_invite(chatroomID: str, username: str, classes: str, expiration_time: float, uses: int) -> (dict or str, int):
+def write_invite(chatroomID: str, username: str, classes: list, expiration_time: float, uses: int) -> (dict or str, int):
     """ Generate an invite and save it in the database """
 
     inviteID = security.gen_uuid()
@@ -684,14 +684,15 @@ def write_invite(chatroomID: str, username: str, classes: str, expiration_time: 
             {
                 "inviteID": inviteID,
                 "username": username,
-                uses: uses,
-                classes: classes,
-                expiration_time: expiration_time,
+
+                "uses": uses,
+                "classes": classes,
+                "expiration_time": expiration_time,
             }
         }
 
     db.invites.insert_one(invite_obj)
-    return invite_obj, 200
+    return invite_obj['public'], 200
 
 
 
@@ -792,7 +793,7 @@ def fetch_class(chatroomID: str, classID: str) -> (dict or str, int):
     db, status = _gethandle(chatroomID)
     if status != 200: return db, status
 
-    class_data = db.find_one({'_id': classID})
+    class_data = db.classes.find_one({'_id': classID})
     if class_data == None:
         return "No such class", 500
 

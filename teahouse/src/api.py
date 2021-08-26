@@ -202,7 +202,7 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     username        = json_data.get('username')
 
     uses            = json_data.get('uses')
-    classes         = json_data.get('classes')
+    classes         = json_data.get('classes', [])
     expiration_time = json_data.get('expiration-time')
 
 
@@ -213,32 +213,56 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
             return "No value supplied for required argument: {i}"
 
 
-    # There can be multiple classes supplied in a list
-    if type(classes) != list and classes != None:
+    # HTML headers do not support sending
+    #   arrays. For now instead we send a
+    #   comma seperated list or define
+    #   the header multiple times as flask
+    #   will interpret them both the same.
+    if type(classes) == str:
+        classes = classes.split(',')
+
+
+    print('classes: ',classes , type(classes))
+    # Classes has to be an array
+    if type(classes) != list:
         return "ClassID was set to an invalid value. Must be array or None.", 400
 
 
-    # make sure all classes are valid
+    # Get a list of all valid classIDs
+    valid_classes, status = database.fetch_all_classes(chatroomID)
+    if status != 200: return valid_classes, status
+
+    valid_classIDs = []
+    for c in valid_classes:
+        valid_classIDs.append(c['classID'])
+
+
+    # There is no need to add the default class
+    #   to each invite as you cannot create a user
+    #   in th without having a default class. (dbhandler/write_user)
     if type(classes) == list:
+
+        # Remove all duplilcats from the 
+        classes = list(set(classes))
+
+        # make sure all classes are valid
         for classID in classes:
-            if not security.is_uuid(classID) and classID not in ['0', '1']:
+            if classID not in valid_classIDs:
                 return "One of the values in 'classes' is not a valid classID", 400
 
-    # If no classes are specified then default to the 'default' class.
-    # for bazsis benefit, yes I am checking None and empty list together here :)
-    if not classes:
-        classes = ['1']
 
-    # check if the user can create an invite
+    # For now only chatroom admins can creaate invites.
+    # I plan on adding more granular permissions were people can have
+    #   invite permissions without having to be admins.
     is_admin, status = database.check_permission(chatroomID, username, "admin")
     if status != 200: return is_admin, status
+
 
     if is_admin != True:
         return "Permission denied: You dont have permissions to create an invite.", 403
 
     # save invite
-    return  database.write_invite(chatroomID, username, classID, expiration_time, uses)
-
+    return  database.write_invite(chatroomID, username, classes, expiration_time, uses)
 
 def use_invite(chatroomID: str, json_data: dict):
     """ Process an invite """

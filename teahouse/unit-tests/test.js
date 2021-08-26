@@ -1,56 +1,41 @@
 const assert = require('assert');
 const chatroom = require('./teahaz.js').chatroom
 
+const print = (o) => console.dir(o, {depth: null});
 
-
-
-
-
-
-
-const main = async(conv1) =>
+const main = async() =>
 {
-    console.log(conv1)
+    let conv1 = await new chatroom({
+        server: 'http://localhost:13337',
+        username: "a",
+        password: "1234567890",
+        nickname: "thomas",
+        chatroomID: '39f1e0e8-064e-11ec-8652-b42e99435986',
+        chatroom_name: "best chat",
+        proxy: {host: 'localhost', port: 8080}
+    }).enable();
+
+
+    print(conv1);
+    console.log("-----------------------------------------------------------------------------------------------");
+
+
+    conv1.create_invite({
+        uses: 1,
+        expiration_time: (new Date().getTime() / 1000) + 1000,
+        classes: ['1', '0']
+    })
+    .then((res) =>
+        {
+            console.log(res.data)
+            console.log("✅ Created invite!");
+        })
+    .catch((res) =>
+        {
+            console.log(res);
+            console.error("❌ Failed to create invite!");
+            process.exit(1);
+        });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-let conv1 = new chatroom({
-      server: 'http://localhost:13337/',
-      chatroomID: 'b949fa22-de46-11eb-821c-b42e99435986',
-      username: 'philipsemous, consumer of semen',
-      username: 'consumer of semen',
-      password: 'slkdjflksdjfkl;sdjklfsdjlkfj',
-      chat_name: 'conv1',
-      cookie: 'bb5a5b18-de46-11eb-821c-b42e99435986',
-      channels: [
-        {
-          channelID: 'b94e10d0-de46-11eb-821c-b42e99435986',
-          channel_name: 'default',
-          permissions: { r: true, w: true, x: true },
-          public: true
-        }
-      ],
-      proxy: undefined,
-      raw_response: false
-});
-main(conv1)
+main()

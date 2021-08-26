@@ -20,6 +20,7 @@ const main = async() =>
         password: "1234567890",
         nickname: "thomas",
         chatroom_name: "best chat",
+        proxy: {host: 'localhost', port: 8080}
     }).enable();
 
 
@@ -261,7 +262,8 @@ const main = async() =>
 
     await conv1.create_invite({
         uses: 10,
-        expiration_time: (new Date().getTime() / 1000) + 1000
+        expiration_time: (new Date().getTime() / 1000) + 1000,
+        classes: ['1', '0']
     })
     .then((res) =>
         {
