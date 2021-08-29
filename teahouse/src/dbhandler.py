@@ -671,6 +671,7 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
 
 #-------------------------------------------------------------- Invites -----------------------
 def write_invite(chatroomID: str, username: str, classes: list, expiration_time: float, uses: int) -> (dict or str, int):
+    print('uses: ',uses , type(uses))
     """ Generate an invite and save it in the database """
 
     inviteID = security.gen_uuid()
@@ -698,36 +699,21 @@ def write_invite(chatroomID: str, username: str, classes: list, expiration_time:
 
 
 
-def get_invite(chatroomID: str, inviteID: str) -> dict:
+def fetch_invite(chatroomID: str, inviteID: str) -> dict:
     """ Get all stored information about an invite """
 
-    db = database(chatroomID)
+    db, status = _gethandle(chatroomID)
+    if status != 200: return db, status
 
-    inviteData, status = db.select('*', 'invites', 'inviteID=?', (inviteID,))
-    if status != 200:
-        return "Internal database error while reading invites", 500
+    document = db.invites.find_one({"_id": inviteID})
+    print('document: ',document , type(document))
+    if document == None:
+        return "Could not find valid invite with that inviteID'", 404
 
-    if len(inviteData) < 1:
-        return "Invite not found", 404
-
-    # format invite data
-    try:
-        inviteData = inviteData[0]
-
-        inviteData = {
-                "inviteID":        inviteData[0],
-                "username":          inviteData[1],
-                "classID":         inviteData[2],
-                "expiration-time": inviteData[3],
-                "uses":            inviteData[4]
-                }
-
-    except Exception as e:
-        return "Internal server error while formatting getting invite information.", 500
+    return document['public'], 200
 
 
-    db.close()
-    return inviteData, 200
+
 
 def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time: float, uses: int):
     """ Update information stored on invite """

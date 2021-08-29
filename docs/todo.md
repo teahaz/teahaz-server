@@ -1,36 +1,11 @@
-Security testing
-================
-- [ ] check wether you can supply int as arguments for username and nickname and such, and check if that is a problem
-
-
-
-
-
-
-Probably but not urgent
-=======================
-- [ ] Remove all instances of `*.ID` to make the namespacing more consistent. (probably replace with snake_case `*._id`.
-
-
-
-
-
-Database
-========
-- [x] look more into the potential switch to mongo db or some other document based database.
-Currently we store a lot of data that doesnt really have relationship, would be better if it didnt have a schema and could probably be more efficiently dont with a document database. Furthermore sqlite is slow but most other databases dont support grouping like mongo db does.
-On the otherhand with mongodb we would probably have to have a seperate document for every message which could get hairy I think idk.
-
-- I have already started, and almost finished this one
-
-
-
+Error checking
+==============
+- [ ] Make sure there is a check for None (not found) after every fetch from the database.
 
 
 Settings
 ========
 - [ ] Provide a setting to modify the maximum message size (text).
-
 
 
 Permissions
@@ -39,4 +14,7 @@ Permissions
 Currently the only information other than id and name stored in a class obj is `admin=bool`. I should change this to a more granular permission system where it can hold many different settings. (eg: `can_create_invite=bool` or `manage_messages=bool`)
 
 
+Fix naming inconsistencies (maybe)
+==================================
+- [ ] Remove all instances of `*.ID` to make the namespacing more consistent. (probably replace with snake_case `*._id`.
 

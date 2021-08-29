@@ -206,11 +206,27 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     expiration_time = json_data.get('expiration-time')
 
 
+
     # These should be manditory because I dont like
     # setting default values for things.
-    for i in ['uses', 'expiration_time']:
+    for i in ['uses', 'expiration-time']:
         if json_data.get(i) == None:
-            return "No value supplied for required argument: {i}"
+            return "No value supplied for required argument: {i}", 400
+
+
+
+    # make sure uses is a valid int
+    try:
+        uses = int(uses)
+    except ValueError:
+        return "'uses' variable is not a valid integer.", 400
+
+    # make sure expiration_time is valid
+    try:
+        expiration_time = float(expiration_time)
+    except ValueError:
+        return "'expiration-time' variable is not a valid float.", 400
+
 
 
     # HTML headers do not support sending
@@ -224,13 +240,9 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
         for c in classes_unclean:
             classes.append(c.strip())
 
-
-
-    print('classes: ',classes , type(classes))
     # Classes has to be an array
     if type(classes) != list:
         return "ClassID was set to an invalid value. Must be array or None.", 400
-
 
     # Get a list of all valid classIDs
     valid_classes, status = database.fetch_all_classes(chatroomID)
@@ -239,7 +251,6 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     valid_classIDs = []
     for c in valid_classes:
         valid_classIDs.append(c['classID'])
-
 
     # There is no need to add the default class
     #   to each invite as you cannot create a user
@@ -253,6 +264,7 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
         for classID in classes:
             if classID not in valid_classIDs:
                 return "One of the values in 'classes' is not a valid classID", 400
+
 
 
     # For now only chatroom admins can creaate invites.
@@ -281,31 +293,36 @@ def use_invite(chatroomID: str, json_data: dict):
     nickname      = (nickname if nickname != None else username)
 
 
-    if not security.is_uuid(inviteID):
-        return "Invalid invite ID sent to server. Must be uuid!", 400
-
-
     required = ['username', 'password', 'inviteID']
     for i, a in enumerate([username, password, inviteID]):
         if a == None or len(a) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
 
-    inviteInfo, status = database.get_invite(chatroomID, inviteID)
+    if not security.is_uuid(inviteID):
+        return "Invalid invite ID sent to server. Must be uuid!", 400
 
-    if inviteInfo['uses'] < 1:
+
+    invite_info, status = database.fetch_invite(chatroomID, inviteID)
+    if status != 200: return invite_info, status
+
+
+    if invite_info['uses'] < 1:
         return "There are no more uses left on this invite", 403
 
 
-    if time.time() > inviteInfo['expiration-time']:
+    if time.time() > invite_info['expiration_time']/1: # div by one to force a float
         return "Invite has expired", 403
 
 
     # decrement uses
-    uses = inviteInfo['uses']
+    uses = invite_info['uses']
     uses = int(uses) - 1
 
-    res, status = database.update_invite(chatroomID, inviteID, inviteInfo['classID'], inviteInfo['expiration-time'],  uses)
+    Got this far in writing use_invite.
+    Need to write changes to the invite and some other things
+
+    res, status = database.update_invite(chatroomID, inviteID, invite_info['classID'], invite_info['expiration_time'],  uses)
     if status != 200: return res, status
 
 

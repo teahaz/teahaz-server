@@ -138,7 +138,6 @@ class Channels(Resource):
         return api.create_channel(chatroomID, request.get_json())
 
 
-
 class Messages(Resource):
     """ /api/v0/messages/ """
 
@@ -171,7 +170,6 @@ class Messages(Resource):
         return api.get_messages(chatroomID, request.headers)
 
 
-
 class Invites(Resource):
     """ /api/v0/invites/ """
 
@@ -187,14 +185,21 @@ class Invites(Resource):
             )
         if status != 200: return res, status
 
-        chatroom_info, status = api.use_invite(chatroomID, request.get_json())
-        if status != 200: return chatroom_info, status
 
-        cookie, status = users.set_cookie(chatroomID, chatroom_info.get('username'))
-        if status != 200: return cookie, status
+        # check and use invite
+        chatroom_data, status = api.use_invite(chatroomID, request.get_json())
+        if status != 200:
+            return chatroom_data, status
+
 
         # set cookie
-        res = make_response(chatroom_info)
+        cookie, status = users.set_cookie(chatroomID, request.get_json()['username'])
+        if status != 200:
+            return cookie, status
+
+
+        # return with cookie
+        res = make_response(chatroom_data)
         res.set_cookie(chatroomID, cookie)
         return res
 
