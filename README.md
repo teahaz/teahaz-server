@@ -27,4 +27,3 @@ Check out the [official client](https://github.com/bczsalba/teahaz-client)!
 * [server/backend structure](https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/tree/master/docs)
 
 
-
