@@ -5,8 +5,7 @@ import security_th as security
 
 # setup logging
 from logging_th import logger
-global log
-log = logger()
+LOG = logger()
 
 
 def add_user(chatroomID: str, username: str, nickname: str, password: str):

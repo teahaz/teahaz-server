@@ -9,8 +9,7 @@ import global_helpers as helpers
 
 # setup logging
 from logging_th import logger
-global log
-log = logger()
+LOG = logger()
 
 
 # make mongodb connection
@@ -36,7 +35,7 @@ class database():
 
 
     def __init__(self, chatroomID: str):
-        log.warn(database, "Depricated database used!")
+        LOG.warn(database, "Depricated database used!")
 
         # cant return in __init__ but make sure that invalid uuid's are not being used
         assert(security.is_uuid(chatroomID))
@@ -57,7 +56,7 @@ class database():
             return cursor, 200
 
         except Exception as e:
-            log.error(self._run, f"Database operation failed: {e}")
+            LOG.error(self._run, f"Database operation failed: {e}")
             return f"Database operation failed: {e}", 500
 
 
@@ -140,7 +139,7 @@ class database():
 #-------------------------------------------------------------- Chatroom -----------------------
 def init_chat(chatroomID: str, chat_name: str):
     """ Creating a mongodb database for a new chatroom """
-    log.log(init_chat, f"Creating chatroom {chatroomID}")
+    LOG.log(init_chat, f"Creating chatroom {chatroomID}")
 
     # This line should get a handle for the new database.
     # note: mongodb doesnt actually create the database,

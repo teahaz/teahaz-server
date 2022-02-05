@@ -9,8 +9,7 @@ import filesystem_th as filesystem
 
 # setup logging
 from logging_th import logger
-global log
-log = logger()
+LOG = logger()
 
 
 #################################################### global variables #############################
@@ -82,7 +81,7 @@ def db_format_channel(channel_info: list):
                 "public": channel_info[2]
                 }
     except Exception as e:
-        log.error(db_format_channel, f"Corrupted information in channels table. {e}")
+        LOG.error(db_format_channel, f"Corrupted information in channels table. {e}")
         return "Internal database error while fetching channel information", 500
 
 
@@ -110,7 +109,7 @@ def db_format_message(messages: list):
             messages_list.append(message_obj)
 
     except Exception as e:
-        log.error(db_format_message, f"An error occured while formatting message: {e}.")
+        LOG.error(db_format_message, f"An error occured while formatting message: {e}.")
         return f"Internal database error wile formatting messages.", 500
 
     return messages_list, 200

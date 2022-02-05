@@ -11,8 +11,7 @@ import filesystem_th as filesystem
 
 # setup logging
 from logging_th import logger
-global log
-log = logger()
+LOG = logger()
 
 
 
@@ -47,14 +46,14 @@ def create_chatroom(json_data) -> (dict, int):
     # Create folders needed for chatroom
     res, status = filesystem.create_chatroom_folders(chatroomID)
     if status != 200:
-        log.error(create_chatroom, "Failed to create chatroom folders!")
+        LOG.error(create_chatroom, "Failed to create chatroom folders!")
         return res, 500
 
 
     # Create mongodb database for the catroom
     chatroom_data, status = database.init_chat(chatroomID, chatroom_name)
     if status != 200:
-        log.error(create_chatroom, f"Failed to create chatroom database.\n Traceback: {res}")
+        LOG.error(create_chatroom, f"Failed to create chatroom database.\n Traceback: {res}")
 
         # If creating the database fails then remove chatroom folders
         filesystem.remove_chatroom(chatroomID)

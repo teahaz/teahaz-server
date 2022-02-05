@@ -17,8 +17,7 @@ import global_helpers as helpers
 
 # setup logging
 from logging_th import logger
-global log
-log = logger()
+LOG = logger()
 
 
 # inisiate flask

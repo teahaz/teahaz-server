@@ -10,8 +10,7 @@ import security_th as security
 
 # setup logging
 from logging_th import logger
-global log
-log = logger()
+LOG = logger()
 
 def _create_folders():
     try:
@@ -24,7 +23,7 @@ def _create_folders():
         return "OK", 200
 
     except Exception as e:
-        log.error(_create_folders, "Failed to create storage folders!")
+        LOG.error(_create_folders, "Failed to create storage folders!")
         return "Internal server error while setting up storage folders.", 500
 
 
@@ -50,7 +49,7 @@ def create_chatroom_folders(chatroomID):
         open(f"storage/chatrooms/{chatroomID}/main.db", "w+").close()
 
     except Exception as e:
-        log.error(create_chatroom_folders, f"Failed to create chatroom folders! Traceback: {e}")
+        LOG.error(create_chatroom_folders, f"Failed to create chatroom folders! Traceback: {e}")
         return f"Internal server error: failed while setting up the chatroom", 500
 
     return "OK", 200
@@ -67,7 +66,7 @@ def remove_chatroom(chatroomID):
         shutil.rmtree(f'storage/chatrooms/{chatroomID}', ignore_errors=True)
 
     except Exception as e:
-        log.error(remove_chatroom, f"Failed to remove chatroom folders\n Traceback: {e}")
+        LOG.error(remove_chatroom, f"Failed to remove chatroom folders\n Traceback: {e}")
         return "Failed to remove chatroom folders", 500
 
     return "OK", 200
