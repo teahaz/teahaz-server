@@ -319,8 +319,8 @@ def use_invite(chatroomID: str, json_data: dict):
     uses = invite_info['uses']
     uses = int(uses) - 1
 
-    Got this far in writing use_invite.
-    Need to write changes to the invite and some other things
+    # Got this far in writing use_invite.
+    # Need to write changes to the invite and some other things
 
     res, status = database.update_invite(chatroomID, inviteID, invite_info['classID'], invite_info['expiration_time'],  uses)
     if status != 200: return res, status
