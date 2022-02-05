@@ -45,7 +45,12 @@ git clone https://github.com/tHoMaStHeThErMoNuClEaRbOmB/teahaz-server/ /teahouse
     ```
     cp nginx.conf /etc/nginx/nginx.conf
     ```
-
+    
+    *  check if the config works
+    ```
+    nginx -t
+    ```
+    
     * start/enable nginx
     ```
     systemctl enable nginx
