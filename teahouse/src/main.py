@@ -28,7 +28,7 @@ restful = Api(app)
 
 class Chatrooms(Resource):
     """ /api/v0/chatrooms """
-    def post(self, chatroomID=None): # create chatroom
+    def post(self, chatroomID=None): # pylint: disable=no-self-use
 
         # In this method chatroomID doesnt mean anything,
         # but its best to set it to None anyway just incase
@@ -64,7 +64,7 @@ class Chatrooms(Resource):
         return res
 
 
-    def get(self, chatroomID=None):
+    def get(self, chatroomID=None): # pylint: disable=no-self-use
         """
             Get information about a chatroom,
             also used to check if you are logged in
@@ -89,7 +89,7 @@ class Chatrooms(Resource):
 class Login(Resource):
     """ /api/v0/login/ """
 
-    def post(self, chatroomID):
+    def post(self, chatroomID): # pylint: disable=no-self-use
         """ Login to a chatrom. """
 
         # check data
@@ -123,7 +123,7 @@ class Login(Resource):
 
 class Channels(Resource):
     """ /api/v0/channels/ """
-    def post(self, chatroomID):
+    def post(self, chatroomID): # pylint: disable=no-self-use
         """ Creating a new channel """
 
         # check data
@@ -141,7 +141,7 @@ class Channels(Resource):
 class Messages(Resource):
     """ /api/v0/messages/ """
 
-    def post(self, chatroomID):
+    def post(self, chatroomID): # pylint: disable=no-self-use
         """ send message to server """
 
         # check data
@@ -155,7 +155,7 @@ class Messages(Resource):
 
         return api.send_message(chatroomID, request.get_json())
 
-    def get(self, chatroomID):
+    def get(self, chatroomID): # pylint: disable=no-self-use
         """ Get a message """
 
         # check data
@@ -173,7 +173,7 @@ class Messages(Resource):
 class Invites(Resource):
     """ /api/v0/invites/ """
 
-    def post(self, chatroomID):
+    def post(self, chatroomID): # pylint: disable=no-self-use
         """ Join a chatroom by invite """
 
         # check data
@@ -205,7 +205,7 @@ class Invites(Resource):
 
 
 
-    def get(self, chatroomID):
+    def get(self, chatroomID): # pylint: disable=no-self-use
         """ Create a new invite to a chatroom """
 
         # check data

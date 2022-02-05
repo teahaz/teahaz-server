@@ -20,7 +20,7 @@ const main = async() =>
         password: "1234567890",
         nickname: "thomas",
         chatroom_name: "best chat",
-        proxy: {host: 'localhost', port: 8080}
+        proxy: {host: '127.0.0.1', port: 8080}
     }).enable();
 
 
@@ -287,17 +287,20 @@ const main = async() =>
 
 
 
-    let conv2 = await new chatroom({
-        server: 'http://localhost:13337',
-        chatroomID: conv1.chatroomID,
-        inviteID: invite.inviteID,
-        username: "b",
-        password: "1234567890",
-        proxy: {host: 'localhost', port: 8080}
-    }).enable();
+    /*
+     * Create a new chatroom to use invite.
+     * This is commented out bc its not finished yet.
+     */
+    // let conv2 = await new chatroom({
+    //     server: 'http://localhost:13337',
+    //     chatroomID: conv1.chatroomID,
+    //     inviteID: invite.inviteID,
+    //     username: "b",
+    //     password: "1234567890",
+    //     proxy: {host: 'localhost', port: 8080}
+    // }).enable();
 
-
-    print(conv2)
+    // print(conv2)
 
 
 
@@ -312,49 +315,25 @@ const main = async() =>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    await conv0.use_invite({
-        inviteID: conv0.invite,
-        username: 'hehehehehe',
-        password: 'newpw, very cool!'
-    })
-    .then((res) =>
-        {
-            // console.log(res)
-            console.log("✅ Used invite to join chatroom");
-        })
-    .catch((res) =>
-        {
-            console.log(res);
-            console.error("❌ Failed to use invite");
-        });
-
-
-    console.log("\n------------------------------------------------------\n")
-    console.dir(conv0, { depth: null });
+    // await conv0.use_invite({
+    //     inviteID: conv0.invite,
+    //     username: 'hehehehehe',
+    //     password: 'newpw, very cool!'
+    // })
+    // .then((res) =>
+    //     {
+    //         // console.log(res)
+    //         console.log("✅ Used invite to join chatroom");
+    //     })
+    // .catch((res) =>
+    //     {
+    //         console.log(res);
+    //         console.error("❌ Failed to use invite");
+    //     });
+    //
+    //
+    // console.log("\n------------------------------------------------------\n")
+    // console.dir(conv0, { depth: null });
 }
 
 main()
