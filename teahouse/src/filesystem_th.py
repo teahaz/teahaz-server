@@ -77,6 +77,8 @@ def remove_chatroom(chatroomID):
 def chatroom_exists(chatroomID):
     """ Check if chatroomID is valid, and that it exists on disc """
 
-    if not security.is_uuid(chatroomID): return False
-    if not os.path.exists(f'storage/chatrooms/{chatroomID}'): return False
+    if not security.is_uuid(chatroomID):
+        return False
+    if not os.path.exists(f'storage/chatrooms/{chatroomID}'):
+        return False
     return True

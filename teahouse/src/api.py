@@ -63,12 +63,14 @@ def create_chatroom(json_data) -> (dict, int):
 
     # add the default user to the chatrom
     user_data, status = users.add_user(chatroomID, username, nickname, password)
-    if status != 200: return user_data, status
+    if status != 200:
+        return user_data, status
 
 
     # add initial message
     messageID, status = database.write_message_event(chatroomID, "system", { "event_type": "newuser", "user_info": user_data })
-    if status != 200: return messageID, status
+    if status != 200:
+        return messageID, status
 
     # no longer using chatroom_data in favour of helpers.get_chat_info
     # chatroom_data['users'] = [user_data]
@@ -96,7 +98,8 @@ def login(chatroomID: str, json_data: dict) -> (dict, int):
 
     # authenticate user
     res, status = users.auth_user(chatroomID, username, password)
-    if status != 200: return res, status
+    if status != 200:
+        return res, status
 
     # return with useful information about the chatroom
     return helpers.get_chat_info(chatroomID, username)
@@ -139,7 +142,8 @@ def send_message(chatroomID: str, json_data: dict):
 
     # Check if channel exists and that the user has access to it
     permissions, status = database.get_channel_permissions(chatroomID, channelID, username)
-    if status != 200: return permissions, status
+    if status != 200:
+        return permissions, status
 
 
     if not permissions['w']:
@@ -166,7 +170,8 @@ def get_messages(chatroomID: str, json_data: dict):
     # all readable channels.
     elif channelID == None:
         channels, status = database.fetch_all_readable_channels(chatroomID, username)
-        if status != 200: return channels, status
+        if status != 200:
+            return channels, status
 
     # If neither than channelID is probably not valid.
     else:
@@ -245,7 +250,8 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
 
     # Get a list of all valid classIDs
     valid_classes, status = database.fetch_all_classes(chatroomID)
-    if status != 200: return valid_classes, status
+    if status != 200:
+        return valid_classes, status
 
     valid_classIDs = []
     for c in valid_classes:
@@ -270,7 +276,8 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     # I plan on adding more granular permissions were people can have
     #   invite permissions without having to be admins.
     is_admin, status = database.check_permission(chatroomID, username, "admin")
-    if status != 200: return is_admin, status
+    if status != 200:
+        return is_admin, status
 
 
     if is_admin != True:
@@ -303,7 +310,8 @@ def use_invite(chatroomID: str, json_data: dict):
 
 
     invite_info, status = database.fetch_invite(chatroomID, inviteID)
-    if status != 200: return invite_info, status
+    if status != 200:
+        return invite_info, status
 
 
     if invite_info['uses'] < 1:
@@ -322,11 +330,13 @@ def use_invite(chatroomID: str, json_data: dict):
     # Need to write changes to the invite and some other things
 
     res, status = database.update_invite(chatroomID, inviteID, invite_info['classID'], invite_info['expiration_time'],  uses)
-    if status != 200: return res, status
+    if status != 200:
+        return res, status
 
 
     username, status = users.add_user(chatroomID, username, nickname, password)
-    if status != 200: return username, status
+    if status != 200:
+        return username, status
 
 
     return helpers.get_chat_info(chatroomID, username)
@@ -348,7 +358,8 @@ def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
 
 
     admins, status =  helpers.get_admins(chatroomID)
-    if status != 200: return admins, status
+    if status != 200:
+        return admins, status
 
 
     if username not in admins:
@@ -356,12 +367,14 @@ def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
 
 
     permissions, status = helpers.sanitize_permission_list(chatroomID, permissions)
-    if status != 200: return permissions, status
+    if status != 200:
+        return permissions, status
 
 
 
     channel_obj, status = database.write_channel(chatroomID, channel_name, permissions)
-    if status != 200: return channel_obj, status
+    if status != 200:
+        return channel_obj, status
 
 
     return channel_obj, 200

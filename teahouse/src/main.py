@@ -41,7 +41,8 @@ class Chatrooms(Resource):
                 request,
                 False
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
 
         # create chatroom
@@ -80,7 +81,8 @@ class Chatrooms(Resource):
                 request,
                 True
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
         return helpers.get_chat_info(chatroomID, request.headers.get('username'))
 
@@ -98,7 +100,8 @@ class Login(Resource):
                 request,
                 False
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
 
         # auth chatroom
@@ -132,7 +135,8 @@ class Channels(Resource):
                 request,
                 True
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
         return api.create_channel(chatroomID, request.get_json())
 
@@ -150,7 +154,8 @@ class Messages(Resource):
                 request,
                 True
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
         return api.send_message(chatroomID, request.get_json())
 
@@ -164,7 +169,8 @@ class Messages(Resource):
                 request,
                 True
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
         return api.get_messages(chatroomID, request.headers)
 
@@ -182,7 +188,8 @@ class Invites(Resource):
                 request,
                 False
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
 
         # check and use invite
@@ -214,7 +221,8 @@ class Invites(Resource):
                 request,
                 True
             )
-        if status != 200: return res, status
+        if status != 200:
+            return res, status
 
         return api.create_invite(chatroomID, request.headers)
 

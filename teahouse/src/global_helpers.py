@@ -35,7 +35,8 @@ def check_default(method: str, chatroomID: str, request: object, need_login: boo
 
 
     # Make sure there was anything sent to the server
-    if not data: return "no data sent", 401
+    if not data:
+        return "no data sent", 401
 
 
     # ChatroomId is only none in the create chatroom method,
@@ -45,7 +46,8 @@ def check_default(method: str, chatroomID: str, request: object, need_login: boo
 
 
     # Check if chatroom exists
-    if not filesystem.chatroom_exists(chatroomID): return "Chatroom does not exist.", 404
+    if not filesystem.chatroom_exists(chatroomID):
+        return "Chatroom does not exist.", 404
 
 
     if need_login == True:
@@ -122,7 +124,8 @@ def get_admins(chatroomID: str) -> (list or str, int):
 
     # get all classes
     classes, status = database.fetch_all_classes(chatroomID)
-    if status != 200: return classes, status
+    if status != 200:
+        return classes, status
 
     # filter to only admin ones
     admin_classes = []
@@ -132,7 +135,8 @@ def get_admins(chatroomID: str) -> (list or str, int):
 
     # get all users
     users, status = database.fetch_all_users(chatroomID)
-    if status != 200: return users, status
+    if status != 200:
+        return users, status
 
     # compare the 2 lits
     admins = set()
@@ -157,7 +161,8 @@ def sanitize_permission_list(chatroomID, permissions: list) -> (dict or str, int
     # Get all valid class ids for to make sure no one is setting
     # classes that dont exist.
     classes, status = database.fetch_all_classes(chatroomID)
-    if status != 200: return classes, status
+    if status != 200:
+        return classes, status
     class_ids = []
     for c in classes:
         class_ids.append(c['classID'])
@@ -226,27 +231,32 @@ def get_chat_info(chatroomID: str, username: str) -> (dict, int):
 
     # get chatroom settings
     settings, status = database.fetch_all_settings(chatroomID)
-    if status != 200: return settings, chatroomID
+    if status != 200:
+        return settings, chatroomID
     chatroom_data['settings'] = settings
 
     # get chatroom name
     chatroom_name, status = database.check_settings(chatroomID, 'chatroom_name')
-    if status != 200: return chatroom_name, chatroomID
+    if status != 200:
+        return chatroom_name, chatroomID
     chatroom_data['chatroom_name'] = chatroom_name
 
     # get users
     users, status = database.fetch_all_users(chatroomID)
-    if status != 200: return users, status
+    if status != 200:
+        return users, status
     chatroom_data['users'] = users
 
     # get classes
     classes, status = database.fetch_all_classes(chatroomID)
-    if status != 200: return classes, status
+    if status != 200:
+        return classes, status
     chatroom_data['classes'] = classes
 
     # get channels
     channels, status = database.fetch_all_readable_channels(chatroomID, username)
-    if status != 200: return channels, status
+    if status != 200:
+        return channels, status
     chatroom_data['channels'] = channels
 
     return chatroom_data, 200
