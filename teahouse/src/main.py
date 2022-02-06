@@ -228,11 +228,6 @@ class Invites(Resource):
 
 
 
-
-
-
-
-
 # NOTE could add to invites a /api/v0/invite/chatroomID/inviteID,
 #   which could just return data about an invite without needing
 #   for auth or anything

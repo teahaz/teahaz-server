@@ -15,6 +15,7 @@ class logger:
         self._UNDERLINE = '\033[4m'
         self._RESET = '\033[0m'
 
+
     def printf(self, function_name, prefix, message):
         msg = prefix
         msg += f" {time.time()}".ljust(21, " ")
@@ -29,9 +30,11 @@ class logger:
         prefix = self._RESET + self._BOLD + self._GREEN + self._UNDERLINE + "[ success ]".ljust(12, " ")
         self.printf(function_name=function_name, prefix=prefix, message=message)
 
+
     def log(self, function_name, message: str):
         prefix = self._RESET + "[   log   ]".ljust(12, " ")
         self.printf(function_name=function_name, prefix=prefix, message=message)
+
 
     def warn(self, function_name, message: str):
         prefix = self._RESET + self._YELLOW + "[ warning ]".ljust(12, " ")

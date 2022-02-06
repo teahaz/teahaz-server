@@ -132,10 +132,6 @@ class database():
 
 
 
-
-
-
-
 #-------------------------------------------------------------- Chatroom -----------------------
 def init_chat(chatroomID: str, chat_name: str):
     """ Creating a mongodb database for a new chatroom """
@@ -236,6 +232,7 @@ def init_chat(chatroomID: str, chat_name: str):
 
     return chatroom_data, 200
 
+
 def check_settings(chatroomID: str, setting_name: str):
     """ Fetch the setting value corresponding to a setting name from database"""
 
@@ -252,6 +249,7 @@ def check_settings(chatroomID: str, setting_name: str):
 
     return "No such setting", 400
 
+
 def fetch_all_settings(chatroomID: str):
     """ Get all settings of a chatroom """
 
@@ -267,7 +265,6 @@ def fetch_all_settings(chatroomID: str):
         settings_list.append(setting)
 
     return settings_list, 200
-
 
 
 
@@ -303,6 +300,7 @@ def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str
 
     return message_obj['public'], 200
 
+
 def write_message_text(chatroomID: str, channelID: str, username: str, message: str, replyID: str = None) -> (dict or str, int):
     """ Write a message inot the messages field """
 
@@ -337,6 +335,7 @@ def write_message_text(chatroomID: str, channelID: str, username: str, message: 
     db.messages.insert_one(message_obj)
     return message_obj['public'], 200
 
+
 def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list) -> (list or str, int):
     """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
 
@@ -370,7 +369,6 @@ def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: l
 
 
 
-
 #-------------------------------------------------------------- Channels -----------------------
 def write_channel(chatroomID: str, channel_name: str, permissions: list) -> (dict or str, int):
     """ Add new channel to database """
@@ -397,6 +395,7 @@ def write_channel(chatroomID: str, channel_name: str, permissions: list) -> (dic
 
     return channel_data['public'], 200
 
+
 def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (dict, int):
     """ Fetch all information about a channel """
 
@@ -413,6 +412,7 @@ def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (di
 
     return channel, 200
 
+
 def fetch_all_channels(chatroomID: str, include_private=False) -> (list or str, int):
     """ Get a list of all channels """
 
@@ -428,6 +428,7 @@ def fetch_all_channels(chatroomID: str, include_private=False) -> (list or str, 
             channels.append(d['public'])
 
     return channels, 200
+
 
 def get_channel_permissions(chatroomID: str, channelID: str, username: str) -> (dict or str, int):
     """
@@ -527,6 +528,7 @@ def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
 
     return False, 200
 
+
 def fetch_all_readable_channels(chatroomID: str, username: str):
     """ Gets a list of all channels that are readable to the user.  """
 
@@ -540,9 +542,6 @@ def fetch_all_readable_channels(chatroomID: str, username: str):
             readable_channels.append(channel)
 
     return readable_channels, 200
-
-
-
 
 
 
@@ -598,6 +597,7 @@ def write_user(chatroomID: str, username: str, nickname: str, password: str):
     db.users.insert_one(user_data)
     return user_data['public'], 200
 
+
 def fetch_user(chatroomID: str, username: str, include_private=False) -> (dict or str, int):
     """
         Fetch all public information about a user
@@ -620,6 +620,7 @@ def fetch_user(chatroomID: str, username: str, include_private=False) -> (dict o
 
     return user_data, 200
 
+
 def fetch_all_users(chatroomID:str):
     """ Fetch all users (members) of a chatroom """
 
@@ -632,6 +633,7 @@ def fetch_all_users(chatroomID:str):
         users.append(d['public'])
 
     return users, 200
+
 
 def check_permission(chatroomID: str, username: str, permission_name: str) -> (bool or str, int):
     """
@@ -660,9 +662,6 @@ def check_permission(chatroomID: str, username: str, permission_name: str) -> (b
 
 
 
-
-
-
 #-------------------------------------------------------------- Cookies -----------------------
 def store_cookie(chatroomID: str, username: str, cookie: str):
     """ Writes a cookie to the database """
@@ -674,7 +673,6 @@ def store_cookie(chatroomID: str, username: str, cookie: str):
     db.users.update_one({'_id': username}, {'$addToSet': {'private.cookies': cookie}})
 
     return "OK", 200
-
 
 def get_cookies(chatroomID: str, username: str, cookie: str):
     """ Get all cookies associated with a user. """
@@ -688,8 +686,6 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
         return "No cookies found!", 404
 
     return cookies, 200
-
-
 
 
 
@@ -721,9 +717,6 @@ def write_invite(chatroomID: str, username: str, classes: list, expiration_time:
     return invite_obj['public'], 200
 
 
-
-
-
 def fetch_invite(chatroomID: str, inviteID: str) -> dict:
     """ Get all stored information about an invite """
 
@@ -737,8 +730,6 @@ def fetch_invite(chatroomID: str, inviteID: str) -> dict:
         return "Could not find valid invite with that inviteID'", 404
 
     return document['public'], 200
-
-
 
 
 def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time: float, uses: int):
@@ -767,7 +758,6 @@ def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time:
 
 
 
-
 #-------------------------------------------------------------- Classes -----------------------
 def get_constructor(chatroomID: str):
     """ 
@@ -785,6 +775,7 @@ def get_constructor(chatroomID: str):
 
     return constructor[0][0], 200
 
+
 def fetch_all_classes(chatroomID: str) -> (dict or str, int):
     """ Gets all classes of a chatroom. """
 
@@ -797,6 +788,7 @@ def fetch_all_classes(chatroomID: str) -> (dict or str, int):
         classes.append(d['public'])
 
     return classes, 200
+
 
 def fetch_class(chatroomID: str, classID: str) -> (dict or str, int):
     """ Fetch all information about a class """

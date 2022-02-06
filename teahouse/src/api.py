@@ -15,8 +15,6 @@ LOG = logger()
 
 
 
-
-
 # -------------------------------------------------------------------- chatroom -------------------------------------------------------
 def create_chatroom(json_data) -> (dict, int):
     """ Create a chatroom """
@@ -81,7 +79,6 @@ def create_chatroom(json_data) -> (dict, int):
 
 
 
-
 # -------------------------------------------------------------------- login ----------------------------------------------------------
 def login(chatroomID: str, json_data: dict) -> (dict, int):
     """ Login to chatroom """
@@ -103,7 +100,6 @@ def login(chatroomID: str, json_data: dict) -> (dict, int):
 
     # return with useful information about the chatroom
     return helpers.get_chat_info(chatroomID, username)
-
 
 
 
@@ -151,6 +147,7 @@ def send_message(chatroomID: str, json_data: dict):
 
     # continue on from here
     return database.write_message_text(chatroomID, channelID, username, mtext, replyID)
+
 
 def get_messages(chatroomID: str, json_data: dict):
     """ Get all messages since <time> """
@@ -286,6 +283,7 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     # save invite
     return  database.write_invite(chatroomID, username, classes, expiration_time, uses)
 
+
 def use_invite(chatroomID: str, json_data: dict):
     """ Process an invite """
 
@@ -343,7 +341,6 @@ def use_invite(chatroomID: str, json_data: dict):
 
 
 
-
 # -------------------------------------------------------------------- channels -------------------------------------------------------
 def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
     """ Create a channel """
@@ -378,7 +375,3 @@ def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
 
 
     return channel_obj, 200
-
-
-
-

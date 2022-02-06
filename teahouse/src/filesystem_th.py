@@ -55,8 +55,6 @@ def create_chatroom_folders(chatroomID):
     return "OK", 200
 
 
-
-
 def remove_chatroom(chatroomID):
     """ Remove chatroom folders from disc """
     if not security.is_uuid(chatroomID):
@@ -70,8 +68,6 @@ def remove_chatroom(chatroomID):
         return "Failed to remove chatroom folders", 500
 
     return "OK", 200
-
-
 
 
 def chatroom_exists(chatroomID):

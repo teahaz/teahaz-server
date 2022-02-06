@@ -29,7 +29,6 @@ def add_user(chatroomID: str, username: str, nickname: str, password: str):
     return user_data, 200
 
 
-
 def auth_user(chatroomID: str, username: str, password: str):
     """ Authenticate user """
 
@@ -45,7 +44,6 @@ def auth_user(chatroomID: str, username: str, password: str):
     return "Logged in!", 200
 
 
-
 def set_cookie(chatroomID: str, username: str):
     """ Generate and store a cookie for a user """
     cookie = security.gen_uuid()
@@ -58,7 +56,6 @@ def set_cookie(chatroomID: str, username: str):
         return res, status
 
     return cookie, 200
-
 
 
 def check_cookie(chatroomID: str, cookie: str, username: str):
@@ -79,5 +76,3 @@ def check_cookie(chatroomID: str, cookie: str, username: str):
             return True
 
     return False
-
-
