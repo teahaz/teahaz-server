@@ -1,3 +1,11 @@
+"""
+Main module.
+
+This module actually starts the server
+and handles incoming requests / responses.
+"""
+
+
 #debug
 from pprint import pprint
 
@@ -28,6 +36,7 @@ restful = Api(app)
 class Chatrooms(Resource):
     """ /api/v0/chatrooms """
     def post(self, chatroomID=None): # pylint: disable=no-self-use
+        """ Method for creating chatrooms """
 
         # In this method chatroomID doesnt mean anything,
         # but its best to set it to None anyway just incase

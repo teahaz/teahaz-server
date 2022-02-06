@@ -1,3 +1,11 @@
+"""
+Module responsible for security related functions.
+
+This module has a few short-helper functions to
+encode/decode data as well as create UUID's and
+check / hash passwords.
+"""
+
 import os
 import uuid
 import base64
@@ -42,6 +50,7 @@ def checkpw(password: str, hashedpw: str):
 
 
 def is_uuid(uid: str) -> bool:
+    """ Function verifies if string is a valid UUID """
     uid = str(uid)
 
     for i in uid:

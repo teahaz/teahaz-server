@@ -1,3 +1,11 @@
+"""
+    Module handles interacting with the database.
+    Things outside this file should not touch the
+    db and all functions here must have something
+    to do with the database.
+"""
+
+
 import os
 import time
 import pymongo
@@ -691,8 +699,15 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
 
 #-------------------------------------------------------------- Invites -----------------------
 def write_invite(chatroomID: str, username: str, classes: list, expiration_time: float, uses: int) -> (dict or str, int):
+    """
+        Generate an invite and save it in the database
+
+        Return Values:
+            - if ok: Public part of object that got written to the db., status_code
+            - else: error string, status_code
+    """
+
     print('uses: ',uses , type(uses))
-    """ Generate an invite and save it in the database """
 
     inviteID = security.gen_uuid()
 
