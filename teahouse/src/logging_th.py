@@ -7,7 +7,6 @@ levels of urgency.
 """
 
 
-import os
 import sys
 import time
 

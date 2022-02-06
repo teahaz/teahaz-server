@@ -3,7 +3,6 @@
 """
 
 import os
-import time
 import shutil
 import security_th as security
 

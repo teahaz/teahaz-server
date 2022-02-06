@@ -6,12 +6,10 @@ encode/decode data as well as create UUID's and
 check / hash passwords.
 """
 
-import os
 import uuid
 import base64
-import bcrypt
 import string
-from hashlib import sha256
+import bcrypt
 
 
 def encode(a):

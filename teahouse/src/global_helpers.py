@@ -4,7 +4,6 @@
 
 import users_th as users
 import dbhandler as database
-import security_th as security
 import filesystem_th as filesystem
 
 # setup logging
