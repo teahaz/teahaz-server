@@ -6,8 +6,6 @@ and handles incoming requests / responses.
 """
 
 
-
-
 from flask import Flask
 from flask import request
 from flask import make_response
@@ -33,13 +31,13 @@ restful = Api(app)
 
 class Chatrooms(Resource):
     """ /api/v0/chatrooms """
-    def post(self, chatroomID=None): # pylint: disable=no-self-use
+    def post(self, chatroom_id=None): # pylint: disable=no-self-use
         """ Method for creating chatrooms """
 
         # In this method chatroomID doesnt mean anything,
         # but its best to set it to None anyway just incase
         # some looser sent a chatroomID to create_chatroom.
-        chatroomID = None
+        chatroom_id = None
 
         # check data
         res, status = helpers.check_default(
@@ -71,39 +69,39 @@ class Chatrooms(Resource):
         return res
 
 
-    def get(self, chatroomID=None): # pylint: disable=no-self-use
+    def get(self, chatroom_id=None): # pylint: disable=no-self-use
         """
             Get information about a chatroom,
             also used to check if you are logged in
         """
 
-        # check chatroomID as this method will work without it too
-        if not chatroomID:
+        # check chatroom_id as this method will work without it too
+        if not chatroom_id:
             return "ChatroomID must be included in the path for this method", 400
 
         # check data
         res, status = helpers.check_default(
                 'get',
-                chatroomID,
+                chatroom_id,
                 request,
                 True
             )
         if status != 200:
             return res, status
 
-        return helpers.get_chat_info(chatroomID, request.headers.get('username'))
+        return helpers.get_chat_info(chatroom_id, request.headers.get('username'))
 
 
 class Login(Resource):
     """ /api/v0/login/ """
 
-    def post(self, chatroomID): # pylint: disable=no-self-use
+    def post(self, chatroom_id): # pylint: disable=no-self-use
         """ Login to a chatrom. """
 
         # check data
         res, status = helpers.check_default(
                 'post',
-                chatroomID,
+                chatroom_id,
                 request,
                 False
             )
@@ -112,86 +110,86 @@ class Login(Resource):
 
 
         # auth chatroom
-        chatroom_data, status = api.login(chatroomID, request.get_json())
+        chatroom_data, status = api.login(chatroom_id, request.get_json())
         if status != 200:
             return chatroom_data, status
 
 
 
         # set cookie
-        cookie, status = users.set_cookie(chatroomID, request.get_json()['username'])
+        cookie, status = users.set_cookie(chatroom_id, request.get_json()['username'])
         if status != 200:
             return cookie, status
 
 
         # return with cookie
         res = make_response(chatroom_data)
-        res.set_cookie(chatroomID, cookie)
+        res.set_cookie(chatroom_id, cookie)
         return res
 
 
 class Channels(Resource):
     """ /api/v0/channels/ """
-    def post(self, chatroomID): # pylint: disable=no-self-use
+    def post(self, chatroom_id): # pylint: disable=no-self-use
         """ Creating a new channel """
 
         # check data
         res, status = helpers.check_default(
                 'post',
-                chatroomID,
+                chatroom_id,
                 request,
                 True
             )
         if status != 200:
             return res, status
 
-        return api.create_channel(chatroomID, request.get_json())
+        return api.create_channel(chatroom_id, request.get_json())
 
 
 class Messages(Resource):
     """ /api/v0/messages/ """
 
-    def post(self, chatroomID): # pylint: disable=no-self-use
+    def post(self, chatroom_id): # pylint: disable=no-self-use
         """ send message to server """
 
         # check data
         res, status = helpers.check_default(
                 'post',
-                chatroomID,
+                chatroom_id,
                 request,
                 True
             )
         if status != 200:
             return res, status
 
-        return api.send_message(chatroomID, request.get_json())
+        return api.send_message(chatroom_id, request.get_json())
 
-    def get(self, chatroomID): # pylint: disable=no-self-use
+    def get(self, chatroom_id): # pylint: disable=no-self-use
         """ Get a message """
 
         # check data
         res, status = helpers.check_default(
                 'get',
-                chatroomID,
+                chatroom_id,
                 request,
                 True
             )
         if status != 200:
             return res, status
 
-        return api.get_messages(chatroomID, request.headers)
+        return api.get_messages(chatroom_id, request.headers)
 
 
 class Invites(Resource):
     """ /api/v0/invites/ """
 
-    def post(self, chatroomID): # pylint: disable=no-self-use
+    def post(self, chatroom_id): # pylint: disable=no-self-use
         """ Join a chatroom by invite """
 
         # check data
         res, status = helpers.check_default(
                 'post',
-                chatroomID,
+                chatroom_id,
                 request,
                 False
             )
@@ -200,38 +198,38 @@ class Invites(Resource):
 
 
         # check and use invite
-        chatroom_data, status = api.use_invite(chatroomID, request.get_json())
+        chatroom_data, status = api.use_invite(chatroom_id, request.get_json())
         if status != 200:
             return chatroom_data, status
 
 
         # set cookie
-        cookie, status = users.set_cookie(chatroomID, request.get_json()['username'])
+        cookie, status = users.set_cookie(chatroom_id, request.get_json()['username'])
         if status != 200:
             return cookie, status
 
 
         # return with cookie
         res = make_response(chatroom_data)
-        res.set_cookie(chatroomID, cookie)
+        res.set_cookie(chatroom_id, cookie)
         return res
 
 
 
-    def get(self, chatroomID): # pylint: disable=no-self-use
+    def get(self, chatroom_id): # pylint: disable=no-self-use
         """ Create a new invite to a chatroom """
 
         # check data
         res, status = helpers.check_default(
                 'get',
-                chatroomID,
+                chatroom_id,
                 request,
                 True
             )
         if status != 200:
             return res, status
 
-        return api.create_invite(chatroomID, request.headers)
+        return api.create_invite(chatroom_id, request.headers)
 
 
 
@@ -242,12 +240,12 @@ class Invites(Resource):
 restful.add_resource(Chatrooms,
         '/api/v0/chatroom',
         '/api/v0/chatroom/',
-        '/api/v0/chatroom/<chatroomID>',
-        '/api/v0/chatroom/<chatroomID>/')
-restful.add_resource(Login,    '/api/v0/login/<chatroomID>',    '/api/v0/login/<chatroomID>/')
-restful.add_resource(Invites,  '/api/v0/invites/<chatroomID>',  '/api/v0/invites/<chatroomID>/')
-restful.add_resource(Channels, '/api/v0/channels/<chatroomID>', '/api/v0/channels/<chatroomID>/')
-restful.add_resource(Messages, '/api/v0/messages/<chatroomID>', '/api/v0/messages/<chatroomID>/')
+        '/api/v0/chatroom/<chatroom_id>',
+        '/api/v0/chatroom/<chatroom_id>/')
+restful.add_resource(Login,    '/api/v0/login/<chatroom_id>',    '/api/v0/login/<chatroom_id>/')
+restful.add_resource(Invites,  '/api/v0/invites/<chatroom_id>',  '/api/v0/invites/<chatroom_id>/')
+restful.add_resource(Channels, '/api/v0/channels/<chatroom_id>', '/api/v0/channels/<chatroom_id>/')
+restful.add_resource(Messages, '/api/v0/messages/<chatroom_id>', '/api/v0/messages/<chatroom_id>/')
 
 
 if __name__ == "__main__":

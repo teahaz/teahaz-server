@@ -16,7 +16,7 @@ LOG = logger()
 
 
 # -------------------------------------------------------------------- chatroom -------------------------------------------------------
-def create_chatroom(json_data) -> (dict, int):
+def create_chatroom(json_data) -> tuple[dict | str, int]:
     """ Create a chatroom """
 
     # get arguments
@@ -31,56 +31,56 @@ def create_chatroom(json_data) -> (dict, int):
 
 
     # generate ID for chatroom
-    chatroomID    = security.gen_uuid()
+    chatroom_id    = security.gen_uuid()
 
 
     # Make sure all arguments are given
     required = ['username', 'password', 'chatroom_name']
-    for i, a in enumerate([username, password, chatroom_name]):
-        if a == None or len(a) < 1:
+    for i, req in enumerate([username, password, chatroom_name]):
+        if req == None or len(req) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
 
     # Create folders needed for chatroom
-    res, status = filesystem.create_chatroom_folders(chatroomID)
+    res, status = filesystem.create_chatroom_folders(chatroom_id)
     if status != 200:
         LOG.error(create_chatroom, "Failed to create chatroom folders!")
         return res, 500
 
 
     # Create mongodb database for the catroom
-    chatroom_data, status = database.init_chat(chatroomID, chatroom_name)
+    chatroom_data, status = database.init_chat(chatroom_id, chatroom_name)
     if status != 200:
         LOG.error(create_chatroom, f"Failed to create chatroom database.\n Traceback: {res}")
 
         # If creating the database fails then remove chatroom folders
-        filesystem.remove_chatroom(chatroomID)
+        filesystem.remove_chatroom(chatroom_id)
         return chatroom_data, status
 
 
 
     # add the default user to the chatrom
-    user_data, status = users.add_user(chatroomID, username, nickname, password)
+    user_data, status = users.add_user(chatroom_id, username, nickname, password)
     if status != 200:
         return user_data, status
 
 
     # add initial message
-    messageID, status = database.write_message_event(chatroomID, "system", { "event_type": "newuser", "user_info": user_data })
+    message_id, status = database.write_message_event(chatroom_id, "system", { "event_type": "newuser", "user_info": user_data })
     if status != 200:
-        return messageID, status
+        return message_id, status
 
     # no longer using chatroom_data in favour of helpers.get_chat_info
     # chatroom_data['users'] = [user_data]
-    # chatroom_data['chatroomID'] = chatroomID
+    # chatroom_data['chatroom_id'] = chatroom_id
 
     # return information about the created chatroom
-    return helpers.get_chat_info(chatroomID, username)
+    return helpers.get_chat_info(chatroom_id, username)
 
 
 
 # -------------------------------------------------------------------- login ----------------------------------------------------------
-def login(chatroomID: str, json_data: dict) -> (dict, int):
+def login(chatroom_id: str, json_data: dict) -> (dict, int):
     """ Login to chatroom """
 
     # get arguments
@@ -89,45 +89,45 @@ def login(chatroomID: str, json_data: dict) -> (dict, int):
 
     # Make sure all arguments are given
     required = ['username', 'password']
-    for i, a in enumerate([username, password]):
-        if a == None or len(a) < 1:
+    for i, req in enumerate([username, password]):
+        if req == None or len(req) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
     # authenticate user
-    res, status = users.auth_user(chatroomID, username, password)
+    res, status = users.auth_user(chatroom_id, username, password)
     if status != 200:
         return res, status
 
     # return with useful information about the chatroom
-    return helpers.get_chat_info(chatroomID, username)
+    return helpers.get_chat_info(chatroom_id, username)
 
 
 
 # -------------------------------------------------------------------- messages -------------------------------------------------------
-def send_message(chatroomID: str, json_data: dict):
+def send_message(chatroom_id: str, json_data: dict):
     """ Save message sent from user """
 
-    replyID   = json_data.get('replyID')
+    reply_id   = json_data.get('replyID')
     mtype     = 'text'
 
-    channelID = json_data.get('channelID')
+    channel_id = json_data.get('channelID')
     username    = json_data.get('username')
 
-    keyID     = None
+    key_id     = None
     mtext     = json_data.get('data')
 
 
     # Make sure all arguments are given
     required = ["mtype", "channelID", "username", "data"]
-    for i, a in enumerate([mtype, channelID, username, mtext]):
-        if a == None:
+    for i, req in enumerate([mtype, channel_id, username, mtext]):
+        if req == None:
             return f"No value supplied for required field: {required[i]}.", 400
 
 
     # Validate user input
     values = ["replyID", "channelID"] # , "keyID" ]
-    for i, a in enumerate([replyID, channelID]):
-        if a != None and not security.is_uuid(a):
+    for i, val in enumerate([reply_id, channel_id]):
+        if val != None and not security.is_uuid(val):
             return f"Value for {values[i]} is not a valid UUID!", 400
 
 
@@ -137,7 +137,7 @@ def send_message(chatroomID: str, json_data: dict):
 
 
     # Check if channel exists and that the user has access to it
-    permissions, status = database.get_channel_permissions(chatroomID, channelID, username)
+    permissions, status = database.get_channel_permissions(chatroom_id, channel_id, username)
     if status != 200:
         return permissions, status
 
@@ -146,27 +146,27 @@ def send_message(chatroomID: str, json_data: dict):
         return "You do not have permissions to write in this channel", 403
 
     # continue on from here
-    return database.write_message_text(chatroomID, channelID, username, mtext, replyID)
+    return database.write_message_text(chatroom_id, channel_id, username, mtext, reply_id)
 
 
-def get_messages(chatroomID: str, json_data: dict):
+def get_messages(chatroom_id: str, json_data: dict):
     """ Get all messages since <time> """
 
     time = json_data.get('time')
     username = json_data.get('username')
-    channelID = json_data.get('channelID')
+    channel_id = json_data.get('channelID')
 
 
 
     # If channelID is a uuid then only look for messages
     # in that one channel.
-    if security.is_uuid(channelID):
-        channels = [{ "channelID": channelID }]
+    if security.is_uuid(channel_id):
+        channels = [{ "channelID": channel_id }]
 
     # If channelID is not set then look for messages in
     # all readable channels.
-    elif channelID == None:
-        channels, status = database.fetch_all_readable_channels(chatroomID, username)
+    elif channel_id == None:
+        channels, status = database.fetch_all_readable_channels(chatroom_id, username)
         if status != 200:
             return channels, status
 
@@ -188,16 +188,16 @@ def get_messages(chatroomID: str, json_data: dict):
     # a value that can be converted to float without any issue.
     try:
         timesince = float(time)
-    except Exception as e:
-        return f"Could not convert variable 'time' to float: {e}", 400
+    except Exception as err:
+        return f"Could not convert variable 'time' to float: {err}", 400
 
     # Return messages
-    return database.get_messages_since(chatroomID, timesince, channel_ids)
+    return database.get_messages_since(chatroom_id, timesince, channel_ids)
 
 
 
 # -------------------------------------------------------------------- invite --------------------------------------------------------
-def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
+def create_invite(chatroom_id: str, json_data: dict) -> (dict or str, int):
     """ Create an invite for a chatroom """
 
     username        = json_data.get('username')
@@ -238,21 +238,21 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     if type(classes) == str:
         classes_unclean = classes.split(',')
         classes = []
-        for c in classes_unclean:
-            classes.append(c.strip())
+        for cls in classes_unclean:
+            classes.append(cls.strip())
 
     # Classes has to be an array
     if type(classes) != list:
         return "ClassID was set to an invalid value. Must be array or None.", 400
 
     # Get a list of all valid classIDs
-    valid_classes, status = database.fetch_all_classes(chatroomID)
+    valid_classes, status = database.fetch_all_classes(chatroom_id)
     if status != 200:
         return valid_classes, status
 
-    valid_classIDs = []
-    for c in valid_classes:
-        valid_classIDs.append(c['classID'])
+    valid_class_ids = []
+    for cls in valid_classes:
+        valid_class_ids.append(cls['classID'])
 
     # There is no need to add the default class
     #   to each invite as you cannot create a user
@@ -263,8 +263,8 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
         classes = list(set(classes))
 
         # make sure all classes are valid
-        for classID in classes:
-            if classID not in valid_classIDs:
+        for class_id in classes:
+            if class_id not in valid_class_ids:
                 return "One of the values in 'classes' is not a valid classID", 400
 
 
@@ -272,7 +272,7 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
     # For now only chatroom admins can creaate invites.
     # I plan on adding more granular permissions were people can have
     #   invite permissions without having to be admins.
-    is_admin, status = database.check_permission(chatroomID, username, "admin")
+    is_admin, status = database.check_permission(chatroom_id, username, "admin")
     if status != 200:
         return is_admin, status
 
@@ -281,16 +281,16 @@ def create_invite(chatroomID: str, json_data: dict) -> (dict or str, int):
         return "Permission denied: You dont have permissions to create an invite.", 403
 
     # save invite
-    return  database.write_invite(chatroomID, username, classes, expiration_time, uses)
+    return  database.write_invite(chatroom_id, username, classes, expiration_time, uses)
 
 
-def use_invite(chatroomID: str, json_data: dict):
+def use_invite(chatroom_id: str, json_data: dict):
     """ Process an invite """
 
     username = json_data.get('username')
     nickname = json_data.get('nickname')
     password = json_data.get('password')
-    inviteID = json_data.get('inviteID')
+    invite_id = json_data.get('inviteID')
 
 
     # The nickname argument is optional and if not set it will be the same as username
@@ -298,16 +298,16 @@ def use_invite(chatroomID: str, json_data: dict):
 
 
     required = ['username', 'password', 'inviteID']
-    for i, a in enumerate([username, password, inviteID]):
-        if a == None or len(a) < 1:
+    for i, req in enumerate([username, password, invite_id]):
+        if req == None or len(req) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
 
-    if not security.is_uuid(inviteID):
+    if not security.is_uuid(invite_id):
         return "Invalid invite ID sent to server. Must be uuid!", 400
 
 
-    invite_info, status = database.fetch_invite(chatroomID, inviteID)
+    invite_info, status = database.fetch_invite(chatroom_id, invite_id)
     if status != 200:
         return invite_info, status
 
@@ -327,22 +327,22 @@ def use_invite(chatroomID: str, json_data: dict):
     # Got this far in writing use_invite.
     # Need to write changes to the invite and some other things
 
-    res, status = database.update_invite(chatroomID, inviteID, invite_info['classID'], invite_info['expiration_time'],  uses)
+    res, status = database.update_invite(chatroom_id, invite_id, invite_info['classID'], invite_info['expiration_time'],  uses)
     if status != 200:
         return res, status
 
 
-    username, status = users.add_user(chatroomID, username, nickname, password)
+    username, status = users.add_user(chatroom_id, username, nickname, password)
     if status != 200:
         return username, status
 
 
-    return helpers.get_chat_info(chatroomID, username)
+    return helpers.get_chat_info(chatroom_id, username)
 
 
 
 # -------------------------------------------------------------------- channels -------------------------------------------------------
-def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
+def create_channel(chatroom_id: str, json_data: dict) -> (dict, int):
     """ Create a channel """
 
     username     = json_data.get('username')
@@ -354,7 +354,7 @@ def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
         return "Channel_name must be a string that is less than 200 characters long", 400
 
 
-    admins, status =  helpers.get_admins(chatroomID)
+    admins, status =  helpers.get_admins(chatroom_id)
     if status != 200:
         return admins, status
 
@@ -363,13 +363,13 @@ def create_channel(chatroomID: str, json_data: dict) -> (dict, int):
         return "You do not have permission to create channels", 403
 
 
-    permissions, status = helpers.sanitize_permission_list(chatroomID, permissions)
+    permissions, status = helpers.sanitize_permission_list(chatroom_id, permissions)
     if status != 200:
         return permissions, status
 
 
 
-    channel_obj, status = database.write_channel(chatroomID, channel_name, permissions)
+    channel_obj, status = database.write_channel(chatroom_id, channel_name, permissions)
     if status != 200:
         return channel_obj, status
 

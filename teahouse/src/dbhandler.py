@@ -1,7 +1,7 @@
 """
     Module handles interacting with the database.
     Things outside this file should not touch the
-    db and all functions here must have something
+    db_handle and all functions here must have something
     to do with the database.
 """
 
@@ -23,13 +23,13 @@ LOG = logger()
 mongodb = pymongo.MongoClient('mongodb', 27017)
 
 
-def _gethandle(chatroomID: str):
-    if not security.is_uuid(chatroomID):
+def _gethandle(chatroom_id: str):
+    if not security.is_uuid(chatroom_id):
         return "ChatroomID is not a valid uuid", 400
-    return mongodb[chatroomID], 200
+    return mongodb[chatroom_id], 200
 
 
-class database():
+class Database():
     """ Abstraction over database functions """
 
 
@@ -41,30 +41,30 @@ class database():
     #   it would mean that we can valiedate some data before executing it.
 
 
-    def __init__(self, chatroomID: str):
-        LOG.warn(database, "Depricated database used!")
+    def __init__(self, chatroom_id: str):
+        LOG.warn(Database, "Depricated database used!")
 
         # cant return in __init__ but make sure that invalid uuid's are not being used
-        assert(security.is_uuid(chatroomID))
+        assert(security.is_uuid(chatroom_id))
 
-        if not os.path.exists(f'storage/chatrooms/{chatroomID}'):
+        if not os.path.exists(f'storage/chatrooms/{chatroom_id}'):
             self.exists = False
         else:
             self.exists = True
 
-        self.chatroomID = chatroomID
-        self.db = sqlite3.connect(f'storage/chatrooms/{chatroomID}/main.db')
+        self.chatroom_id = chatroom_id
+        self.db_handle = sqlite3.connect(f'storage/chatrooms/{chatroom_id}/main.db_handle')
 
     def _run(self, statement: str, variables: tuple = ()):
         """ Internal function to run sql statements """
         try:
-            cursor = self.db.cursor()
+            cursor = self.db_handle.cursor()
             cursor.execute(statement, variables)
             return cursor, 200
 
-        except Exception as e:
-            LOG.error(self._run, f"Database operation failed: {e}")
-            return f"Database operation failed: {e}", 500
+        except Exception as err:
+            LOG.error(self._run, f"Database operation failed: {err}")
+            return f"Database operation failed: {err}", 500
 
 
     def close(self):
@@ -73,11 +73,11 @@ class database():
 
             This method MUST be run after using the database
         """
-        self.db.close()
+        self.db_handle.close()
 
     def commit(self):
         """ Saves changes to a database """
-        self.db.commit()
+        self.db_handle.commit()
 
 
     def create(self, table: str, values: list):
@@ -140,18 +140,18 @@ class database():
 
 
 #-------------------------------------------------------------- Chatroom -----------------------
-def init_chat(chatroomID: str, chat_name: str):
+def init_chat(chatroom_id: str, chat_name: str):
     """ Creating a mongodb database for a new chatroom """
-    LOG.log(init_chat, f"Creating chatroom {chatroomID}")
+    LOG.log(init_chat, f"Creating chatroom {chatroom_id}")
 
     # This line should get a handle for the new database.
     # note: mongodb doesnt actually create the database,
     #   or any collections until the first document is inserted into them.
-    db = mongodb[chatroomID]
+    db_handle = mongodb[chatroom_id]
 
 
     # insert constructor and default class
-    class_collection = db.classes
+    class_collection = db_handle.classes
     default_classes = [
         {
             "_id": "0",
@@ -175,13 +175,13 @@ def init_chat(chatroomID: str, chat_name: str):
 
 
     # Add the default channel
-    channelID = security.gen_uuid()
-    channel_collection = db.channels
+    channel_id = security.gen_uuid()
+    channel_collection = db_handle.channels
     default_channel = {
-            "_id": channelID,
+            "_id": channel_id,
             "public":
             {
-                "channelID": channelID,
+                "channelID": channel_id,
                 "name": "default",
                 "permissions":
                 [
@@ -198,9 +198,9 @@ def init_chat(chatroomID: str, chat_name: str):
 
 
     # Add some default settings
-    chatroom_collection = db.chatroom
+    chatroom_collection = db_handle.chatroom
     default_settings = {
-            "_id": str(chatroomID),
+            "_id": str(chatroom_id),
             "public":
             {
                 "settings":
@@ -217,7 +217,7 @@ def init_chat(chatroomID: str, chat_name: str):
                     },
                     {
                         "sname": "default_channel",
-                        "svalue": channelID,
+                        "svalue": channel_id,
                         "stype": "string"
                     }
                 ]
@@ -240,14 +240,14 @@ def init_chat(chatroomID: str, chat_name: str):
     return chatroom_data, 200
 
 
-def check_settings(chatroomID: str, setting_name: str):
+def check_settings(chatroom_id: str, setting_name: str):
     """ Fetch the setting value corresponding to a setting name from database"""
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    document = db.chatroom.find_one()
+    document = db_handle.chatroom.find_one()
     settings = document['public']['settings']
 
     for setting in settings:
@@ -257,14 +257,14 @@ def check_settings(chatroomID: str, setting_name: str):
     return "No such setting", 400
 
 
-def fetch_all_settings(chatroomID: str):
+def fetch_all_settings(chatroom_id: str):
     """ Get all settings of a chatroom """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    document = db.chatroom.find_one()
+    document = db_handle.chatroom.find_one()
     settings = document['public']['settings']
 
     settings_list = []
@@ -276,26 +276,26 @@ def fetch_all_settings(chatroomID: str):
 
 
 #-------------------------------------------------------------- Messages -----------------------
-def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str, int):
+def write_message_event(chatroom_id: str, mtype: str, data: dict) -> (dict or str, int):
     """ Write an event into the messages collection """
 
     # just make sure that I am using this function correctly
     assert(mtype not in ['text', 'file'])
 
-    # get db
-    db, status = _gethandle(chatroomID)
+    # get db_handle
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     # randomly generate an id for the message
-    messageID = security.gen_uuid()
+    message_id = security.gen_uuid()
 
     # format message
     message_obj ={
-            "_id": messageID,
+            "_id": message_id,
             "public":
             {
-                "messageID": messageID,
+                "messageID": message_id,
                 "time": time.time(),
                 "type": str(mtype),
                 "data": data
@@ -303,29 +303,29 @@ def write_message_event(chatroomID: str, mtype: str, data: dict) -> (dict or str
         }
 
     # add to database
-    db.messages.insert_one(message_obj)
+    db_handle.messages.insert_one(message_obj)
 
     return message_obj['public'], 200
 
 
-def write_message_text(chatroomID: str, channelID: str, username: str, message: str, replyID: str = None) -> (dict or str, int):
+def write_message_text(chatroom_id: str, channel_id: str, username: str, message: str, reply_id: str = None) -> (dict or str, int):
     """ Write a message inot the messages field """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     # randomly generate an id for the message
-    messageID = security.gen_uuid()
+    message_id = security.gen_uuid()
 
     # format message
     message_obj ={
-            "_id": messageID,
+            "_id": message_id,
             "public":
             {
-                "messageID": messageID,
+                "messageID": message_id,
                 "time": time.time(),
-                "channelID": channelID,
+                "channelID": channel_id,
                 "username": username,
                 "type": 'text',
                 "data": message
@@ -334,22 +334,22 @@ def write_message_text(chatroomID: str, channelID: str, username: str, message: 
 
     # If there is a replyID is set then add then change the message
     # from a standard text to a reply.
-    if replyID != None:
+    if reply_id != None:
         message_obj['public']['type'] = 'reply-text'
-        message_obj['public']['replyID'] = replyID
+        message_obj['public']['replyID'] = reply_id
 
 
-    db.messages.insert_one(message_obj)
+    db_handle.messages.insert_one(message_obj)
     return message_obj['public'], 200
 
 
-def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: list) -> (list or str, int):
+def get_messages_since(chatroom_id: str, timesince: float, channels_to_look_in: list) -> (list or str, int):
     """ Get all messages since {timesince} from channels specified by {channels_to_look_in} """
 
-    # get db
-    db, status = _gethandle(chatroomID)
+    # get db_handle
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
 
     # Make a query for mongodb.
@@ -371,46 +371,46 @@ def get_messages_since(chatroomID: str, timesince: float, channels_to_look_in: l
     }
 
     # Loop over the messages iterator and return an array.
-    messages = [m['public'] for m in db.messages.find(query)]
+    messages = [m['public'] for m in db_handle.messages.find(query)]
     return messages, 200
 
 
 
 #-------------------------------------------------------------- Channels -----------------------
-def write_channel(chatroomID: str, channel_name: str, permissions: list) -> (dict or str, int):
+def write_channel(chatroom_id: str, channel_name: str, permissions: list) -> (dict or str, int):
     """ Add new channel to database """
 
     # generate channelID
-    channelID = security.gen_uuid()
+    channel_id = security.gen_uuid()
 
-    # insert into db
-    db, status = _gethandle(chatroomID)
+    # insert into db_handle
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     channel_data = {
-            "_id": channelID,
+            "_id": channel_id,
             "public":
                 {
-                    "channelID": channelID,
+                    "channelID": channel_id,
                     "name": channel_name,
                     "permissions": permissions
                 }
             }
 
-    db.channels.insert_one(channel_data)
+    db_handle.channels.insert_one(channel_data)
 
     return channel_data['public'], 200
 
 
-def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (dict, int):
+def fetch_channel(chatroom_id: str, channel_id: str, include_private=False) -> (dict, int):
     """ Fetch all information about a channel """
 
-    db, status= _gethandle(chatroomID)
+    db_handle, status= _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    channel = db.channels.find_one({'_id': channelID})
+    channel = db_handle.channels.find_one({'_id': channel_id})
     if not channel:
         return "Channel not found", 404
 
@@ -420,39 +420,39 @@ def fetch_channel(chatroomID: str, channelID: str, include_private=False) -> (di
     return channel, 200
 
 
-def fetch_all_channels(chatroomID: str, include_private=False) -> (list or str, int):
+def fetch_all_channels(chatroom_id: str, include_private=False) -> (list or str, int):
     """ Get a list of all channels """
 
-    db, status= _gethandle(chatroomID)
+    db_handle, status= _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     channels = []
-    for d in db.channels.find():
+    for channel in db_handle.channels.find():
         if include_private:
-            channels.append(d)
+            channels.append(channel)
         else:
-            channels.append(d['public'])
+            channels.append(channel['public'])
 
     return channels, 200
 
 
-def get_channel_permissions(chatroomID: str, channelID: str, username: str) -> (dict or str, int):
+def get_channel_permissions(chatroom_id: str, channel_id: str, username: str) -> (dict or str, int):
     """
         Gets channel permissions from the perspective of the user.
 
         ie: it gets the what the user can do in a channel
     """
 
-    db, status = _gethandle(channelID)
+    db_handle, status = _gethandle(channel_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    user, status = fetch_user(chatroomID, username)
+    user, status = fetch_user(chatroom_id, username)
     if status != 200:
         return user, status
 
-    admins, status = helpers.get_admins(chatroomID)
+    admins, status = helpers.get_admins(chatroom_id)
     if status != 200:
         return admins, status
 
@@ -465,7 +465,7 @@ def get_channel_permissions(chatroomID: str, channelID: str, username: str) -> (
                 }, 200
 
 
-    channel, status = fetch_channel(chatroomID, channelID)
+    channel, status = fetch_channel(chatroom_id, channel_id)
     if status != 200:
         return channel, status
 
@@ -491,7 +491,7 @@ def get_channel_permissions(chatroomID: str, channelID: str, username: str) -> (
 
 
 
-def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
+def can_read(chatroom_id: str, channel_id: str, username: str) -> (bool, int):
     """
         Checks if a user can read a channel.
 
@@ -502,7 +502,7 @@ def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
     """
 
     # get user info
-    user, status = fetch_user(chatroomID, username)
+    user, status = fetch_user(chatroom_id, username)
     if status != 200:
         return user, status
 
@@ -513,7 +513,7 @@ def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
 
 
     # check if user is admin
-    classes, status = fetch_all_classes(chatroomID)
+    classes, status = fetch_all_classes(chatroom_id)
     if status != 200:
         return classes, status
 
@@ -523,7 +523,7 @@ def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
 
 
     # get channel info
-    channels, status = fetch_channel(channelID, channelID)
+    channels, status = fetch_channel(chatroom_id, channel_id)
     if status != 200:
         return channels, status
 
@@ -536,16 +536,16 @@ def can_read(chatroomID: str, channelID: str, username: str) -> (bool, int):
     return False, 200
 
 
-def fetch_all_readable_channels(chatroomID: str, username: str):
+def fetch_all_readable_channels(chatroom_id: str, username: str):
     """ Gets a list of all channels that are readable to the user.  """
 
-    channels, status = fetch_all_channels(chatroomID)
+    channels, status = fetch_all_channels(chatroom_id)
     if status != 200:
         return channels, status
 
     readable_channels = []
     for channel in channels:
-        if can_read(chatroomID, channel['channelID'], username)[0]:
+        if can_read(chatroom_id, channel['channelID'], username)[0]:
             readable_channels.append(channel)
 
     return readable_channels, 200
@@ -553,13 +553,13 @@ def fetch_all_readable_channels(chatroomID: str, username: str):
 
 
 #-------------------------------------------------------------- Users -----------------------
-def write_user(chatroomID: str, username: str, nickname: str, password: str):
+def write_user(chatroom_id: str, username: str, nickname: str, password: str):
     """ write user to database """
 
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
 
     # hash password
@@ -588,7 +588,7 @@ def write_user(chatroomID: str, username: str, nickname: str, password: str):
 
 
     # if this is the first user in the chatroom then make them the constructor
-    first_user = db.users.find_one()
+    first_user = db_handle.users.find_one()
     if not first_user:
         user_data['public']['classes'].append('0')
 
@@ -597,15 +597,15 @@ def write_user(chatroomID: str, username: str, nickname: str, password: str):
 
 
     # make sure someone with the same username doesnt already exist
-    if db.users.find_one({"_id": str(username)}) != None:
+    if db_handle.users.find_one({"_id": str(username)}) != None:
         return "A user with this username already exists", 400
 
 
-    db.users.insert_one(user_data)
+    db_handle.users.insert_one(user_data)
     return user_data['public'], 200
 
 
-def fetch_user(chatroomID: str, username: str, include_private=False) -> (dict or str, int):
+def fetch_user(chatroom_id: str, username: str, include_private=False) -> (dict or str, int):
     """
         Fetch all public information about a user
 
@@ -613,11 +613,11 @@ def fetch_user(chatroomID: str, username: str, include_private=False) -> (dict o
         the public info from fetch_user().
     """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    user_data = db.users.find_one({'_id': username})
+    user_data = db_handle.users.find_one({'_id': username})
 
     if not user_data:
         return "User not found", 404
@@ -628,21 +628,21 @@ def fetch_user(chatroomID: str, username: str, include_private=False) -> (dict o
     return user_data, 200
 
 
-def fetch_all_users(chatroomID:str):
+def fetch_all_users(chatroom_id:str):
     """ Fetch all users (members) of a chatroom """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     users = []
-    for d in db.users.find():
+    for d in db_handle.users.find():
         users.append(d['public'])
 
     return users, 200
 
 
-def check_permission(chatroomID: str, username: str, permission_name: str) -> (bool or str, int):
+def check_permission(chatroom_id: str, username: str, permission_name: str) -> (bool or str, int):
     """
         With permission name supplied to something like 'admin',
         the function checks whether or not the user has any class
@@ -651,12 +651,12 @@ def check_permission(chatroomID: str, username: str, permission_name: str) -> (b
         Note: any true value overwrites all other non-true value,
         so the user only needs this permission from any one class.
     """
-    user_data, status = fetch_user(chatroomID, username)
+    user_data, status = fetch_user(chatroom_id, username)
     if status != 200:
         return user_data, status
 
-    for classID in user_data['classes']:
-        class_data, status = fetch_class(chatroomID, classID)
+    for class_id in user_data['classes']:
+        class_data, status = fetch_class(chatroom_id, class_id)
         if status != 200:
             return "Internal database error: User classes are corrupt", 500
 
@@ -670,25 +670,25 @@ def check_permission(chatroomID: str, username: str, permission_name: str) -> (b
 
 
 #-------------------------------------------------------------- Cookies -----------------------
-def store_cookie(chatroomID: str, username: str, cookie: str):
+def store_cookie(chatroom_id: str, username: str, cookie: str):
     """ Writes a cookie to the database """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    db.users.update_one({'_id': username}, {'$addToSet': {'private.cookies': cookie}})
+    db_handle.users.update_one({'_id': username}, {'$addToSet': {'private.cookies': cookie}})
 
     return "OK", 200
 
-def get_cookies(chatroomID: str, username: str, cookie: str):
+def get_cookies(chatroom_id: str, username: str, cookie: str):
     """ Get all cookies associated with a user. """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    cookies = db.users.find_one({'_id': username}).get('private').get('cookies')
+    cookies = db_handle.users.find_one({'_id': username}).get('private').get('cookies')
     if cookie == None:
         return "No cookies found!", 404
 
@@ -697,28 +697,28 @@ def get_cookies(chatroomID: str, username: str, cookie: str):
 
 
 #-------------------------------------------------------------- Invites -----------------------
-def write_invite(chatroomID: str, username: str, classes: list, expiration_time: float, uses: int) -> (dict or str, int):
+def write_invite(chatroom_id: str, username: str, classes: list, expiration_time: float, uses: int) -> (dict or str, int):
     """
         Generate an invite and save it in the database
 
         Return Values:
-            - if ok: Public part of object that got written to the db., status_code
+            - if ok: Public part of object that got written to the db_handle., status_code
             - else: error string, status_code
     """
 
     print('uses: ',uses , type(uses))
 
-    inviteID = security.gen_uuid()
+    invite_id = security.gen_uuid()
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     invite_obj = {
-            "_id": inviteID,
+            "_id": invite_id,
             "public":
             {
-                "inviteID": inviteID,
+                "inviteID": invite_id,
                 "username": username,
 
                 "uses": uses,
@@ -727,18 +727,18 @@ def write_invite(chatroomID: str, username: str, classes: list, expiration_time:
             }
         }
 
-    db.invites.insert_one(invite_obj)
+    db_handle.invites.insert_one(invite_obj)
     return invite_obj['public'], 200
 
 
-def fetch_invite(chatroomID: str, inviteID: str) -> dict:
+def fetch_invite(chatroom_id: str, invite_id: str) -> dict:
     """ Get all stored information about an invite """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    document = db.invites.find_one({"_id": inviteID})
+    document = db_handle.invites.find_one({"_id": invite_id})
     print('document: ',document , type(document))
     if document == None:
         return "Could not find valid invite with that inviteID'", 404
@@ -746,7 +746,7 @@ def fetch_invite(chatroomID: str, inviteID: str) -> dict:
     return document['public'], 200
 
 
-def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time: float, uses: int):
+def update_invite(chatroom_id: str, invite_id: str, class_id: str, expiration_time: float, uses: int):
     """ Update information stored on invite """
 
     # Force variables to be the right type
@@ -755,25 +755,25 @@ def update_invite(chatroomID: str, inviteID: str, classID: str, expiration_time:
     uses = int(uses)
     expiration_time = float(expiration_time)
 
-    db = database(chatroomID)
+    db_handle = Database(chatroom_id)
 
-    res, status = db.update(
+    res, status = db_handle.update(
             'invites',
             ["classID", "expiration_time", "uses"],
-            (classID, expiration_time, uses, inviteID),
+            (class_id, expiration_time, uses, invite_id),
             "inviteID=?"
             )
     if status != 200:
         return "Internal database error while updateing invite", 500
 
-    db.commit()
-    db.close()
+    db_handle.commit()
+    db_handle.close()
     return "OK", 200
 
 
 
 #-------------------------------------------------------------- Classes -----------------------
-def get_constructor(chatroomID: str):
+def get_constructor(chatroom_id: str):
     """ 
         Simple, fast function for gettitng the chatroom constructor
 
@@ -781,40 +781,40 @@ def get_constructor(chatroomID: str):
             username, status
     """
 
-    db = database(chatroomID)
+    db_handle = Database(chatroom_id)
 
-    constructor, status = db.select('username', 'userclasses', 'classID=?', ('0',))
+    constructor, status = db_handle.select('username', 'userclasses', 'classID=?', ('0',))
     if status != 200:
         return constructor, status
 
     return constructor[0][0], 200
 
 
-def fetch_all_classes(chatroomID: str) -> (dict or str, int):
+def fetch_all_classes(chatroom_id: str) -> (dict or str, int):
     """ Gets all classes of a chatroom. """
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
     classes = []
-    for d in db.classes.find():
+    for d in db_handle.classes.find():
         classes.append(d['public'])
 
     return classes, 200
 
 
-def fetch_class(chatroomID: str, classID: str) -> (dict or str, int):
+def fetch_class(chatroom_id: str, class_id: str) -> (dict or str, int):
     """ Fetch all information about a class """
 
-    if classID not in ['0', '1'] and not security.is_uuid(classID):
-        return "Invalild classID was supplied", 500
+    if class_id not in ['0', '1'] and not security.is_uuid(class_id):
+        return "Invalild class_id was supplied", 500
 
-    db, status = _gethandle(chatroomID)
+    db_handle, status = _gethandle(chatroom_id)
     if status != 200:
-        return db, status
+        return db_handle, status
 
-    class_data = db.classes.find_one({'_id': classID})
+    class_data = db_handle.classes.find_one({'_id': class_id})
     if class_data == None:
         return "No such class", 500
 

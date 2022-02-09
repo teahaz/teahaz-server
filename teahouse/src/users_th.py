@@ -8,11 +8,11 @@ from logging_th import logger
 LOG = logger()
 
 
-def add_user(chatroomID: str, username: str, nickname: str, password: str):
+def add_user(chatroom_id: str, username: str, nickname: str, password: str):
     """ Add user to chatroom. """
 
     # make sure password is long enough
-    pwlength, status = database.check_settings(chatroomID, "min_password_length")
+    pwlength, status = database.check_settings(chatroom_id, "min_password_length")
     if status != 200:
         return "Internal server error while checking password length setting.", 500
 
@@ -21,7 +21,7 @@ def add_user(chatroomID: str, username: str, nickname: str, password: str):
 
 
     # save user creds
-    user_data, status = database.write_user(chatroomID, username, nickname, password)
+    user_data, status = database.write_user(chatroom_id, username, nickname, password)
     if status != 200:
         return user_data, status
 
@@ -29,10 +29,10 @@ def add_user(chatroomID: str, username: str, nickname: str, password: str):
     return user_data, 200
 
 
-def auth_user(chatroomID: str, username: str, password: str):
+def auth_user(chatroom_id: str, username: str, password: str):
     """ Authenticate user """
 
-    user_data, status = database.fetch_user(chatroomID, username, include_private=True)
+    user_data, status = database.fetch_user(chatroom_id, username, include_private=True)
     if status != 200:
         return user_data, status
 
@@ -44,21 +44,21 @@ def auth_user(chatroomID: str, username: str, password: str):
     return "Logged in!", 200
 
 
-def set_cookie(chatroomID: str, username: str):
+def set_cookie(chatroom_id: str, username: str):
     """ Generate and store a cookie for a user """
     cookie = security.gen_uuid()
 
-    if not chatroomID or not username:
+    if not chatroom_id or not username:
         return "internal server error while setting cookies", 500
 
-    res, status = database.store_cookie(chatroomID, username, cookie)
+    res, status = database.store_cookie(chatroom_id, username, cookie)
     if status != 200:
         return res, status
 
     return cookie, 200
 
 
-def check_cookie(chatroomID: str, cookie: str, username: str):
+def check_cookie(chatroom_id: str, cookie: str, username: str):
     """ Check if a cookie value is valid for the specified user """
 
     if not username or not cookie:
@@ -67,7 +67,7 @@ def check_cookie(chatroomID: str, cookie: str, username: str):
         return False
 
 
-    cookies, status = database.get_cookies(chatroomID, username, cookie)
+    cookies, status = database.get_cookies(chatroom_id, username, cookie)
     if status != 200:
         return False
 
