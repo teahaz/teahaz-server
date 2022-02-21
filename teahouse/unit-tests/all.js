@@ -291,16 +291,16 @@ const main = async() =>
      * Create a new chatroom to use invite.
      * This is commented out bc its not finished yet.
      */
-    // let conv2 = await new chatroom({
-    //     server: 'http://localhost:13337',
-    //     chatroomID: conv1.chatroomID,
-    //     inviteID: invite.inviteID,
-    //     username: "b",
-    //     password: "1234567890",
-    //     proxy: {host: 'localhost', port: 8080}
-    // }).enable();
+    let conv2 = await new chatroom({
+        server: 'http://localhost:13337',
+        chatroomID: conv1.chatroomID,
+        inviteID: invite.inviteID,
+        username: "b",
+        password: "1234567890",
+        proxy: {host: '127.0.0.1', port: 8080}
+    }).enable();
 
-    // print(conv2)
+    print(conv2)
 
 
 

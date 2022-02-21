@@ -20,14 +20,17 @@ const main = async() =>
     console.log("-----------------------------------------------------------------------------------------------");
 
 
-    conv1.create_invite({
-        uses: 1,
+    // creating an invite
+    let invite;
+    let invite_classes = ['0'];
+    await conv1.create_invite({
+        uses: 10,
         expiration_time: (new Date().getTime() / 1000) + 1000,
-        classes: ['1', '0']
+        classes: invite_classes
     })
     .then((res) =>
         {
-            console.log(res.data)
+            invite = res.data;
             console.log("✅ Created invite!");
         })
     .catch((res) =>
@@ -36,6 +39,18 @@ const main = async() =>
             console.error("❌ Failed to create invite!");
             process.exit(1);
         });
+
+
+    let conv2 = await new chatroom({
+        server: 'http://localhost:13337',
+        chatroomID: conv1.chatroomID,
+        inviteID: invite.inviteID,
+        username: "b",
+        password: "1234567890",
+        proxy: {host: 'localhost', port: 8080}
+    }).enable();
+
+    print(conv2);
 }
 
 main()

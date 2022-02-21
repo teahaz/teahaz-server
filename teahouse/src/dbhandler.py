@@ -759,7 +759,7 @@ def update_invite(chatroom_id: str, invite_id: str, class_id: str, expiration_ti
 
     res, status = db_handle.update(
             'invites',
-            ["classID", "expiration_time", "uses"],
+            ["classes", "expiration_time", "uses"],
             (class_id, expiration_time, uses, invite_id),
             "inviteID=?"
             )
@@ -819,3 +819,28 @@ def fetch_class(chatroom_id: str, class_id: str) -> (dict or str, int):
         return "No such class", 500
 
     return class_data['public'], 200
+
+
+
+
+#
+# class database:
+#     __init__:
+#         creates the db and stuff like that
+#
+#     many different methods for each
+#     thing we can do. each top-level
+#     feature like write_message should
+#     be a method of this.
+
+      # All security stuff should be handled
+      # within the database handler class
+#
+#     commit:
+#         save things
+#
+#     __del__:
+#         if not commited, crash and tell the
+#         developer that things have been done
+#         without commiting.
+

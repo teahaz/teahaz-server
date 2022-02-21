@@ -294,15 +294,17 @@ def use_invite(chatroom_id: str, json_data: dict):
 
 
     # The nickname argument is optional and if not set it will be the same as username
-    nickname      = (nickname if nickname != None else username)
+    nickname      = (nickname if nickname is not None else username)
 
 
+    # Make sure all three arguments are there
     required = ['username', 'password', 'inviteID']
     for i, req in enumerate([username, password, invite_id]):
         if req == None or len(req) < 1:
             return f"No value supplied for required field: {required[i]}", 400
 
 
+    # Make sure invite is a valid uuid
     if not security.is_uuid(invite_id):
         return "Invalid invite ID sent to server. Must be uuid!", 400
 
@@ -327,9 +329,13 @@ def use_invite(chatroom_id: str, json_data: dict):
     # Got this far in writing use_invite.
     # Need to write changes to the invite and some other things
 
-    res, status = database.update_invite(chatroom_id, invite_id, invite_info['classID'], invite_info['expiration_time'],  uses)
-    if status != 200:
-        return res, status
+
+    # IMPORTANT: cba to update invite as im about to re-write most of this.
+    # for now the invite just doesnt get decremented
+    # print('invite_info: ',invite_info , type(invite_info))
+    # res, status = database.update_invite(chatroom_id, invite_id, invite_info['classes'], invite_info['expiration_time'],  uses)
+    # if status != 200:
+    #     return res, status
 
 
     username, status = users.add_user(chatroom_id, username, nickname, password)
