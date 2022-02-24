@@ -34,6 +34,11 @@ import codectrl
 import coloredlogs
 
 
+
+# Local imports
+import th__api as api
+
+
 # Initialise flask and flask_restful objects.
 app_regular = Flask(__name__)
 app_restful = Api(app_regular)
@@ -42,9 +47,11 @@ app_restful = Api(app_regular)
 
 class Chatrooms(Resource):
     """ /api/v0/chatroom/ """
-    def post(self, chatroom_id=None): # pylint: disable=no-self-use
+    def post(self, chatroom_id=None) -> tuple[dict[str, str | int], int]: # pylint: disable=no-self-use
         """ Method for creating chat-rooms """
         codectrl.log("method: Create chat-room", chatroom_id=chatroom_id)
+        return api.create_chatroom(request)
+
 
 
     def get(self, chatroom_id=None): # pylint: disable=no-self-use
