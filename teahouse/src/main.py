@@ -53,7 +53,6 @@ class Chatrooms(Resource):
         return api.create_chatroom(request)
 
 
-
     def get(self, chatroom_id=None): # pylint: disable=no-self-use
         """
             Method for getting information about a chat-room.
@@ -142,5 +141,5 @@ app_restful.add_resource(Messages,
 # under gunicorn  __name__ is not equal
 # to __main__.
 if __name__ == "__main__":
-    coloredlogs.install()
+    coloredlogs.install(milliseconds=True)
     app_regular.run(host="0.0.0.0", port=13337, debug=True)

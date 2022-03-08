@@ -1,6 +1,8 @@
-pymongo==3.12.0
-Flask==1.1.2
-Flask-RESTful==0.3.8
-bcrypt==3.2.0
-uuid==1.30
-gunicorn==20.1.0
+pymongo
+Flask
+Flask-RESTful
+bcrypt
+uuid
+gunicorn
+codectrl
+coloredlogs
