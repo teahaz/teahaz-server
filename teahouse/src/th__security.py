@@ -39,3 +39,4 @@ def gen_uuid():
         be changed in one place if need be.
     """
     return str(uuid.uuid1())
+

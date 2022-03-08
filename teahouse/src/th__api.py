@@ -45,8 +45,5 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
 
     # Create folders needed for chatroom
     res, status = filesystem.create_chatroom_folders(chatroom_id)
-    if status != 200:
-        return res, 500
-
-
-
+    if helpers.bad(status):
+        return res, status
