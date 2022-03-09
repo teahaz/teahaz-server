@@ -46,5 +46,5 @@ def gen_uuid() -> str:
 def hash_password(password: str) -> str:
     """ bcrypt hash password for storage """
     password_bytes = password.encode("utf-8")
-    password_encrypted = bcrypt.hashpw(password_bytes, bcrypt.gensalt(rounds=16))
+    password_encrypted = bcrypt.hashpw(password_bytes, bcrypt.gensalt(rounds=8))
     return password_encrypted.decode("utf-8")
