@@ -10,6 +10,7 @@
 
 import uuid
 import string
+import bcrypt
 
 
 def is_uuid(uid: str) -> bool:
@@ -31,7 +32,7 @@ def is_uuid(uid: str) -> bool:
 
 
 
-def gen_uuid():
+def gen_uuid() -> str:
     """
         Generates uuid.
 
@@ -40,3 +41,10 @@ def gen_uuid():
     """
     return str(uuid.uuid1())
 
+
+
+def hash_password(password: str) -> str:
+    """ bcrypt hash password for storage """
+    password_bytes = password.encode("utf-8")
+    password_encrypted = bcrypt.hashpw(password_bytes, bcrypt.gensalt(rounds=16))
+    return password_encrypted.decode("utf-8")

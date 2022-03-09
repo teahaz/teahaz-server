@@ -56,6 +56,13 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
         }, 400
 
 
+    # The password needs to be hashed as soon as checks
+    # are done, so it cannot accidentally be saved in
+    # plain text by a developer that isn't paying perfect
+    # attention
+    password = security.hash_password(password)
+
+
     # Create a new UUID for the chat-room.
     chatroom_id: str = security.gen_uuid()
 
