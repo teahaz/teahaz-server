@@ -3,6 +3,7 @@ A few misc functions that could not be categorised into
 any of the other files.
 """
 
+from th__database import Database
 import th__filesystem as filesystem
 
 
@@ -26,11 +27,27 @@ def check_default_and_get_data(chatroom_id: str, request) -> tuple[dict, int]:
         return {"error": "The username variable has to be sent with every request."}, 400
 
 
-    if not filesystem.chatroom_exists(chatroom_id):
+    if not chatroom_exists(chatroom_id):
         return {"error": "The requested chat-room does not exist on this server."}, 404
 
 
     return data, 200
+
+
+def chatroom_exists(chatroom_id: str) -> bool:
+    """
+        Function checks both the filesystem
+        and the database to determine whether
+        a chatroom exists or not.
+    """
+    if not filesystem.chatroom_directories_exist(chatroom_id):
+        return False
+
+    # TODO: test and see if this actually creates the chatroom.
+    #       (We don't want that to happen)
+    db_class = Database(chatroom_id, "bs non-existing user")
+    return db_class.exists
+
 
 
 

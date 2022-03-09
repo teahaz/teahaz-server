@@ -29,7 +29,7 @@ const main = async() =>
 
 
     // a couple of tests
-    assert(conv0.chatroomID);
+    assert(conv0.chatroom_id);
     assert(conv0.cookie);
     assert(conv0.channels.length == 1);
     assert(conv0.classes.length == 2);
@@ -52,7 +52,7 @@ const main = async() =>
     let conv1 = await new chatroom(conv0).enable()
 
     assert(conv0.chatroom_name == conv1.chatroom_name);
-    assert(conv0.chatroomID    == conv1.chatroomID);
+    assert(conv0.chatroom_id    == conv1.chatroom_id);
 
     assert(JSON.stringify(conv0.channels) == JSON.stringify(conv1.channels));
     assert(JSON.stringify(conv0.settings) == JSON.stringify(conv1.settings));
@@ -78,7 +78,7 @@ const main = async() =>
     info = info.data
 
     assert(info.chatroom_name == conv1.chatroom_name);
-    assert(info.chatroomID    == conv1.chatroomID);
+    assert(info.chatroom_id    == conv1.chatroom_id);
 
     assert(JSON.stringify(info.channels) == JSON.stringify(conv1.channels));
     assert(JSON.stringify(info.settings) == JSON.stringify(conv1.settings));
@@ -94,7 +94,7 @@ const main = async() =>
      */
     let channel_name = "memes channel";
     let permissions = [{
-        classID: '1',
+        class_id: '1',
         r: true,
         w: false,
         x: false
@@ -126,13 +126,13 @@ const main = async() =>
 
     // message_text is saved for comparison
     let message_text = 'hello';
-    // messageID is saved to make the reply
-    let prev_messageID = '';
+    // message_id is saved to make the reply
+    let prev_message_id = '';
 
     // sending a simple message in the default channel
     await conv1.send_message({
         message: message_text,
-        channelID: conv1.channels[0].channelID,
+        channel_id: conv1.channels[0].channel_id,
     })
     .then((res) =>
         {
@@ -141,7 +141,7 @@ const main = async() =>
             assert(res.data.text == message_text);
             assert(res.data.type == 'text');
 
-            prev_messageID = res.data.messageID;
+            prev_message_id = res.data.message_id;
             console.log("✅ successfully sent message");
         })
     .catch((res) =>
@@ -155,7 +155,7 @@ const main = async() =>
     // sending a message in the newly created memes channel
     await conv1.send_message({
         message: meme_message,
-        channelID: conv1.channels[1].channelID,
+        channel_id: conv1.channels[1].channel_id,
     })
     .then((res) =>
         {
@@ -164,7 +164,7 @@ const main = async() =>
             assert(res.data.text == meme_message);
             assert(res.data.type == 'text');
 
-            prev_messageID = res.data.messageID;
+            prev_message_id = res.data.message_id;
             console.log("✅ successfully sent message");
         })
     .catch((res) =>
@@ -184,8 +184,8 @@ const main = async() =>
     let r_message_text = 'sup?';
     await conv1.send_message({
         message: r_message_text,
-        channelID: conv1.channels[0].channelID,
-        replyID: prev_messageID
+        channel_id: conv1.channels[0].channel_id,
+        reply_id: prev_message_id
     })
     .then((res) =>
         {
@@ -212,7 +212,7 @@ const main = async() =>
      * The method should return all messages that
      * have been sent since the supplied time variable.
      *
-     * There is also an optional channelID variable to only
+     * There is also an optional channel_id variable to only
      * get messages from one channel. If this is not set
      * then it will look in all channels the user has access
      * to.
@@ -238,7 +238,7 @@ const main = async() =>
     // Get from just one channel
     await conv1.get({
         time: 0,
-        channelID: conv1.channels[1].channelID
+        channel_id: conv1.channels[1].channel_id
     })
     .then((res) =>
         {
@@ -293,8 +293,8 @@ const main = async() =>
      */
     let conv2 = await new chatroom({
         server: 'http://localhost:13337',
-        chatroomID: conv1.chatroomID,
-        inviteID: invite.inviteID,
+        chatroom_id: conv1.chatroom_id,
+        invite_id: invite.invite_id,
         username: "b",
         password: "1234567890",
         proxy: {host: '127.0.0.1', port: 8080}
@@ -316,7 +316,7 @@ const main = async() =>
 
 
     // await conv0.use_invite({
-    //     inviteID: conv0.invite,
+    //     invite_id: conv0.invite,
     //     username: 'hehehehehe',
     //     password: 'newpw, very cool!'
     // })

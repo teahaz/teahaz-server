@@ -12,7 +12,7 @@ import th__security as security
 
 
 
-def chatroom_exists(chatroom_id: str) -> bool:
+def chatroom_directories_exist(chatroom_id: str) -> bool:
     """ Check if chatroom_id is valid, and that it exists on disk """
 
     if not security.is_uuid(chatroom_id):
