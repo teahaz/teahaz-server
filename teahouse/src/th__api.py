@@ -46,6 +46,7 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
     if not isinstance(nickname, str) or len(nickname) < 1 or len(nickname) > 20:
         return {"error": "Nickname has to be a string between 1 and 20 characters."}, 400
 
+
     # Password needs some extra checks as it has to meet the
     # minimum length requirements
     min_password_length = 10 # Check server settings for this
@@ -54,13 +55,6 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
             "error": f"Password has to be a string between\
                       {min_password_length} and 100 characters."
         }, 400
-
-
-    # The password needs to be hashed as soon as checks
-    # are done, so it cannot accidentally be saved in
-    # plain text by a developer that isn't paying perfect
-    # attention
-    password = security.hash_password(password)
 
 
     # Create a new UUID for the chat-room.
@@ -75,6 +69,4 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
 
     # Create the database for the chatroom
     db_class = Database(chatroom_id, username, password, nickname)
-
     return db_class.init_chatroom(chatroom_name)
-    # TODO: "login" (assign cookie) for the user.

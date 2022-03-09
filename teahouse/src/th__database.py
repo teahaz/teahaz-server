@@ -21,6 +21,7 @@ import logging
 import pymongo
 import codectrl
 
+import th__helpers as helpers
 import th__security as security
 
 # Connect to the mongo-db server.
@@ -43,6 +44,18 @@ class Database:
 
             Furthermore the (optional) password and nickname
             arguments are for users that have not yet registered.
+
+
+            Todo:
+                * self.user_exists gets set to false by default
+                  as there is no method for checking if a user
+                  exists yet. This needs to be changed once
+                  such a method is implemented
+
+                * Look into whether the database gets created
+                  after reference or just after adding an element.
+                  We ideally don't want the database to be created
+                  on class __init__.
         """
 
         self.username: str = username
@@ -61,10 +74,9 @@ class Database:
 
         # Variable to keep track of whether the user exists
         # (similar reason to database exits)
-        # TODO: replace this with an actual check.
         self.user_exists: bool = False
 
-    def init_chatroom(self, chatroom_name: str):
+    def init_chatroom(self, chatroom_name: str) -> tuple[dict, int]:
         """
             Function creates a chatroom database,
             and adds at least one default document into
@@ -141,7 +153,7 @@ class Database:
                 "_id": str(self.username),
                 "private":
                 {
-                    "password": self.password,
+                    "password": security.hash_password(self.password),
                     "cookies": []
                 },
                 "public":
@@ -299,6 +311,13 @@ class Database:
             ]
         settings_collection.insert_many(array_default_settings)
 
+
+        # Get a cookie for the user so they don't have to log in after
+        # creating the chatroom
+        cookie_dict, res = self.set_cookie()
+        if helpers.bad(res):
+            return cookie_dict, res
+
         # set state variables for the Database object
         self.exists = True
         self.user_exists = True
@@ -306,11 +325,48 @@ class Database:
         chatroom_details =  {
                 "chatroom-id": self.chatroom_id,
                 "chatroom-name": chatroom_name,
+                "cookie": cookie_dict['cookie'],
                 "users": [document_constructor_class['public']],
                 "channels": [document_default_channel['public']],
                 "classes": [document_constructor_class['public'], document_default_class['public']],
                 "settings": [x['public'] for x in array_default_settings]
                 }
 
-        codectrl.log(json.dumps(chatroom_details, indent=4), status=200)
         return chatroom_details, 200
+
+
+    def set_cookie(self) -> tuple[dict, int]:
+        """
+            Function authenticates a user using their
+            username and password.
+            Then it generates a cookie, saves it in
+            the database, and returns it.
+
+            Returns:
+                * A cookie in th format.
+                  Th format cookies are a key-value pair
+                  of a chatroom_id and a cookie_id.
+
+                * A status code representing whether the
+                  operation was successful. If unsuccessful
+                  then the cookie is replaced with an error string.
+        """
+
+        user_data: dict = self.db_handle.users.find_one({"_id": self.username})
+
+        if user_data is None:
+            return {"error": "Internal Server error: Cannot set cookie for a non-existing user"},500
+
+        if not security.check_password(self.password, user_data['private']['password']):
+            return {"error": "Invalid password"}, 400
+
+        cookie: str = security.gen_uuid()
+
+        self.db_handle.users.update_one(
+                {'_id': self.username},
+                {'$addToSet': {'private.cookies': cookie}})
+
+        # Needs to be returned like this because of the other errors
+        # that get returned form this function. Also adds future-proofing
+        # for later features like expiring (or limited use) cookies.
+        return {"cookie": cookie}, 200

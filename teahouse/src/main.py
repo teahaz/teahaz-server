@@ -5,6 +5,7 @@ This module starts the server, handles
 incoming requests and returns responses.
 """
 
+import json
 
 from flask import Flask
 from flask import request
@@ -47,10 +48,15 @@ app_restful = Api(app_regular)
 
 class Chatrooms(Resource):
     """ /api/v0/chatroom/ """
-    def post(self, chatroom_id=None) -> tuple[dict[str, str | int], int]: # pylint: disable=no-self-use
+    def post(self, chatroom_id=None): # pylint: disable=no-self-use
         """ Method for creating chat-rooms """
-        codectrl.log("method: Create chat-room", chatroom_id=chatroom_id)
-        return api.create_chatroom(request)
+        data, status = api.create_chatroom(request)
+        res = make_response(data)
+        res.status_code = status
+        if data.get('cookie') is not None:
+            res.set_cookie(data['chatroom-id'], data['cookie'])
+        return res
+
 
 
     def get(self, chatroom_id=None): # pylint: disable=no-self-use

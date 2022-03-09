@@ -9,8 +9,7 @@ import codectrl
 import th__helpers as helpers
 
 
-
-def login(chatroom_id: str, request, callback) -> tuple[dict, int]:
+def check_cookie_before(chatroom_id: str, request, callback) -> tuple[dict, int]:
     """
         This function is meant to be placed between functions in
         main.py and api.py.
@@ -40,3 +39,5 @@ def login(chatroom_id: str, request, callback) -> tuple[dict, int]:
     #         return True
     #
     # return False
+
+

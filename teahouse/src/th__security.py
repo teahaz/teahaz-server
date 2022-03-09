@@ -48,3 +48,18 @@ def hash_password(password: str) -> str:
     password_bytes = password.encode("utf-8")
     password_encrypted = bcrypt.hashpw(password_bytes, bcrypt.gensalt(rounds=8))
     return password_encrypted.decode("utf-8")
+
+
+
+def check_password(password: str, hashedpw: str) -> bool:
+    """
+        Use the built in password check
+        to verify a password with salt.
+
+        Returns:
+            Boolian representing whether or not
+            the password is correct.
+    """
+    password_bytes = password.encode("utf-8")
+    hashedpw_bytes = hashedpw.encode("utf-8")
+    return bcrypt.checkpw(password_bytes, hashedpw_bytes)
