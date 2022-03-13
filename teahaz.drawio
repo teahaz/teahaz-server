@@ -1,9 +1,181 @@
-<mxfile host="app.diagrams.net" modified="2022-03-13T20:22:55.490Z" agent="5.0 (X11)" etag="I8hhfDesKLf8E7s989MB" version="17.1.2" type="github">
+<mxfile host="app.diagrams.net" modified="2022-03-13T21:00:25.576Z" agent="5.0 (X11)" etag="EWKUFRn1ufNvNIPQ4mGX" version="17.1.2" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="2050" dy="788" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1414" dy="543" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-2" value="&lt;div&gt;Create chatroom method&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.document2;whiteSpace=wrap;size=0.25;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="130" y="75" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-3" value="&lt;ul style=&quot;font-size: 6px&quot;&gt;&lt;li&gt;&lt;font style=&quot;font-size: 6px&quot;&gt;username&lt;/font&gt;&lt;/li&gt;&lt;li&gt;&lt;font style=&quot;font-size: 6px&quot;&gt;password&lt;/font&gt;&lt;/li&gt;&lt;li&gt;&lt;font style=&quot;font-size: 6px&quot;&gt;nickname (optional)&lt;br&gt;&lt;/font&gt;&lt;/li&gt;&lt;li&gt;&lt;font style=&quot;font-size: 6px&quot;&gt;chatroom-name&lt;br&gt;&lt;/font&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;font-size: 6px&quot;&gt;&lt;span style=&quot;white-space: pre&quot;&gt;	&lt;/span&gt;&lt;span style=&quot;white-space: pre&quot;&gt;	&lt;/span&gt;&lt;span style=&quot;white-space: pre&quot;&gt;	&lt;/span&gt;(all strings)&lt;br&gt;&lt;/div&gt;" style="shape=parallelogram;html=1;strokeWidth=2;perimeter=parallelogramPerimeter;whiteSpace=wrap;rounded=1;arcSize=12;size=0.23;align=left;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="165" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-4" value="" style="endArrow=classic;html=1;rounded=0;fontSize=5;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-2" target="vHkr2KqRRbAuJVuYWGBd-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="205" as="sourcePoint" />
+            <mxPoint x="210" y="155" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-5" value="Was nickname supplied?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fontSize=5;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="270" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-6" value="" style="endArrow=classic;html=1;rounded=0;fontSize=5;exitX=0.406;exitY=0.996;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-3" target="vHkr2KqRRbAuJVuYWGBd-5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="225" as="sourcePoint" />
+            <mxPoint x="170" y="175" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-7" value="&lt;div style=&quot;font-size: 7px&quot;&gt;&lt;font style=&quot;font-size: 7px&quot;&gt;Data needed for method&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=5;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="190" y="135" width="83" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-8" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-5" target="vHkr2KqRRbAuJVuYWGBd-9">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="375" as="sourcePoint" />
+            <mxPoint x="280" y="295" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-9" value="&lt;div&gt;Set username to same as &lt;br&gt;&lt;/div&gt;&lt;div&gt;nickname&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="295" y="280" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-11" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-9">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="340" y="365" as="sourcePoint" />
+            <mxPoint x="170" y="395" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="335" y="395" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-13" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-24" target="vHkr2KqRRbAuJVuYWGBd-17">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="210" y="470" as="sourcePoint" />
+            <mxPoint x="272.9999999999998" y="473.2142857142858" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-16" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-5" target="vHkr2KqRRbAuJVuYWGBd-24">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="190" y="380" as="sourcePoint" />
+            <mxPoint x="170" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-17" value="return 400" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="285" y="440" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-18" value="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Check that username,&lt;span style=&quot;white-space: pre&quot;&gt;	&lt;/span&gt; nickname and chatroom-name conform to length and type standards" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="560" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-20" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-24" target="vHkr2KqRRbAuJVuYWGBd-18">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="510" as="sourcePoint" />
+            <mxPoint x="170" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-21" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-18" target="vHkr2KqRRbAuJVuYWGBd-22">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="620" as="sourcePoint" />
+            <mxPoint x="280" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-22" value="return 400" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="285" y="580" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-24" value="Has user supplied all arguments?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="420" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-25" value="&lt;div&gt;Make sure password &lt;br&gt;&lt;/div&gt;&lt;div&gt;is long enough&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="800" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-26" value="&lt;div&gt;Get min password length from settings&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="700" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-28" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-18" target="vHkr2KqRRbAuJVuYWGBd-26">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="169.74" y="670" as="sourcePoint" />
+            <mxPoint x="170" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-30" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-26" target="vHkr2KqRRbAuJVuYWGBd-25">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="70" y="760" as="sourcePoint" />
+            <mxPoint x="120" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-31" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" target="vHkr2KqRRbAuJVuYWGBd-32" source="vHkr2KqRRbAuJVuYWGBd-25">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="870" as="sourcePoint" />
+            <mxPoint x="280" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-32" value="return 400" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="285" y="820" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-34" value="Generate chatroom ID" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="940" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-35" value="&lt;div&gt;Create folders for the chatroom&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(to store uploads and stuff)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="1040" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-36" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-25" target="vHkr2KqRRbAuJVuYWGBd-34">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="1040" as="sourcePoint" />
+            <mxPoint x="220" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-37" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-34" target="vHkr2KqRRbAuJVuYWGBd-35">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="1040" as="sourcePoint" />
+            <mxPoint x="220" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-39" value="Initialize chat database" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="1137.5" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-40" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-35" target="vHkr2KqRRbAuJVuYWGBd-39">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="50" y="1170" as="sourcePoint" />
+            <mxPoint x="100" y="1120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-55" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=6;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-46" target="vHkr2KqRRbAuJVuYWGBd-48">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-46" value="&lt;div&gt;Create the collections needed for the database.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(adding 1 document to each collection)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="293" y="1015" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-57" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=6;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-48" target="vHkr2KqRRbAuJVuYWGBd-49">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-48" value="Hash password and create a user for the &quot;constructor&quot; of the chatroom." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="293" y="1100" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-59" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=6;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-49" target="vHkr2KqRRbAuJVuYWGBd-58">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-49" value="Generate and store cookie of the user so they don&#39;t have to log in first time." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="293" y="1180" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-62" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=6;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-50" target="vHkr2KqRRbAuJVuYWGBd-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-50" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="240" y="1005" width="65" height="325" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-52" value="All within the th_database module" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="285" y="990" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-53" value="" style="endArrow=classic;html=1;rounded=0;fontSize=6;exitX=0.447;exitY=1.015;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="vHkr2KqRRbAuJVuYWGBd-39" target="vHkr2KqRRbAuJVuYWGBd-61">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="50" y="1280" as="sourcePoint" />
+            <mxPoint x="165" y="1340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-58" value="Return all non-private information that got added to the chatroom, along with the cookie of the new user." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="293" y="1260" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vHkr2KqRRbAuJVuYWGBd-61" value="Assign cookie and return data." style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontSize=6;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="115" y="1366" width="100" height="60" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
