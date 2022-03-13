@@ -45,6 +45,8 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
         return {"error": "Username has to be a string between 1 and 20 characters."}, 400
     if not isinstance(nickname, str) or len(nickname) < 1 or len(nickname) > 20:
         return {"error": "Nickname has to be a string between 1 and 20 characters."}, 400
+    if not isinstance(chatroom_name, str) or len(chatroom_name) < 1 or len(chatroom_name) > 20:
+        return {"error": "Chatroom-name has to be a string between 1 and 20 characters."}, 400
 
 
     # Password needs some extra checks as it has to meet the
@@ -70,3 +72,5 @@ def create_chatroom(request) -> tuple[dict[str, str | int], int]:
     # Create the database for the chatroom
     db_class = Database(chatroom_id, username, password, nickname)
     return db_class.init_chatroom(chatroom_name)
+
+
